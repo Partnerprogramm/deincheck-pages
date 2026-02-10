@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🚀 Affiliate-Partner Import | Admin</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-900 text-white min-h-screen p-8">
+    <div class="max-w-4xl mx-auto">
+        <h1 class="text-3xl font-bold mb-2">🚀 Affiliate-Partner Import</h1>
+        <p class="text-gray-400 mb-8">Importiert alle 313 Affiliate-Partner aus der CSV direkt in die Datenbank</p>
+
+        <!-- CSV Upload -->
+        <div class="bg-gray-800 rounded-xl p-6 mb-6">
+            <h2 class="text-xl font-bold mb-4">1️⃣ CSV hochladen</h2>
+            <input type="file" id="csvFile" accept=".csv" class="block w-full text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-purple-600 file:text-white hover:file:bg-purple-700">
+            <p id="csvStatus" class="mt-2 text-green-400 hidden">✅ CSV geladen</p>
+        </div>
+
+        <!-- Import Button -->
+        <div class="bg-gray-800 rounded-xl p-6 mb-6">
+            <h2 class="text-xl font-bold mb-4">2️⃣ Import starten</h2>
+            <button id="importBtn" class="bg-green-600 text-white px-8 py-4 rounded-lg font-bold text-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+                📥 Alle Affiliates importieren
+            </button>
+        </div>
+
+        <!-- Progress -->
+        <div id="progressSection" class="bg-gray-800 rounded-xl p-6 mb-6 hidden">
+            <h2 class="text-xl font-bold mb-4">📊 Fortschritt</h2>
+            <div class="w-full bg-gray-700 rounded-full h-4 mb-4">
+                <div id="progressBar" class="bg-green-500 h-4 rounded-full transition-all" style="width: 0%"></div>
+            </div>
+            <p id="progressText" class="text-gray-400">0 / 0 Partner importiert</p>
+        </div>
+
+        <!-- Log -->
+        <div class="bg-gray-800 rounded-xl p-6">
+            <h2 class="text-xl font-bold mb-4">📝 Log</h2>
+            <div id="log" class="bg-black rounded-lg p-4 h-64 overflow-y-auto font-mono text-sm text-green-400"></div>
+        </div>
+    </div>
+
+    <script>
+        let affiliates = [];
+        const log = document.getElementById('log');
+        
+        function addLog(msg, type = 'info') {
+            const colors = { info: 'text-gray-400', success: 'text-green-400', error: 'text-red-400', warn: 'text-yellow-400' };
+            log.innerHTML += `<div class="${colors[type]}">[${new Date().toLocaleTimeString()}] ${msg}</div>`;
+            log.scrollTop = log.scrollHeight;
+        }
+
+        // CSV Upload
+        document.getElementById('csvFile').addEventListener('change', async (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+            
+            addLog('📄 CSV wird geladen...');
+            const text = await file.text();
+            parseCSV(text);
+        });
+
+        function parseCSV(csv) {
+            const lines = csv.split('\n');
+            const headers = parseCSVLine(lines[0]);
+            
+            const fieldMap = {
+                'email': 'email', 'first name': 'vorname', 'last name': 'nachname',
+                'phone': 'telefon', 'company': 'firma', 'address': 'adresse',
+                'city': 'stadt', 'zipcode': 'plz', 'country': 'land',
+                'referral code': 'referral_code', 'network link': 'netzwerk_link',
+                'standard link': 'standard_link', 'shortlink': 'shortlink',
+                'payment method': 'zahlungsmethode', 'payment info': 'zahlungsinfo',
+                'website': 'website'
+            };
+
+            const headerIndex = {};
+            headers.forEach((h, i) => {
+                const normalized = h.toLowerCase().trim();
+                if (fieldMap[normalized]) headerIndex[fieldMap[normalized]] = i;
+            });
+
+            affiliates = [];
+            for (let i = 1; i < lines.length; i++) {
+                if (!lines[i].trim()) continue;
+                
+                const values = parseCSVLine(lines[i]);
+                const getValue = (field) => {
+                    const idx = headerIndex[field];
+                    return idx !== undefined ? (values[idx] || '').trim() : '';
+                };
+
+                const email = getValue('email');
+                if (!email || !email.includes('@')) continue;
+
+                affiliates.push({
+                    email: email.toLowerCase(),
+                    vorname: getValue('vorname'),
+                    nachname: getValue('nachname'),
+                    telefon: getValue('telefon'),
+                    firma: getValue('firma'),
+                    adresse: getValue('adresse'),
+                    plz: getValue('plz'),
+                    stadt: getValue('stadt'),
+                    land: getValue('land') || 'DE',
+                    referral_code: getValue('referral_code'),
+                    standard_link: getValue('standard_link'),
+                    shortlink: getValue('shortlink'),
+                    netzwerk_link: getValue('netzwerk_link'),
+                    zahlungsmethode: getValue('zahlungsmethode'),
+                    zahlungsinfo: getValue('zahlungsinfo'),
+                    website: getValue('website'),
+                    status: 'Approved',
+                    ist_affiliate: true,
+                    aktiv: true,
+                    tarif: 'Silber',
+                    passwort_hash: 'Partner2026!',
+                    passwort_muss_geaendert_werden: true,
+                    onboarding_abgeschlossen: false,
+                    onboarding_fortschritt: 20
+                });
+            }
+
+            addLog(`✅ ${affiliates.length} Affiliate-Partner gefunden`, 'success');
+            document.getElementById('csvStatus').classList.remove('hidden');
+            document.getElementById('importBtn').disabled = false;
+        }
+
+        function parseCSVLine(line) {
+            const result = [];
+            let current = '';
+            let inQuotes = false;
+            for (let i = 0; i < line.length; i++) {
+                const char = line[i];
+                if (char === '"') inQuotes = !inQuotes;
+                else if (char === ',' && !inQuotes) { result.push(current.trim()); current = ''; }
+                else current += char;
+            }
+            result.push(current.trim());
+            return result;
+        }
+
+        // Import
+        document.getElementById('importBtn').addEventListener('click', async () => {
+            if (affiliates.length === 0) return;
+            
+            document.getElementById('importBtn').disabled = true;
+            document.getElementById('progressSection').classList.remove('hidden');
+            
+            const progressBar = document.getElementById('progressBar');
+            const progressText = document.getElementById('progressText');
+            
+            let imported = 0;
+            let skipped = 0;
+            let errors = 0;
+
+            addLog(`🚀 Starte Import von ${affiliates.length} Partnern...`);
+
+            for (let i = 0; i < affiliates.length; i++) {
+                const partner = affiliates[i];
+                
+                try {
+                    // Prüfen ob E-Mail existiert
+                    const checkRes = await fetch(`tables/partners?search=${encodeURIComponent(partner.email)}&limit=1`);
+                    const checkData = await checkRes.json();
+                    
+                    const exists = checkData.data?.some(p => p.email?.toLowerCase() === partner.email.toLowerCase());
+                    
+                    if (exists) {
+                        skipped++;
+                        addLog(`⏭️ ${partner.email} existiert bereits`, 'warn');
+                    } else {
+                        // Partner anlegen
+                        const res = await fetch('tables/partners', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(partner)
+                        });
+                        
+                        if (res.ok) {
+                            imported++;
+                            addLog(`✅ ${partner.vorname} ${partner.nachname} (${partner.email})`, 'success');
+                        } else {
+                            errors++;
+                            addLog(`❌ Fehler bei ${partner.email}: ${res.status}`, 'error');
+                        }
+                    }
+                } catch (err) {
+                    errors++;
+                    addLog(`❌ Fehler bei ${partner.email}: ${err.message}`, 'error');
+                }
+
+                // Progress update
+                const progress = Math.round(((i + 1) / affiliates.length) * 100);
+                progressBar.style.width = `${progress}%`;
+                progressText.textContent = `${i + 1} / ${affiliates.length} verarbeitet (${imported} importiert, ${skipped} übersprungen, ${errors} Fehler)`;
+
+                // Kleine Pause um API nicht zu überlasten
+                if ((i + 1) % 10 === 0) {
+                    await new Promise(r => setTimeout(r, 100));
+                }
+            }
+
+            addLog(`🎉 Import abgeschlossen!`, 'success');
+            addLog(`📊 Ergebnis: ${imported} importiert, ${skipped} übersprungen, ${errors} Fehler`, 'info');
+        });
+    </script>
+</body>
+</html>
