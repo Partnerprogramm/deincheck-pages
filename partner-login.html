@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Partner Login - DeinCheck</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #3b82f6 0%, #60a5fa 100%);
+            min-height: 100vh;
+            min-height: 100dvh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            padding-top: calc(20px + env(safe-area-inset-top, 0px));
+            padding-bottom: calc(20px + env(safe-area-inset-bottom, 0px));
+        }
+        .login-container {
+            background: white;
+            border-radius: 24px;
+            padding: 40px 30px;
+            width: 100%;
+            max-width: 400px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        .logo { text-align: center; margin-bottom: 30px; }
+        .logo h1 { font-size: 28px; color: #3b82f6; font-weight: 700; margin-bottom: 8px; }
+        .logo p { font-size: 15px; color: #718096; }
+        .form-group { margin-bottom: 20px; }
+        .form-group label { display: block; font-size: 14px; font-weight: 600; color: #2d3748; margin-bottom: 8px; }
+        .form-group input {
+            width: 100%;
+            padding: 16px;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            font-size: 16px;
+            -webkit-appearance: none;
+            appearance: none;
+        }
+        .form-group input:focus { outline: none; border-color: #3b82f6; }
+        .btn-login {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 17px;
+            font-weight: 600;
+            cursor: pointer;
+            min-height: 50px;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .btn-login:active { transform: scale(0.98); opacity: 0.9; }
+        .error-message {
+            background: #fef2f2;
+            border: 1px solid #fecaca;
+            color: #dc2626;
+            padding: 14px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            display: none;
+            font-size: 14px;
+        }
+        .success-message {
+            background: #f0fdf4;
+            border: 1px solid #bbf7d0;
+            color: #16a34a;
+            padding: 14px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            display: none;
+            font-size: 14px;
+        }
+        .info-text { text-align: center; margin-top: 25px; font-size: 14px; color: #718096; }
+        .info-text a { color: #3b82f6; text-decoration: none; font-weight: 600; }
+        
+        /* Mobile Optimierungen */
+        @media (max-width: 480px) {
+            body { padding: 16px; }
+            .login-container { padding: 30px 24px; border-radius: 20px; }
+            .logo h1 { font-size: 24px; }
+            .logo { margin-bottom: 24px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="logo">
+            <h1>Partner Login</h1>
+            <p>DeinCheck Partnerprogramm</p>
+        </div>
+
+        <div class="error-message" id="errorMessage"></div>
+        <div class="success-message" id="successMessage"></div>
+
+        <form id="loginForm">
+            <div class="form-group">
+                <label>E-Mail Adresse</label>
+                <input type="email" id="email" placeholder="deine@email.de" required>
+            </div>
+            <div class="form-group">
+                <label>Passwort</label>
+                <input type="password" id="password" placeholder="••••••••" required>
+            </div>
+            <button type="submit" class="btn-login">Anmelden</button>
+        </form>
+
+        <div class="info-text">
+            <a href="passwort-vergessen.html">Passwort vergessen?</a>
+        </div>
+        <div class="info-text" style="margin-top: 10px;">
+            Noch kein Partner? <a href="index.html#kontakt">Jetzt registrieren</a>
+        </div>
+    </div>
+
+    <script>
+        // ✅ VOLLSTÄNDIGE 313 BESTANDS-PARTNER E-MAILS - AKTUALISIERT 28.01.2026
+        // Login prüft: 1. Datenbank 2. Diese Liste als Fallback
+        const BESTANDS_EMAILS = [
+            "germanydripy56@gmail.com","mohammadalkhat123@gmail.com","umidmalakzada@gmail.com","suatdestani929@gmail.com",
+            "arnoheyne@loarno.de","fatih.oeztas@icloud.com","ouchaou@web.de","emkrt@outlook.de","mad@lephone.de",
+            "dogan.enes@live.de","nermin.rajkovic@outlook.de","salim.aziza4@gmail.com","hussein.omeirate@web.de",
+            "tarifpro83@gmail.com","marco.catgiu@telegy.de","fahri_cakir99@icloud.com","nawidzamani@gmail.com",
+            "janaferro1995@gmail.com","hammer@consultstth.de","mogernagar@gmail.com","handyweltgronau@gmail.com",
+            "luciano.pendolino@hotmail.de","dennis.ibo@mail.de","mobilfunk.din@gmail.com","a.lawa@gmx.de",
+            "h_oezciftci@web.de","a.dabko@checkyourtarif.com","m.berisa@newreach.de","franko.daloiso@web.de",
+            "jason.gellert@ymail.com","service@erano.de","emisan-salesmarketing@outlook.com","genexhd2@web.de",
+            "bekirruzgar@hotmail.com","dejumax42@gmail.com","fabian.ernst1203@gmail.com","nextmobile24.shop@gmail.com",
+            "suher23@web.de","g.ilhan@phoneconcept-lahr.de","ahmed.elhamad@outlook.de","steven.nowakowski@web.de",
+            "info@guelak-consulting.de","s.hotaki@web.de","klener03@hotmail.de","aleksandar124@web.de",
+            "info@deincheck.de","askardia@yahoo.com","juergenhoeck@proton.me","fabian120503@gmx.de",
+            "info@3k-solutions.de","ua@efemobile.de","yelkenmarketing@t-online.de","ra.vermittlung@gmail.com",
+            "wedekind-peter@t-online.de","veselkrasniqi014@gmail.com","luciano.pendolino@hotmail.dd","b.berkem@web.de",
+            "supermarktomid@gmail.com","johnluwali@gmail.con","meynsilvia@gmail.com","stabelmarcus@gmail.com",
+            "yamemmoon7@gmail.com","jh28payments@proton.me","dannyradke@d2dcoaching.de","mustafa.berisa@gmx.de",
+            "harald.wilhelms@gmail.com","germanavakjan4@gmail.com","hasmust20@gmail.com","mklein24211@yahoo.de",
+            "s.schmitt1@vodafone.de","wanja.musik@gmx.de","info@dfly-webservices.de","mariam.el.baouti1996@gmail.com",
+            "muratdalman00@icloud.com","isahmuc@gmail.com","ersin.yumusak@icloud.com","mkanat@gmx.de",
+            "oezguer29g@hotmail.de","morteza@connect-cell.de","yukhno.anatoliy@gmail.com","buelent1979@yahoo.de",
+            "boehm@mata-door.de","becktayfun@gmail.com","inanc.oezdemir@gmail.com","wyrwol@experten-point-hildesheim.de",
+            "andykhelifa@gmail.com","west-team@web.de","crosseller232@gmail.com","nickschmidt-vertrieb@outlook.de",
+            "k.efetuerk@gmail.com","fabio.doelker@gmail.com","arifdogrufb66@gmail.com","loris.zahiri1@icloud.com",
+            "kontakt@dominickrueger.de","ndricim.sal@outlook.de","christianzell.19@icloud.com","info@4more-energy.de",
+            "andiaziri@hotmail.com","maxi.kundmueller@gmail.com","matole89@gmail.com","pham.duc-viet@outlook.de",
+            "ghakan90@gmail.com","fatihozkul3541@gmail.com","minhduc@yahoo.com.vn","mustafab75@gmail.com",
+            "kamikmainz@gmail.com","su.jannik@gmail.com","al.dadaev@wayfone.de","skoytek141@gmail.com",
+            "ismet.hussein@yahoo.com","furathammadi11@gmail.com","danielteliga10@gmail.com","info@rg-groupp.de",
+            "info@zunamedia.de","cem.sarikaya@hotmail.com","saalepower56@web.de","manukyansaq777@gmail.com",
+            "emanuelweigel21@gmail.com","kevin.plenio09@gmail.com","fadiabbee24@gmail.com","d.s.17@gmx.de",
+            "herbst-dominik@web.de","michael-tavares@gmx.de","caner.1991@hotmail.de","sueleyman.goektas1@gmail.com",
+            "malek.abo.alleth@gmail.com","sascha@sakura-sol.com","pbenndorf@icloud.com","r.szabo@live.de",
+            "halil_uenal@hotmail.de","rotschkesebastian@gmail.com","info@skyline-vertrieb.de","27wmaximilian@gmail.com",
+            "dennisotto90@gmail.com","info@cd-phoneboxx.de","einsparteam@googlemail.com","marcel.zwanzig@googlemail.com",
+            "m.santos@marc2media.de","soerenheber@gmail.com","megafonegodesberg@gmail.com","michael.kokocinski85@gmail.com",
+            "vanessachristinatonk@gmail.com","roswithavogel1@web.de","jiwan.yousef1@gmx.de","dropship.tiryaki@outlook.de",
+            "grescha@web.de","a.weber87@gmx.de","akbar.b.aziz@gmail.com","andriespinzari2@gmail.com",
+            "vertrieb.raffke@gmail.com","akkanat.ss@googlemail.com","rziel@web.de","accapple666@gmail.com",
+            "anhaack2409@gmail.com","osama.munla@gmail.com","algaber.y@web.de","marcel.kempe@t-online.de",
+            "levent.aslan.hh@gmail.com","raminsharifi@web.de","info@v-nedelcu.de","vermittlung@jaydin.de",
+            "nasser.promotion97@gmail.com","mayertimo374@gmail.com","patrick.karpa@magenta.de","ajamim46@gmail.com",
+            "wilkemax26@yahoo.com","mail@raimundschwab.de","majedtaam@outlook.de","kawalsundri@gmx.de",
+            "adrianapino1963@gmail.com","youssef_elahmad@gmx.de","shaker.aldada@outlook.com","danilo.zayas8808@gmail.com",
+            "ivan.sido@web.de","nazarysiyar96@gmail.com","s.schaefen@icloud.com","hischam.taha@web.de","v.merk@gmx.de",
+            "ezzoalyuosef96@gmail.com","ramyalhamoud46@gmail.com","brimo.master.card@gmail.com","ghadafr88@gmail.com",
+            "alberto.figuccio@online.de","david.hazem@gmail.com","sinan.cakiral@outlook.de","samuel.jakob1985@web.de",
+            "admir12kadusic@gmail.com","beautifulfaceandsmile@gmail.com","munirfalaha8@gmail.com","azimiz@outlook.de",
+            "st@schaugh.de","info@tvms-haberaecker.de","einsarepair@outlook.de","fauxjelly1986@freenet.de",
+            "thorstensigg@gmail.com","office.levin@icloud.com","wienholz016@hotmail.com","bestehaze00@gmail.com",
+            "m.tunc@gmx.net","info@sparway.de","nikolaj.samek@sparsam-direkt.de","edris.you@outlook.de",
+            "ahmadalkhatib254@hotmail.com","mahmoudkadi05@gmail.com","issa92.a@hotmail.com","yo.zaabi89@gmail.com",
+            "salmanahmed@web.de","info@carat-handyshop.de","sandro.weisser@gmail.com","aleksandar421@web.de",
+            "info@handy-performance.de","michelzorn@gmx.de","info@sa-telecom.de","info@phone-serviceoelde.de",
+            "maximilianscharf10@gmail.com","falconevj@gmail.com","shopgeier@gmail.com","tano@misterinprogress.it",
+            "samek.ni@web.de","heiko-zuhause@web.de","pascal.schwickert@eppfon.de","amir@adnagroup.de",
+            "mehmetak453@outlook.com","pitiabraham@icloud.com","m.mirzo@zeppelin-university.net","pendolino.mawax@gmail.com",
+            "akbar.go.aziz@gmail.com","loheiderbjorn@gmail.com","info-muehlbauer@gmx.de","universal.media.shop@gmail.com",
+            "oktay1109@gmail.com","oez.yog.info@gmail.com","alikeskin2019@icloud.com","alshaarmohamad.6@gmail.com",
+            "mehmetyilmaz424@gmail.com","davidschulze361@icloud.com","sbaykara21@outlook.de","mustafaissa144@gmail.com",
+            "arben.lushi@outlook.de","mr.wuppertal@outlook.com","habilarslan@icloud.com","adnan_alhawari@gmx.de",
+            "saidbg12@gmail.com","gabriel.i.gomez.p@gmail.com","johnluwali@gmail.com","doran.ac@web.de",
+            "walter.stein@weconnect.ba","albahri@deinebestewahl.de","batughancinar@outlook.de","bueche.timothy@gmx.de",
+            "tikuhajdinaj97@gmail.com","atilla.sicim@gmail.com","omermoonsaeed99@gmail.com","rainerlang.mhf@gmail.com",
+            "a.mazhary1999@gmail.com","bjornloheider@icloud.com","info@apkom.de","a.aabed@web.de","mdhtza@gmail.com",
+            "citycut.express@gmail.com","smarttel.parchim@yahoo.com","el.ahmad@hotmail.de","tommsanders@icloud.com",
+            "aym.suliman@gmail.com","hasan.polat4605@icloud.com","ecomind@outlook.de","edis.trakic@icloud.com",
+            "henkepromotion@t-online.de","anto9892@gmail.com","mahdiabdolrahim25@gmail.com","matrix.dessau@gmail.com",
+            "gamboss@hotmail.com","ibrahim.torun@web.de","nabilberkani@outlook.de","sivakas7@gmail.com",
+            "sichersein7@gmail.com","kdr.cm@outlook.de","info@nl-gmbh.com","mustafaalzu94@gmail.com","sharifi0@web.de",
+            "max.brug@yahoo.de","dolgoon_u@yahoo.de","muratdivar_23@outlook.de","realmaher123@gmail.com",
+            "habilkos@icloud.com","deniz21@live.de","aramis.winter@icloud.com","oliveira5@web.de","arno.fr@yahoo.com",
+            "keine@gmail.com","flo.teuscher@gmail.com","murat01520@hotmail.de","n.mahdi@outlook.de",
+            "info@jetztvergleiche.de","haitam.al@outlook.de","service1@erano.de","alalifayiz@gmail.com","muratyeni@gmx.de",
+            "rene.radosavljevic@outlook.de","merih.kineselassie@skyline-vertrieb.de","ralf.foit@arcor.de",
+            "firma@netyo.de","abdullahhadad1988@gmail.com","fabimessthaler97@icloud.com","alasafinn@gmail.com",
+            "wrmhwrmh@gmail.com","enis.mersinli@gmail.com","burejic@live.de","julienwagnervertrieb@gmail.com",
+            "kohl.mario@me.com"
+        ];
+
+        const STANDARD_PASSWORT = "Partner2026!";
+
+        document.getElementById('loginForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const email = document.getElementById('email').value.trim().toLowerCase();
+            const password = document.getElementById('password').value;
+            const errorMsg = document.getElementById('errorMessage');
+            const successMsg = document.getElementById('successMessage');
+            
+            errorMsg.style.display = 'none';
+            successMsg.style.display = 'none';
+            
+            // 🔧 STEVEN RESET FIX: Lösche alten Cache für steven.nowakowski@web.de
+            if (email === 'steven.nowakowski@web.de') {
+                console.log('🔄 Steven Reset: Lösche alten Cache...');
+                localStorage.removeItem('partnerData');
+                localStorage.removeItem('partnerEmail');
+                localStorage.removeItem('cachedVertraege_steven.nowakowski@web.de');
+                localStorage.removeItem('bestandsPartner_steven.nowakowski@web.de');
+            }
+            
+            // 💾 LOKALER CACHE CHECK - Falls DB leer/gelöscht wurde
+            let cachedPartner = null;
+            try {
+                const cached = localStorage.getItem('partnerData');
+                if (cached) {
+                    const data = JSON.parse(cached);
+                    if (data.email?.toLowerCase() === email) {
+                        cachedPartner = data;
+                        console.log('💾 Lokaler Partner-Cache gefunden:', email);
+                    }
+                }
+            } catch(e) {}
+
+            // 1. Prüfe zuerst in der Datenbank (für alle Partner inkl. geänderter Passwörter)
+            let dbPartner = null;
+            try {
+                const response = await fetch(`tables/partners?limit=1000`);
+                const result = await response.json();
+                // 🔧 FIX: Bei mehreren Einträgen den NEUESTEN nehmen (höchste updated_at)
+                const matches = (result.data || []).filter(p => p.email?.toLowerCase() === email);
+                if (matches.length > 1) {
+                    console.log('⚠️ Mehrere DB-Einträge für', email, '- nehme neuesten');
+                    matches.sort((a, b) => (b.updated_at || 0) - (a.updated_at || 0));
+                }
+                dbPartner = matches[0] || null;
+            } catch(e) {
+                console.log('DB nicht erreichbar');
+            }
+            
+            // Nutze DB-Partner oder Cache
+            const partner = dbPartner || cachedPartner;
+
+            if (partner) {
+                    // Prüfe gespeichertes Passwort (DB oder lokal)
+                    const storedPassword = partner.passwort_hash || partner.passwort || STANDARD_PASSWORT;
+                    const isFromCache = !dbPartner && cachedPartner;
+                    
+                    console.log('🔐 Login-Check:', isFromCache ? 'CACHE' : 'DB');
+                    console.log('🔐 Gespeichertes PW:', storedPassword === STANDARD_PASSWORT ? 'Standard' : 'Geändert');
+                    console.log('🔐 passwort_muss_geaendert_werden:', partner.passwort_muss_geaendert_werden);
+                    
+                    if (storedPassword === password) {
+                        // 🆕 BESTANDS-PARTNER CHECK: Ist E-Mail in der 313er Liste?
+                        const istBestandsPartner = BESTANDS_EMAILS.includes(email);
+                        
+                        // Flags setzen für Dashboard
+                        partner.ist_bestandspartner = istBestandsPartner;
+                        partner.ist_affiliate = istBestandsPartner;
+                        
+                        // 💾 WICHTIG: passwort_muss_geaendert_werden NUR setzen wenn:
+                        // - Noch nicht explizit auf false gesetzt wurde (im Cache)
+                        // - UND Bestands-Partner
+                        // - UND noch Standard-Passwort verwendet
+                        if (partner.passwort_muss_geaendert_werden !== false) {
+                            if (istBestandsPartner && storedPassword === STANDARD_PASSWORT) {
+                                partner.passwort_muss_geaendert_werden = true;
+                                console.log('🔐 Passwort-Änderung erforderlich!');
+                            }
+                        } else {
+                            console.log('🔐 Passwort bereits geändert - kein Modal');
+                        }
+                        
+                        // Login erfolgreich
+                        localStorage.setItem('partnerEmail', partner.email);
+                        localStorage.setItem('partnerData', JSON.stringify(partner));
+                        localStorage.setItem('userRole', 'partner');
+                        
+                        // 💾 VERTRÄGE VORAB CACHEN für Offline/DB-Reset
+                        try {
+                            const vertraegeRes = await fetch('tables/vertragsabschluesse?limit=1000');
+                            const vertraegeData = await vertraegeRes.json();
+                            const meineVertraege = (vertraegeData.data || []).filter(v => 
+                                v.partner_email && v.partner_email.toLowerCase() === email
+                            );
+                            if (meineVertraege.length > 0) {
+                                localStorage.setItem('cachedVertraege_' + email, JSON.stringify(meineVertraege));
+                                console.log('💾', meineVertraege.length, 'Verträge gecached');
+                            }
+                        } catch(e) { console.log('Verträge-Cache übersprungen'); }
+                        
+                        // 💾 Falls aus Cache: Versuche Partner in DB neu anzulegen
+                        if (isFromCache && !dbPartner) {
+                            console.log('💾 Partner aus Cache - versuche DB-Sync...');
+                            try {
+                                await fetch('tables/partners', {
+                                    method: 'POST',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify({
+                                        email: partner.email,
+                                        vorname: partner.vorname || '',
+                                        nachname: partner.nachname || '',
+                                        passwort_hash: partner.passwort_hash || STANDARD_PASSWORT,
+                                        ist_affiliate: partner.ist_affiliate || false,
+                                        ist_bestandspartner: partner.ist_bestandspartner || false,
+                                        passwort_muss_geaendert_werden: partner.passwort_muss_geaendert_werden || false,
+                                        aktiv: true,
+                                        status: 'Approved'
+                                    })
+                                });
+                                console.log('✅ Partner in DB wiederhergestellt!');
+                            } catch(e) { console.log('DB-Sync übersprungen'); }
+                        }
+                        
+                        // 🆕 ERST-LOGIN für Bestands-Partner setzen + letzter_login IMMER aktualisieren
+                        if (dbPartner) {
+                            const now = new Date().toISOString();
+                            const updateData = {
+                                letzter_login: now,
+                                aktiv: true,
+                                status: 'Aktiv'
+                            };
+                            
+                            // Bei Bestands-Partnern: erst_login setzen falls noch nicht vorhanden
+                            if (istBestandsPartner) {
+                                updateData.ist_bestandspartner = true;
+                                updateData.ist_affiliate = true;
+                                if (!dbPartner.erst_login) {
+                                    updateData.erst_login = now;
+                                    console.log('🔑 Setze erst_login für Bestands-Partner:', now);
+                                }
+                            }
+                            
+                            try {
+                                const patchRes = await fetch(`tables/partners/${dbPartner.id}`, {
+                                    method: 'PATCH',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify(updateData)
+                                });
+                                if (patchRes.ok) {
+                                    console.log('✅ Partner-Login aktualisiert:', updateData);
+                                } else {
+                                    console.error('❌ PATCH fehlgeschlagen:', patchRes.status);
+                                }
+                            } catch(e) { 
+                                console.error('❌ erst_login/letzter_login konnte nicht gesetzt werden:', e); 
+                            }
+                        }
+                        
+                        successMsg.textContent = '✅ Anmeldung erfolgreich...';
+                        successMsg.style.display = 'block';
+                        
+                        setTimeout(() => { window.location.href = 'partner-dashboard.html'; }, 500);
+                        return;
+                    } else {
+                        errorMsg.textContent = '❌ Falsches Passwort.';
+                        errorMsg.style.display = 'block';
+                        return;
+                    }
+                }
+
+            // 2. Wenn nicht in DB: Prüfe Bestands-Partner-Liste
+            if (BESTANDS_EMAILS.includes(email)) {
+                if (password === STANDARD_PASSWORT) {
+                    // 🆕 ERST-LOGIN: Bestands-Partner in DB anlegen mit erst_login Timestamp
+                    try {
+                        const now = new Date().toISOString();
+                        const newPartnerRes = await fetch('tables/partners', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                email: email,
+                                ist_affiliate: true,
+                                ist_bestandspartner: true,
+                                passwort_muss_geaendert_werden: true,
+                                passwort_hash: STANDARD_PASSWORT,
+                                erst_login: now,
+                                aktiv: true,
+                                status: 'Approved'
+                            })
+                        });
+                        
+                        if (newPartnerRes.ok) {
+                            const newPartner = await newPartnerRes.json();
+                            console.log('✅ Bestands-Partner angelegt mit erst_login:', now);
+                            localStorage.setItem('partnerEmail', email);
+                            localStorage.setItem('partnerData', JSON.stringify(newPartner));
+                            localStorage.setItem('userRole', 'partner');
+                        }
+                    } catch(e) {
+                        console.log('DB nicht erreichbar, speichere lokal');
+                        localStorage.setItem('partnerEmail', email);
+                        localStorage.setItem('partnerData', JSON.stringify({
+                            email: email,
+                            ist_affiliate: true,
+                            ist_bestandspartner: true,
+                            passwort_muss_geaendert_werden: true
+                        }));
+                        localStorage.setItem('userRole', 'partner');
+                    }
+                    
+                    successMsg.textContent = '✅ Anmeldung erfolgreich...';
+                    successMsg.style.display = 'block';
+                    
+                    setTimeout(() => { window.location.href = 'partner-dashboard.html'; }, 500);
+                    return;
+                } else {
+                    errorMsg.textContent = '❌ Falsches Passwort. Für Erstanmeldung: Partner2026!';
+                    errorMsg.style.display = 'block';
+                    return;
+                }
+            }
+
+            // 3. E-Mail nicht gefunden
+            errorMsg.textContent = '❌ E-Mail nicht gefunden. Bitte registriere dich zuerst.';
+            errorMsg.style.display = 'block';
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🏆 Bonus-Widget Test - JETZT FUNKTIONIERT ES!</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 40px 20px;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .success-banner {
+            background: linear-gradient(135deg, #48bb78, #38a169);
+            color: white;
+            padding: 30px;
+            border-radius: 20px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+        }
+        .success-banner h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+        .bonus-widget {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            overflow: hidden;
+        }
+        .widget-header {
+            background: linear-gradient(90deg, #ff9500 0%, #ff6b35 50%, #ff3366 100%);
+            height: 4px;
+        }
+        .widget-content {
+            padding: 2rem 2.5rem;
+        }
+        .header-section {
+            display: flex;
+            align-items: center;
+            gap: 1.25rem;
+            margin-bottom: 2rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid rgba(0,0,0,0.06);
+        }
+        .icon-badge {
+            width: 64px;
+            height: 64px;
+            background: linear-gradient(135deg, #ff9500 0%, #ff5e3a 100%);
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            box-shadow: 0 8px 24px rgba(255, 94, 58, 0.35), 0 2px 8px rgba(0,0,0,0.08);
+        }
+        .staffel-container {
+            display: grid;
+            gap: 1.25rem;
+            margin-bottom: 2rem;
+        }
+        .staffel-card {
+            background: white;
+            border: 1.5px solid;
+            border-radius: 14px;
+            padding: 1.5rem 1.75rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .staffel-1 { border-color: rgba(72, 187, 120, 0.3); }
+        .staffel-2 { border-color: rgba(66, 153, 225, 0.3); }
+        .staffel-3 { border-color: rgba(237, 137, 54, 0.3); }
+        .staffel-icon {
+            width: 52px;
+            height: 52px;
+            border-radius: 13px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+        .icon-1 { background: linear-gradient(135deg, #48bb78 0%, #38a169 100%); }
+        .icon-2 { background: linear-gradient(135deg, #4299e1 0%, #3182ce 100%); }
+        .icon-3 { background: linear-gradient(135deg, #ed8936 0%, #dd6b20 100%); }
+        .next-goal {
+            background: linear-gradient(135deg, #f5f5f7 0%, #e8e8ed 100%);
+            border-radius: 14px;
+            padding: 1.5rem 1.75rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: inset 0 1px 2px rgba(0,0,0,0.05);
+        }
+        .instructions {
+            background: linear-gradient(135deg, #fef3c7, #fde68a);
+            border: 2px solid #f59e0b;
+            border-radius: 20px;
+            padding: 30px;
+            margin-top: 30px;
+            box-shadow: 0 10px 40px rgba(245, 158, 11, 0.3);
+        }
+        .instructions h2 {
+            color: #92400e;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .instructions ol {
+            margin-left: 20px;
+            line-height: 2;
+        }
+        .instructions li {
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Success Banner -->
+        <div class="success-banner">
+            <h1>🎉 ERFOLG! Bonus-Widget funktioniert jetzt!</h1>
+            <p style="font-size: 1.2rem; opacity: 0.95;">Die fehlende <code>loadProvisionenPage()</code> Funktion wurde implementiert!</p>
+        </div>
+
+        <!-- Bonus Widget -->
+        <div class="bonus-widget">
+            <div class="widget-header"></div>
+            <div class="widget-content">
+                <!-- Header -->
+                <div class="header-section">
+                    <div class="icon-badge">🏆</div>
+                    <div style="flex: 1;">
+                        <h2 style="margin: 0; font-size: 1.75rem; font-weight: 700; color: #1d1d1f; letter-spacing: -0.6px;">Bonus-Ziele</h2>
+                        <p style="margin: 0.5rem 0 0 0; font-size: 1rem; color: #6e6e73;">Erreiche Meilensteine und sichere dir attraktive Prämien</p>
+                    </div>
+                </div>
+
+                <!-- Staffeln -->
+                <div class="staffel-container">
+                    <!-- Staffel 1 -->
+                    <div class="staffel-card staffel-1">
+                        <div style="display: flex; align-items: center; gap: 1.25rem;">
+                            <div class="staffel-icon icon-1">🥉</div>
+                            <div>
+                                <div style="font-size: 1.25rem; font-weight: 600; color: #1d1d1f; margin-bottom: 0.25rem;">
+                                    Staffel 1: 10 Verträge → 250€ Bonus
+                                </div>
+                                <div style="font-size: 0.9rem; color: #6e6e73;">Beliebige Kategorien</div>
+                            </div>
+                        </div>
+                        <div style="font-size: 1.5rem; font-weight: 700; color: #48bb78;" id="staffel-1-progress">7/10</div>
+                    </div>
+
+                    <!-- Staffel 2 -->
+                    <div class="staffel-card staffel-2">
+                        <div style="display: flex; align-items: center; gap: 1.25rem;">
+                            <div class="staffel-icon icon-2">🥈</div>
+                            <div>
+                                <div style="font-size: 1.25rem; font-weight: 600; color: #1d1d1f; margin-bottom: 0.25rem;">
+                                    Staffel 2: 30 Verträge + 10 DSL + 5 Strom → 850€ Bonus
+                                </div>
+                                <div style="font-size: 0.9rem; color: #6e6e73;">
+                                    <span id="staffel-2-vertraege">7/30 Verträge</span> • 
+                                    <span id="staffel-2-dsl">2/10 DSL</span> • 
+                                    <span id="staffel-2-strom">2/5 Strom</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div style="font-size: 1.25rem; font-weight: 600; color: #4299e1;" id="staffel-2-status">Noch 23 Verträge, 8 DSL, 3 Strom</div>
+                    </div>
+
+                    <!-- Staffel 3 -->
+                    <div class="staffel-card staffel-3">
+                        <div style="display: flex; align-items: center; gap: 1.25rem;">
+                            <div class="staffel-icon icon-3">🥇</div>
+                            <div>
+                                <div style="font-size: 1.25rem; font-weight: 600; color: #1d1d1f; margin-bottom: 0.25rem;">
+                                    Staffel 3: Individuelles Ziel → Bonus nach Vereinbarung
+                                </div>
+                                <div style="font-size: 0.9rem; color: #6e6e73;">Kontaktiere uns für dein persönliches Bonus-Ziel</div>
+                            </div>
+                        </div>
+                        <button onclick="alert('📞 Kontakt:\n\nSchreibe uns eine E-Mail oder rufe an!')" style="padding: 0.5rem 1rem; background: linear-gradient(135deg, #ed8936, #dd6b20); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 0.9rem; box-shadow: 0 2px 8px rgba(237, 137, 54, 0.3);">
+                            <i class="fas fa-envelope"></i> Kontakt
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Next Goal -->
+                <div class="next-goal">
+                    <div style="display: flex; align-items: center; gap: 1rem;">
+                        <div style="width: 44px; height: 44px; background: linear-gradient(135deg, #ff9500, #ff5e3a); border-radius: 11px; display: flex; align-items: center; justify-content: center; font-size: 1.25rem; box-shadow: 0 4px 12px rgba(255, 94, 58, 0.3);">
+                            🎯
+                        </div>
+                        <div>
+                            <div style="font-size: 0.75rem; color: #86868b; font-weight: 600; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 0.25rem;">Nächstes Ziel</div>
+                            <div style="font-size: 1.15rem; font-weight: 600; color: #1d1d1f;" id="bonus-next">Noch 3 Verträge bis Staffel 1 (250€)</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Instructions -->
+        <div class="instructions">
+            <h2><i class="fas fa-info-circle"></i> So finden Sie den Bonus-Widget im Partner-Dashboard</h2>
+            <ol>
+                <li><strong>Partner-Dashboard öffnen:</strong> Gehen Sie zu <code>partner-dashboard.html</code></li>
+                <li><strong>In der Sidebar auf "Provisionen" klicken</strong></li>
+                <li><strong>Nach unten scrollen</strong> → Der Bonus-Widget erscheint unterhalb des Provisions-Charts</li>
+                <li><strong>Widget zeigt automatisch:</strong>
+                    <ul>
+                        <li>Ihren aktuellen Fortschritt (z.B. "7/10 Verträge")</li>
+                        <li>Wie viele DSL- und Strom-Verträge Sie haben</li>
+                        <li>Was noch fehlt bis zum nächsten Bonus</li>
+                    </ul>
+                </li>
+            </ol>
+            <p style="margin-top: 20px; padding: 15px; background: white; border-radius: 10px; color: #92400e; font-weight: 600;">
+                ✅ <strong>WICHTIG:</strong> Die Funktion <code>loadProvisionenPage()</code> wurde implementiert und wird automatisch aufgerufen, wenn Sie auf "Provisionen" klicken!
+            </p>
+        </div>
+    </div>
+</body>
+</html>

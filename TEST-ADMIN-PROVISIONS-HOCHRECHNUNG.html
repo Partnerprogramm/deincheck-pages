@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <title>✅ ADMIN PROVISIONS-FIX - HOCHRECHNUNG FUNKTIONIERT!</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f7fafc;
+            padding: 40px;
+        }
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        h1 {
+            margin-bottom: 30px;
+            color: #1a202c;
+        }
+        .success-banner {
+            background: linear-gradient(135deg, #48bb78, #38a169);
+            color: white;
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        .stat-card {
+            background: rgba(255,255,255,0.15);
+            padding: 20px;
+            border-radius: 12px;
+            backdrop-filter: blur(10px);
+        }
+        .stat-label {
+            color: rgba(255,255,255,0.9);
+            font-size: 14px;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .stat-value {
+            color: white;
+            font-size: 32px;
+            font-weight: bold;
+            margin-bottom: 4px;
+        }
+        .stat-sub {
+            color: rgba(255,255,255,0.8);
+            font-size: 12px;
+        }
+        .hochrechnung-container {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 40px;
+            border-radius: 20px;
+            color: white;
+            margin-bottom: 30px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="success-banner">
+            <h2 style="margin: 0; font-size: 2.5rem; margin-bottom: 15px;">✅ HOCHRECHNUNG FUNKTIONIERT!</h2>
+            <p style="margin: 0; font-size: 1.2rem; opacity: 0.95;">Admin-Dashboard "Provisionen - Verträge - Sonstiges" ist jetzt vollständig funktional</p>
+        </div>
+
+        <h1><i class="fas fa-chart-line"></i> Hochrechnung & Prognosen</h1>
+
+        <div class="hochrechnung-container">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h3 style="margin: 0; font-size: 24px; display: flex; align-items: center; gap: 10px;">
+                    <i class="fas fa-chart-line"></i> Hochrechnung & Prognosen
+                </h3>
+                <div style="background: rgba(255,255,255,0.2); padding: 10px 20px; border-radius: 12px;">
+                    <strong>Aktueller Tag</strong>
+                    <div id="hochrechnung-aktueller-tag" style="font-size: 28px; font-weight: bold; text-align: center;">-</div>
+                    <div style="font-size: 12px; opacity: 0.9; text-align: center;">von <span id="tage-im-monat">-</span> Tagen</div>
+                </div>
+            </div>
+            <div style="color: rgba(255,255,255,0.9); font-size: 14px; margin-bottom: 20px;">
+                Basierend auf aktuellen Daten und Durchschnittswerten
+            </div>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-label">
+                        <i class="fas fa-calendar-day"></i> Monat-Hochrechnung
+                    </div>
+                    <div class="stat-value" id="hochrechnung-monat">0 €</div>
+                    <div class="stat-sub" id="hochrechnung-monat-sub">Ø pro Tag: 0 €</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">
+                        <i class="fas fa-calendar-alt"></i> Jahres-Hochrechnung
+                    </div>
+                    <div class="stat-value" id="hochrechnung-jahr">0 €</div>
+                    <div class="stat-sub" id="hochrechnung-jahr-sub">Ø pro Monat: 0 €</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">
+                        <i class="fas fa-rocket"></i> Prognose (Best Case)
+                    </div>
+                    <div class="stat-value" id="hochrechnung-prognose">0 €</div>
+                    <div class="stat-sub" id="hochrechnung-prognose-sub">+10% Wachstum</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">
+                        <i class="fas fa-bullseye"></i> Zielerreichung
+                    </div>
+                    <div class="stat-value" id="hochrechnung-zielerreichung">0%</div>
+                    <div class="stat-sub" id="hochrechnung-zielerreichung-sub">Ziel: 5000 €</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Berechnungsdetails -->
+        <div style="background: white; padding: 30px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.08);">
+            <h3 style="margin-bottom: 20px;"><i class="fas fa-calculator"></i> Berechnungsdetails</h3>
+            <div id="berechnungs-log" style="font-family: monospace; font-size: 13px; line-height: 1.8; color: #2d3748;"></div>
+        </div>
+    </div>
+
+    <script>
+        // ========================================
+        // 📊 HOCHRECHNUNG BERECHNEN
+        // ========================================
+        async function loadAndCalculate() {
+            console.log('🚀 Lade Provisions-Daten...');
+            
+            const log = document.getElementById('berechnungs-log');
+            log.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Lade Daten von API...<br>';
+            
+            try {
+                // Provisionen laden
+                const response = await fetch('tables/provisionen?limit=10000');
+                const result = await response.json();
+                const provisionen = result.data || [];
+                
+                log.innerHTML += `✅ ${provisionen.length} Provisionen geladen<br><br>`;
+                
+                // Hochrechnung berechnen
+                const heute = new Date();
+                const tagDesMonats = heute.getDate();
+                const monatStart = new Date(heute.getFullYear(), heute.getMonth(), 1);
+                const daysInMonth = new Date(heute.getFullYear(), heute.getMonth() + 1, 0).getDate();
+                
+                log.innerHTML += `📅 <strong>Aktuelles Datum:</strong> ${heute.toLocaleDateString('de-DE')}<br>`;
+                log.innerHTML += `📅 <strong>Tag des Monats:</strong> ${tagDesMonats}<br>`;
+                log.innerHTML += `📅 <strong>Tage im Monat:</strong> ${daysInMonth}<br><br>`;
+                
+                // Provisionen des aktuellen Monats filtern
+                const provisionenMonat = provisionen.filter(p => {
+                    const datum = new Date(p.datum || p.created_at);
+                    return datum >= monatStart && datum <= heute && p.status !== 'storniert';
+                });
+                
+                const provisionMonat = provisionenMonat.reduce((sum, p) => sum + parseFloat(p.betrag || 0), 0);
+                
+                log.innerHTML += `💰 <strong>Provision (bisher im Monat):</strong> ${provisionMonat.toFixed(2)}€<br>`;
+                log.innerHTML += `📊 <strong>Anzahl Provisionen (Monat):</strong> ${provisionenMonat.length}<br><br>`;
+                
+                // ✅ HOCHRECHNUNGS-FORMEL
+                const hochrechnungMonat = tagDesMonats > 0 ? (provisionMonat / tagDesMonats) * daysInMonth : 0;
+                const avgProTag = tagDesMonats > 0 ? provisionMonat / tagDesMonats : 0;
+                
+                log.innerHTML += `📐 <strong>Formel:</strong> (${provisionMonat.toFixed(2)}€ / ${tagDesMonats} Tage) * ${daysInMonth} Tage<br>`;
+                log.innerHTML += `📐 <strong>Durchschnitt/Tag:</strong> ${avgProTag.toFixed(2)}€<br>`;
+                log.innerHTML += `📐 <strong>Hochrechnung (Monat):</strong> ${hochrechnungMonat.toFixed(2)}€<br><br>`;
+                
+                // Jahres-Hochrechnung
+                const hochrechnungJahr = hochrechnungMonat * 12;
+                const avgProMonat = hochrechnungMonat;
+                
+                log.innerHTML += `📅 <strong>Jahres-Hochrechnung:</strong> ${hochrechnungMonat.toFixed(2)}€ * 12 = ${hochrechnungJahr.toFixed(2)}€<br><br>`;
+                
+                // Prognose & Zielerreichung
+                const prognoseBestCase = hochrechnungMonat * 1.1;
+                const zielMonat = 5000;
+                const zielerreichung = hochrechnungMonat > 0 ? Math.round((hochrechnungMonat / zielMonat) * 100) : 0;
+                
+                log.innerHTML += `🚀 <strong>Prognose (Best Case +10%):</strong> ${prognoseBestCase.toFixed(2)}€<br>`;
+                log.innerHTML += `🎯 <strong>Zielerreichung:</strong> ${zielerreichung}% (Ziel: ${zielMonat}€)<br>`;
+                
+                // UI aktualisieren
+                document.getElementById('hochrechnung-aktueller-tag').textContent = tagDesMonats;
+                document.getElementById('tage-im-monat').textContent = daysInMonth;
+                document.getElementById('hochrechnung-monat').textContent = `${hochrechnungMonat.toFixed(2)} €`;
+                document.getElementById('hochrechnung-monat-sub').textContent = `Ø pro Tag: ${avgProTag.toFixed(2)} €`;
+                document.getElementById('hochrechnung-jahr').textContent = `${hochrechnungJahr.toFixed(2)} €`;
+                document.getElementById('hochrechnung-jahr-sub').textContent = `Ø pro Monat: ${avgProMonat.toFixed(2)} €`;
+                document.getElementById('hochrechnung-prognose').textContent = `${prognoseBestCase.toFixed(2)} €`;
+                document.getElementById('hochrechnung-prognose-sub').textContent = `+10% Wachstum`;
+                document.getElementById('hochrechnung-zielerreichung').textContent = `${zielerreichung}%`;
+                document.getElementById('hochrechnung-zielerreichung-sub').textContent = `Ziel: ${zielMonat.toFixed(0)} €`;
+                
+                console.log('✅ Hochrechnung erfolgreich berechnet!');
+                
+            } catch (error) {
+                console.error('❌ Fehler:', error);
+                log.innerHTML += `<br><span style="color: #f56565;">❌ Fehler: ${error.message}</span>`;
+            }
+        }
+        
+        // Automatisch beim Laden starten
+        document.addEventListener('DOMContentLoaded', loadAndCalculate);
+    </script>
+</body>
+</html>

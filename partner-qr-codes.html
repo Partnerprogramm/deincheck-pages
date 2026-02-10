@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QR-Codes - DeinCheck</title>
+    <link rel="icon" type="image/png" href="images/favicon-partner.png">
+    <link rel="apple-touch-icon" href="images/favicon-partner.png">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css">
+    <style>
+        /* Navigation Hover Effects */
+        nav a:not([style*="background: linear-gradient"]):not([style*="background: #f56565"]):hover {
+            background: #f7fafc !important;
+            color: #3b82f6 !important;
+        }
+
+        nav a[style*="background: linear-gradient"]:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        nav a[style*="background: #f56565"]:hover {
+            background: #e53e3e !important;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #f7fafc;
+            color: #2d3748;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 30px auto;
+            padding: 0 20px;
+        }
+
+        .header-section {
+            background: linear-gradient(135deg, #3b82f6 0%, #60a5fa 100%);
+            border-radius: 20px;
+            padding: 40px;
+            color: white;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .header-section h1 {
+            font-size: 36px;
+            margin-bottom: 10px;
+        }
+
+        .header-section p {
+            font-size: 16px;
+            opacity: 0.95;
+        }
+
+        .card {
+            background: white;
+            border-radius: 16px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+        }
+
+        .card h2 {
+            margin-bottom: 20px;
+            color: #2d3748;
+            font-size: 24px;
+        }
+
+        .qr-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+            margin-top: 30px;
+        }
+
+        .qr-card {
+            background: white;
+            border: 2px solid #e2e8f0;
+            border-radius: 16px;
+            padding: 25px;
+            text-align: center;
+            transition: all 0.3s;
+        }
+
+        .qr-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
+            border-color: #3b82f6;
+        }
+
+        .qr-card h3 {
+            margin-bottom: 15px;
+            color: #2d3748;
+            font-size: 20px;
+        }
+
+        .qr-code-container {
+            background: #f7fafc;
+            padding: 20px;
+            border-radius: 12px;
+            margin: 20px 0;
+            display: inline-block;
+        }
+
+        .qr-code-container canvas {
+            display: block;
+        }
+
+        .qr-description {
+            color: #718096;
+            font-size: 14px;
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+
+        .qr-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #3b82f6 0%, #60a5fa 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: #48bb78;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #38a169;
+        }
+
+        .btn-outline {
+            background: white;
+            color: #3b82f6;
+            border: 2px solid #3b82f6;
+        }
+
+        .btn-outline:hover {
+            background: #3b82f6;
+            color: white;
+        }
+
+        .info-box {
+            background: #ebf4ff;
+            border-left: 4px solid #4299e1;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+
+        .info-box h3 {
+            color: #2c5282;
+            margin-bottom: 10px;
+            font-size: 18px;
+        }
+
+        .info-box p {
+            color: #2d3748;
+            line-height: 1.6;
+        }
+
+        .info-box ul {
+            margin: 15px 0 0 20px;
+            color: #2d3748;
+        }
+
+        .info-box li {
+            margin: 8px 0;
+        }
+
+        /* Formats Section */
+        .formats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .format-option {
+            padding: 15px;
+            background: #f7fafc;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: center;
+        }
+
+        .format-option:hover {
+            border-color: #3b82f6;
+            background: #ebf4ff;
+        }
+
+        .format-option.selected {
+            border-color: #3b82f6;
+            background: #ebf4ff;
+        }
+
+        .format-label {
+            font-weight: 600;
+            color: #2d3748;
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .format-desc {
+            font-size: 12px;
+            color: #718096;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav style="background: white; padding: 15px 30px; box-shadow: 0 2px 10px rgba(0,0,0,0.08); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 20px; position: sticky; top: 0; z-index: 1000;">
+        <div style="display: flex; align-items: center; gap: 12px; font-size: 20px; font-weight: 700; color: #3b82f6;">
+            <i class="fas fa-qrcode"></i>
+            <span>QR-Codes</span>
+        </div>
+        <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+            <a href="partner-dashboard.html" style="padding: 10px 18px; color: #718096; text-decoration: none; border-radius: 8px; font-weight: 600; transition: all 0.2s; display: inline-flex; align-items: center; gap: 8px; font-size: 14px;">
+                <i class="fas fa-home"></i> Dashboard
+            </a>
+            <a href="partner-provisionen.html" style="padding: 10px 18px; color: #718096; text-decoration: none; border-radius: 8px; font-weight: 600; transition: all 0.2s; display: inline-flex; align-items: center; gap: 8px; font-size: 14px;">
+                <i class="fas fa-money-bill-wave"></i> Provisionen
+            </a>
+            <a href="partner-akademie.html" style="padding: 10px 18px; color: #718096; text-decoration: none; border-radius: 8px; font-weight: 600; transition: all 0.2s; display: inline-flex; align-items: center; gap: 8px; font-size: 14px;">
+                <i class="fas fa-graduation-cap"></i> Akademie
+            </a>
+            <a href="partner-kalender.html" style="padding: 10px 18px; color: #718096; text-decoration: none; border-radius: 8px; font-weight: 600; transition: all 0.2s; display: inline-flex; align-items: center; gap: 8px; font-size: 14px;">
+                <i class="fas fa-calendar-alt"></i> Termine
+            </a>
+            <a href="partner-empfehlungen.html" style="padding: 10px 18px; color: #718096; text-decoration: none; border-radius: 8px; font-weight: 600; transition: all 0.2s; display: inline-flex; align-items: center; gap: 8px; font-size: 14px;">
+                <i class="fas fa-gift"></i> Empfehlungen
+            </a>
+            <a href="partner-qr-codes.html" style="padding: 10px 18px; background: linear-gradient(135deg, #3b82f6 0%, #60a5fa 100%); color: white; text-decoration: none; border-radius: 8px; font-weight: 600; transition: all 0.2s; display: inline-flex; align-items: center; gap: 8px; font-size: 14px;">
+                <i class="fas fa-qrcode"></i> QR-Codes
+            </a>
+            <a href="index.html" style="padding: 10px 18px; background: #f56565; color: white; text-decoration: none; border-radius: 8px; font-weight: 600; transition: all 0.2s; display: inline-flex; align-items: center; gap: 8px; font-size: 14px; margin-left: 12px;">
+                <i class="fas fa-sign-out-alt"></i> Logout
+            </a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <!-- Header -->
+        <div class="header-section">
+            <h1><i class="fas fa-qrcode"></i> Deine Persönlichen QR-Codes</h1>
+            <p>Nutze diese QR-Codes für Flyer, Visitenkarten, Präsentationen und mehr!</p>
+        </div>
+
+        <!-- Coming Soon Banner -->
+        <div style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); border-radius: 20px; padding: 60px 40px; text-align: center; color: white; margin-bottom: 30px; box-shadow: 0 10px 30px rgba(240, 147, 251, 0.3);">
+            <div style="font-size: 80px; margin-bottom: 20px;">🚀</div>
+            <h2 style="font-size: 42px; margin-bottom: 15px; font-weight: 800;">Bald verfügbar!</h2>
+            <p style="font-size: 20px; opacity: 0.95; max-width: 600px; margin: 0 auto;">
+                Deine persönlichen QR-Codes sind in Vorbereitung und werden sehr bald freigeschaltet. 
+                Du kannst dann deine individuellen QR-Codes für Flyer, Visitenkarten und mehr erstellen!
+            </p>
+        </div>
+
+        <!-- Info Box (ausgeblendet bis Launch) -->
+        <div class="info-box" style="display: none;">
+            <h3><i class="fas fa-info-circle"></i> Wie funktionieren QR-Codes?</h3>
+            <p>QR-Codes sind scanbare Bilder, die direkt zu deinen persönlichen Links führen:</p>
+            <ul>
+                <li><strong>Einfach scannen:</strong> Kunden scannen den Code mit ihrem Smartphone</li>
+                <li><strong>Automatische Zuordnung:</strong> Alle Anmeldungen werden dir zugeordnet</li>
+                <li><strong>Überall einsetzbar:</strong> Flyer, Visitenkarten, Social Media, Präsentationen</li>
+                <li><strong>Kostenlos herunterladen:</strong> PNG oder SVG Format für beste Qualität</li>
+            </ul>
+        </div>
+
+        <!-- QR-Codes Grid (ausgeblendet bis Launch) -->
+        <div class="qr-grid" style="display: none;">
+            <!-- Empfehlungslink QR-Code -->
+            <div class="qr-card">
+                <h3><i class="fas fa-gift"></i> Empfehlungslink</h3>
+                <p class="qr-description">Für neue Partner-Anmeldungen. Jeder der diesen Code scannt, wird automatisch als deine Empfehlung registriert.</p>
+                <div class="qr-code-container">
+                    <canvas id="qr-empfehlung"></canvas>
+                </div>
+                <div class="qr-actions">
+                    <button class="btn btn-primary" onclick="downloadQR('qr-empfehlung', 'Empfehlungslink')">
+                        <i class="fas fa-download"></i> PNG Download
+                    </button>
+                    <button class="btn btn-outline" onclick="downloadQRSVG('empfehlung')">
+                        <i class="fas fa-vector-square"></i> SVG
+                    </button>
+                </div>
+            </div>
+
+            <!-- Kontakt QR-Code -->
+            <div class="qr-card">
+                <h3><i class="fas fa-address-card"></i> Visitenkarte</h3>
+                <p class="qr-description">Deine digitale Visitenkarte (vCard). Enthält alle deine Kontaktdaten zum direkten Speichern.</p>
+                <div class="qr-code-container">
+                    <canvas id="qr-vcard"></canvas>
+                </div>
+                <div class="qr-actions">
+                    <button class="btn btn-primary" onclick="downloadQR('qr-vcard', 'Visitenkarte')">
+                        <i class="fas fa-download"></i> PNG Download
+                    </button>
+                    <button class="btn btn-outline" onclick="downloadQRSVG('vcard')">
+                        <i class="fas fa-vector-square"></i> SVG
+                    </button>
+                </div>
+            </div>
+
+            <!-- WhatsApp QR-Code -->
+            <div class="qr-card">
+                <h3><i class="fab fa-whatsapp"></i> WhatsApp</h3>
+                <p class="qr-description">Direkt-Link zu deinem WhatsApp Chat. Kunden können dich sofort kontaktieren.</p>
+                <div class="qr-code-container">
+                    <canvas id="qr-whatsapp"></canvas>
+                </div>
+                <div class="qr-actions">
+                    <button class="btn btn-secondary" onclick="downloadQR('qr-whatsapp', 'WhatsApp')">
+                        <i class="fas fa-download"></i> PNG Download
+                    </button>
+                    <button class="btn btn-outline" onclick="downloadQRSVG('whatsapp')">
+                        <i class="fas fa-vector-square"></i> SVG
+                    </button>
+                </div>
+            </div>
+
+            <!-- E-Mail QR-Code -->
+            <div class="qr-card">
+                <h3><i class="fas fa-envelope"></i> E-Mail</h3>
+                <p class="qr-description">E-Mail-Adresse zum Scannen. Öffnet automatisch ein neues E-Mail-Fenster.</p>
+                <div class="qr-code-container">
+                    <canvas id="qr-email"></canvas>
+                </div>
+                <div class="qr-actions">
+                    <button class="btn btn-primary" onclick="downloadQR('qr-email', 'Email')">
+                        <i class="fas fa-download"></i> PNG Download
+                    </button>
+                    <button class="btn btn-outline" onclick="downloadQRSVG('email')">
+                        <i class="fas fa-vector-square"></i> SVG
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Druckvorlagen (ausgeblendet bis Launch) -->
+        <div class="card" style="display: none;">
+            <h2><i class="fas fa-print"></i> Druckvorlagen</h2>
+            <p style="color: #718096; margin-bottom: 20px;">Lade komplette Druckvorlagen mit deinen QR-Codes herunter:</p>
+            
+            <div class="formats-grid">
+                <div class="format-option" onclick="generateFlyer()">
+                    <span class="format-label"><i class="fas fa-file-pdf"></i> Flyer A5</span>
+                    <span class="format-desc">148 × 210 mm</span>
+                </div>
+                <div class="format-option" onclick="generateBusinessCard()">
+                    <span class="format-label"><i class="fas fa-id-card"></i> Visitenkarte</span>
+                    <span class="format-desc">85 × 55 mm</span>
+                </div>
+                <div class="format-option" onclick="generatePoster()">
+                    <span class="format-label"><i class="fas fa-image"></i> Poster A4</span>
+                    <span class="format-desc">210 × 297 mm</span>
+                </div>
+                <div class="format-option" onclick="generateSocialMedia()">
+                    <span class="format-label"><i class="fas fa-share-alt"></i> Social Media</span>
+                    <span class="format-desc">1080 × 1080 px</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- QRCode.js Library -->
+    <script src="https://cdn.jsdelivr.net/npm/qrcodejs2@0.0.2/qrcode.min.js"></script>
+
+    <!-- Chat & Ticket Widget -->
+    <script src="js/chat-ticket-widget.js"></script>
+
+    <script>
+        const partnerEmail = localStorage.getItem('partnerEmail');
+        const partnerData = JSON.parse(localStorage.getItem('partnerData') || '{}');
+
+        if (!partnerEmail) {
+            window.location.href = 'index.html';
+        }
+
+        // Referral-Code generieren
+        function generateReferralCode() {
+            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+            let code = '';
+            for (let i = 0; i < 6; i++) {
+                code += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            return code;
+        }
+
+        const myReferralCode = generateReferralCode();
+        const baseUrl = window.location.origin;
+
+        // QR-Codes generieren
+        function generateQRCodes() {
+            // 1. Empfehlungslink
+            const referralUrl = `${baseUrl}/partner-onboarding.html?ref=${myReferralCode}`;
+            new QRCode(document.getElementById('qr-empfehlung'), {
+                text: referralUrl,
+                width: 200,
+                height: 200,
+                colorDark: '#3b82f6',
+                colorLight: '#ffffff',
+                correctLevel: QRCode.CorrectLevel.H
+            });
+
+            // 2. vCard (Visitenkarte)
+            const vCard = `BEGIN:VCARD
+VERSION:3.0
+FN:${partnerData.vorname || ''} ${partnerData.nachname || ''}
+TEL:${partnerData.telefon || ''}
+EMAIL:${partnerEmail}
+URL:${referralUrl}
+END:VCARD`;
+            new QRCode(document.getElementById('qr-vcard'), {
+                text: vCard,
+                width: 200,
+                height: 200,
+                colorDark: '#2d3748',
+                colorLight: '#ffffff',
+                correctLevel: QRCode.CorrectLevel.H
+            });
+
+            // 3. WhatsApp
+            const whatsappUrl = `https://wa.me/${(partnerData.telefon || '').replace(/[^0-9]/g, '')}?text=Hallo, ich interessiere mich für das Partner-Programm!`;
+            new QRCode(document.getElementById('qr-whatsapp'), {
+                text: whatsappUrl,
+                width: 200,
+                height: 200,
+                colorDark: '#25D366',
+                colorLight: '#ffffff',
+                correctLevel: QRCode.CorrectLevel.H
+            });
+
+            // 4. Email
+            const emailUrl = `mailto:${partnerEmail}?subject=Partner-Programm Anfrage&body=Hallo, ich möchte mehr über das Partner-Programm erfahren.`;
+            new QRCode(document.getElementById('qr-email'), {
+                text: emailUrl,
+                width: 200,
+                height: 200,
+                colorDark: '#3b82f6',
+                colorLight: '#ffffff',
+                correctLevel: QRCode.CorrectLevel.H
+            });
+        }
+
+        // QR-Code als PNG herunterladen
+        function downloadQR(canvasId, name) {
+            const canvas = document.querySelector(`#${canvasId} canvas`);
+            if (canvas) {
+                const url = canvas.toDataURL('image/png');
+                const link = document.createElement('a');
+                link.download = `QR-${name}-${partnerData.vorname || 'Partner'}.png`;
+                link.href = url;
+                link.click();
+            }
+        }
+
+        // SVG Download (Platzhalter - würde SVG-Version des QR-Codes generieren)
+        function downloadQRSVG(type) {
+            alert('ℹ️ SVG-Download wird vorbereitet...\n\nTipp: PNG-Format ist für die meisten Zwecke ausreichend!');
+        }
+
+        // Druckvorlagen
+        function generateFlyer() {
+            alert('📄 Flyer-Vorlage wird generiert...\n\nEnthält: Dein QR-Code + Empfehlungstext + Kontaktdaten');
+        }
+
+        function generateBusinessCard() {
+            alert('💼 Visitenkarten-Vorlage wird generiert...\n\nFormat: 85×55mm, druckfertig mit Schnittmarken');
+        }
+
+        function generatePoster() {
+            alert('🖼️ Poster-Vorlage wird generiert...\n\nFormat: A4, hochauflösend für Druck');
+        }
+
+        function generateSocialMedia() {
+            alert('📱 Social Media Vorlage wird generiert...\n\nFormat: 1080×1080px, Instagram/Facebook optimiert');
+        }
+
+        // QR-Codes generieren
+        generateQRCodes();
+
+        // Chat-Widget initialisieren
+        if (window.initChatTicketWidget) {
+            initChatTicketWidget();
+        }
+    </script>
+</body>
+</html>

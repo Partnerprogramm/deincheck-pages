@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Umsatz-Tracking Test</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            padding: 20px;
+            background: #f7fafc;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        h1 {
+            color: #2d3748;
+            margin-bottom: 20px;
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .stat-card h3 {
+            font-size: 14px;
+            color: #718096;
+            margin-bottom: 10px;
+        }
+        .stat-card .value {
+            font-size: 32px;
+            font-weight: 700;
+            color: #2d3748;
+        }
+        .debug {
+            background: #2d3748;
+            color: #e2e8f0;
+            padding: 20px;
+            border-radius: 12px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            margin-top: 20px;
+            max-height: 500px;
+            overflow-y: auto;
+        }
+        .debug h3 {
+            color: #63b3ed;
+            margin-bottom: 10px;
+        }
+        .debug-line {
+            padding: 5px 0;
+            border-bottom: 1px solid #4a5568;
+        }
+        button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-bottom: 20px;
+        }
+        button:hover {
+            background: #5568d3;
+        }
+        .error {
+            background: #fed7d7;
+            color: #742a2a;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        .success {
+            background: #c6f6d5;
+            color: #22543d;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 Umsatz-Tracking System Test</h1>
+        
+        <button onclick="testSystem()">🔄 System testen</button>
+        
+        <div id="message"></div>
+        
+        <div class="stats-grid">
+            <div class="stat-card">
+                <h3>📅 Provision (Heute)</h3>
+                <div class="value" id="heute">0 €</div>
+            </div>
+            <div class="stat-card">
+                <h3>📅 Provision (Woche)</h3>
+                <div class="value" id="woche">0 €</div>
+            </div>
+            <div class="stat-card">
+                <h3>📅 Provision (Monat)</h3>
+                <div class="value" id="monat">0 €</div>
+            </div>
+            <div class="stat-card">
+                <h3>📊 Verträge (Monat)</h3>
+                <div class="value" id="vertraege">0</div>
+            </div>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <h3>📈 Monat-Hochrechnung</h3>
+                <div class="value" id="prognose-monat">0 €</div>
+            </div>
+            <div class="stat-card">
+                <h3>📊 Jahres-Hochrechnung</h3>
+                <div class="value" id="prognose-jahr">0 €</div>
+            </div>
+            <div class="stat-card">
+                <h3>🎯 Bis Monatsende</h3>
+                <div class="value" id="prognose-rest">0 €</div>
+            </div>
+            <div class="stat-card">
+                <h3>📈 Wachstum</h3>
+                <div class="value" id="wachstum">+0%</div>
+            </div>
+        </div>
+        
+        <div class="debug" id="debug">
+            <h3>🔍 Debug-Informationen</h3>
+            <div id="debug-content">Klicke auf "System testen" um zu starten...</div>
+        </div>
+    </div>
+
+    <script>
+        function addDebug(message, type = 'info') {
+            const content = document.getElementById('debug-content');
+            const line = document.createElement('div');
+            line.className = 'debug-line';
+            
+            let icon = '📝';
+            if (type === 'success') icon = '✅';
+            if (type === 'error') icon = '❌';
+            if (type === 'warning') icon = '⚠️';
+            
+            line.innerHTML = `${icon} ${new Date().toLocaleTimeString('de-DE')} - ${message}`;
+            content.appendChild(line);
+            content.scrollTop = content.scrollHeight;
+        }
+
+        function formatCurrency(amount) {
+            return new Intl.NumberFormat('de-DE', {
+                style: 'currency',
+                currency: 'EUR'
+            }).format(amount || 0);
+        }
+
+        function parseDate(dateStr) {
+            if (!dateStr) return null;
+            
+            // Timestamp in Millisekunden
+            if (typeof dateStr === 'number') {
+                return new Date(dateStr);
+            }
+            
+            // String zu Date konvertieren
+            const date = new Date(dateStr);
+            if (!isNaN(date.getTime())) {
+                return date;
+            }
+            
+            return null;
+        }
+
+        function getProvision(vertrag) {
+            const provision = parseFloat(vertrag.gesamt_provision) || 
+                            parseFloat(vertrag.provision_betrag) || 
+                            parseFloat(vertrag.provision) || 0;
+            return provision;
+        }
+
+        async function testSystem() {
+            document.getElementById('debug-content').innerHTML = '';
+            document.getElementById('message').innerHTML = '';
+            
+            addDebug('🚀 Starte System-Test...', 'info');
+            
+            try {
+                // 1. API-Verbindung testen
+                addDebug('📡 Teste API-Verbindung...', 'info');
+                const response = await fetch('tables/vertragsabschluesse?limit=1000');
+                
+                if (!response.ok) {
+                    throw new Error(`API-Fehler: ${response.status} ${response.statusText}`);
+                }
+                
+                addDebug('✅ API-Verbindung erfolgreich', 'success');
+                
+                // 2. Daten laden
+                const result = await response.json();
+                const vertraege = result.data || [];
+                
+                addDebug(`📦 ${vertraege.length} Verträge geladen`, 'success');
+                
+                if (vertraege.length === 0) {
+                    document.getElementById('message').innerHTML = 
+                        '<div class="error">⚠️ Keine Verträge in der Datenbank gefunden!</div>';
+                    addDebug('⚠️ KEINE DATEN! Tabelle ist leer.', 'warning');
+                    return;
+                }
+                
+                // 3. Sample-Daten anzeigen
+                addDebug('📋 Sample Vertrag #1:', 'info');
+                const sample = vertraege[0];
+                addDebug(`   - ID: ${sample.id}`, 'info');
+                addDebug(`   - erstellt_am: ${sample.erstellt_am}`, 'info');
+                addDebug(`   - created_at: ${sample.created_at}`, 'info');
+                addDebug(`   - gesamt_provision: ${sample.gesamt_provision}`, 'info');
+                addDebug(`   - provision_betrag: ${sample.provision_betrag}`, 'info');
+                
+                const sampleDate = parseDate(sample.erstellt_am || sample.created_at);
+                addDebug(`   - Parsed Date: ${sampleDate ? sampleDate.toISOString() : 'NULL'}`, sampleDate ? 'success' : 'error');
+                
+                // 4. Zeiträume berechnen
+                const now = new Date();
+                const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+                const weekAgo = new Date(today);
+                weekAgo.setDate(weekAgo.getDate() - 7);
+                const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+                
+                addDebug('📅 Zeiträume:', 'info');
+                addDebug(`   - Heute ab: ${today.toISOString()}`, 'info');
+                addDebug(`   - Woche ab: ${weekAgo.toISOString()}`, 'info');
+                addDebug(`   - Monat ab: ${monthStart.toISOString()}`, 'info');
+                
+                // 5. Daten filtern und berechnen
+                let heuteCount = 0, heuteProvision = 0;
+                let wocheCount = 0, wocheProvision = 0;
+                let monatCount = 0, monatProvision = 0;
+                
+                vertraege.forEach(v => {
+                    const date = parseDate(v.erstellt_am || v.created_at);
+                    if (!date) return;
+                    
+                    const provision = getProvision(v);
+                    
+                    if (date >= today) {
+                        heuteCount++;
+                        heuteProvision += provision;
+                    }
+                    if (date >= weekAgo) {
+                        wocheCount++;
+                        wocheProvision += provision;
+                    }
+                    if (date >= monthStart) {
+                        monatCount++;
+                        monatProvision += provision;
+                    }
+                });
+                
+                addDebug('📊 Berechnete Statistiken:', 'info');
+                addDebug(`   - Heute: ${heuteCount} Verträge, ${formatCurrency(heuteProvision)}`, heuteCount > 0 ? 'success' : 'warning');
+                addDebug(`   - Woche: ${wocheCount} Verträge, ${formatCurrency(wocheProvision)}`, wocheCount > 0 ? 'success' : 'warning');
+                addDebug(`   - Monat: ${monatCount} Verträge, ${formatCurrency(monatProvision)}`, monatCount > 0 ? 'success' : 'warning');
+                
+                // 6. Hochrechnungen
+                const currentDay = now.getDate();
+                const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+                const daysRemaining = daysInMonth - currentDay;
+                
+                const avgPerDay = currentDay > 0 ? monatProvision / currentDay : 0;
+                const prognoseMonat = avgPerDay * daysInMonth;
+                const prognoseJahr = prognoseMonat * 12;
+                const prognoseRest = monatProvision + (avgPerDay * daysRemaining);
+                
+                // Vormonat
+                const lastMonthStart = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+                const lastMonthEnd = new Date(now.getFullYear(), now.getMonth(), 0);
+                let lastMonatProvision = 0;
+                
+                vertraege.forEach(v => {
+                    const date = parseDate(v.erstellt_am || v.created_at);
+                    if (!date) return;
+                    if (date >= lastMonthStart && date <= lastMonthEnd) {
+                        lastMonatProvision += getProvision(v);
+                    }
+                });
+                
+                const growth = lastMonatProvision > 0 ? ((monatProvision - lastMonatProvision) / lastMonatProvision) * 100 : 0;
+                const growthFormatted = growth > 0 ? `+${growth.toFixed(1)}%` : `${growth.toFixed(1)}%`;
+                
+                addDebug('📈 Hochrechnungen:', 'info');
+                addDebug(`   - Ø pro Tag: ${formatCurrency(avgPerDay)}`, 'info');
+                addDebug(`   - Monat-Prognose: ${formatCurrency(prognoseMonat)}`, 'success');
+                addDebug(`   - Jahres-Prognose: ${formatCurrency(prognoseJahr)}`, 'success');
+                addDebug(`   - Bis Monatsende: ${formatCurrency(prognoseRest)}`, 'success');
+                addDebug(`   - Vormonat: ${formatCurrency(lastMonatProvision)}`, 'info');
+                addDebug(`   - Wachstum: ${growthFormatted}`, growth > 0 ? 'success' : 'warning');
+                
+                // 7. UI aktualisieren
+                document.getElementById('heute').textContent = formatCurrency(heuteProvision);
+                document.getElementById('woche').textContent = formatCurrency(wocheProvision);
+                document.getElementById('monat').textContent = formatCurrency(monatProvision);
+                document.getElementById('vertraege').textContent = monatCount;
+                
+                document.getElementById('prognose-monat').textContent = formatCurrency(prognoseMonat);
+                document.getElementById('prognose-jahr').textContent = formatCurrency(prognoseJahr);
+                document.getElementById('prognose-rest').textContent = formatCurrency(prognoseRest);
+                document.getElementById('wachstum').textContent = growthFormatted;
+                
+                document.getElementById('message').innerHTML = 
+                    '<div class="success">✅ System funktioniert! Alle Berechnungen erfolgreich.</div>';
+                
+                addDebug('✅ TEST ERFOLGREICH ABGESCHLOSSEN!', 'success');
+                
+            } catch (error) {
+                addDebug(`❌ FEHLER: ${error.message}`, 'error');
+                document.getElementById('message').innerHTML = 
+                    `<div class="error">❌ Fehler: ${error.message}</div>`;
+                console.error('Test-Fehler:', error);
+            }
+        }
+
+        // Auto-Test beim Laden
+        window.addEventListener('DOMContentLoaded', () => {
+            addDebug('🎯 Seite geladen. Bereit für Test!', 'success');
+            addDebug('💡 Klicke auf "System testen" um zu starten.', 'info');
+        });
+    </script>
+</body>
+</html>

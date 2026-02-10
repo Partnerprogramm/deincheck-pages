@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Simple Dashboard Test</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: Arial; padding: 40px; background: #f5f5f5; }
+        h1 { color: #333; margin-bottom: 30px; }
+        .test-section { background: white; padding: 24px; margin-bottom: 20px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+        button { padding: 12px 24px; background: #667eea; color: white; border: none; border-radius: 8px; cursor: pointer; margin-right: 10px; margin-bottom: 10px; font-weight: 600; }
+        button:hover { background: #5568d3; }
+        #projekte-grid, #partner-cards-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; margin-top: 20px; }
+        .status { padding: 8px 12px; border-radius: 6px; margin-top: 10px; }
+        .success { background: #d4edda; color: #155724; }
+        .error { background: #f8d7da; color: #721c24; }
+        .loading { background: #fff3cd; color: #856404; }
+    </style>
+</head>
+<body>
+    <h1>🧪 Dashboard Funktions-Test (Direkt)</h1>
+    
+    <div class="test-section">
+        <h2>1️⃣ Projekte laden (Aufgaben & Projekte)</h2>
+        <button onclick="testLoadProjekte()">▶️ loadProjekte() ausführen</button>
+        <div id="projekte-status" class="status loading">Warte auf Test...</div>
+        <div id="projekte-grid"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>2️⃣ Partner laden (Partner-Verwaltung)</h2>
+        <button onclick="testLoadPartner()">▶️ loadPartnerVerwaltung() ausführen</button>
+        <div id="partner-status" class="status loading">Warte auf Test...</div>
+        <div id="partner-cards-grid"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>3️⃣ News laden (News & Aktionen)</h2>
+        <button onclick="testLoadNews()">▶️ loadNews() ausführen</button>
+        <div id="news-status" class="status loading">Warte auf Test...</div>
+        <div id="newsTable"></div>
+    </div>
+
+    <script>
+        // ========================================
+        // TEST 1: Projekte laden
+        // ========================================
+        async function testLoadProjekte() {
+            const statusEl = document.getElementById('projekte-status');
+            const grid = document.getElementById('projekte-grid');
+            
+            statusEl.className = 'status loading';
+            statusEl.textContent = '⏳ Lade Projekte...';
+            grid.innerHTML = '<div style="padding: 40px; text-align: center; color: #666;">Lädt...</div>';
+            
+            try {
+                console.log('🔄 Fetching task_projekte...');
+                const res = await fetch('tables/task_projekte?limit=50');
+                console.log('📦 Response:', res.status, res.statusText);
+                
+                if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                
+                const data = await res.json();
+                console.log('✅ Data:', data);
+                
+                statusEl.className = 'status success';
+                statusEl.textContent = `✅ Erfolgreich! ${data.data.length} Projekte geladen`;
+                
+                if (data.data.length === 0) {
+                    grid.innerHTML = '<div style="padding: 40px; text-align: center; color: #666;">Keine Projekte vorhanden</div>';
+                    return;
+                }
+                
+                // Tasks laden
+                const tasksRes = await fetch('tables/tasks?limit=100');
+                const tasksData = await tasksRes.json();
+                console.log('✅ Tasks geladen:', tasksData.data.length);
+                
+                grid.innerHTML = '';
+                data.data.forEach(projekt => {
+                    const tasks = tasksData.data.filter(t => t.projekt_id === projekt.id);
+                    const card = document.createElement('div');
+                    card.style.cssText = 'background: white; padding: 20px; border-radius: 8px; border-left: 4px solid ' + (projekt.farbe || '#667eea') + '; box-shadow: 0 2px 4px rgba(0,0,0,0.1);';
+                    card.innerHTML = `
+                        <h3 style="margin-top: 0; color: #333;">${projekt.name}</h3>
+                        <p style="color: #666; font-size: 14px; margin: 8px 0;">${projekt.beschreibung || ''}</p>
+                        <div style="display: flex; gap: 8px; margin-top: 12px;">
+                            <span style="background: #edf2f7; padding: 4px 12px; border-radius: 6px; font-size: 13px;">${projekt.status}</span>
+                            <span style="background: #bee3f8; padding: 4px 12px; border-radius: 6px; font-size: 13px;">${tasks.length} Tasks</span>
+                        </div>
+                    `;
+                    grid.appendChild(card);
+                });
+                
+            } catch (error) {
+                console.error('❌ Fehler:', error);
+                statusEl.className = 'status error';
+                statusEl.textContent = `❌ Fehler: ${error.message}`;
+                grid.innerHTML = '<div style="padding: 40px; text-align: center; color: #c00;">Fehler beim Laden</div>';
+            }
+        }
+        
+        // ========================================
+        // TEST 2: Partner laden
+        // ========================================
+        async function testLoadPartner() {
+            const statusEl = document.getElementById('partner-status');
+            const grid = document.getElementById('partner-cards-grid');
+            
+            statusEl.className = 'status loading';
+            statusEl.textContent = '⏳ Lade Partner...';
+            grid.innerHTML = '<div style="padding: 40px; text-align: center; color: #666;">Lädt...</div>';
+            
+            try {
+                console.log('🔄 Fetching partners...');
+                const res = await fetch('tables/partners?limit=50');
+                console.log('📦 Response:', res.status, res.statusText);
+                
+                if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                
+                const data = await res.json();
+                console.log('✅ Data:', data);
+                
+                statusEl.className = 'status success';
+                statusEl.textContent = `✅ Erfolgreich! ${data.data.length} Partner geladen`;
+                
+                if (data.data.length === 0) {
+                    grid.innerHTML = '<div style="padding: 40px; text-align: center; color: #666;">Keine Partner vorhanden</div>';
+                    return;
+                }
+                
+                grid.innerHTML = '';
+                data.data.slice(0, 20).forEach(partner => {
+                    const card = document.createElement('div');
+                    card.style.cssText = 'background: white; padding: 20px; border-radius: 8px; border-left: 4px solid #48bb78; box-shadow: 0 2px 4px rgba(0,0,0,0.1);';
+                    card.innerHTML = `
+                        <h3 style="margin-top: 0; color: #333;">${partner.vorname} ${partner.nachname}</h3>
+                        <p style="color: #666; font-size: 14px; margin: 8px 0;">${partner.email}</p>
+                        <div style="display: flex; gap: 8px; margin-top: 12px;">
+                            <span style="background: #${partner.status === 'aktiv' ? 'c6f6d5' : 'fed7d7'}; padding: 4px 12px; border-radius: 6px; font-size: 13px;">${partner.status}</span>
+                            <span style="background: #bee3f8; padding: 4px 12px; border-radius: 6px; font-size: 13px;">${partner.modell || 'Standard'}</span>
+                        </div>
+                    `;
+                    grid.appendChild(card);
+                });
+                
+            } catch (error) {
+                console.error('❌ Fehler:', error);
+                statusEl.className = 'status error';
+                statusEl.textContent = `❌ Fehler: ${error.message}`;
+                grid.innerHTML = '<div style="padding: 40px; text-align: center; color: #c00;">Fehler beim Laden</div>';
+            }
+        }
+        
+        // ========================================
+        // TEST 3: News laden
+        // ========================================
+        async function testLoadNews() {
+            const statusEl = document.getElementById('news-status');
+            const table = document.getElementById('newsTable');
+            
+            statusEl.className = 'status loading';
+            statusEl.textContent = '⏳ Lade News...';
+            table.innerHTML = '<div style="padding: 40px; text-align: center; color: #666;">Lädt...</div>';
+            
+            try {
+                console.log('🔄 Fetching news...');
+                const res = await fetch('tables/news?limit=50');
+                console.log('📦 Response:', res.status, res.statusText);
+                
+                if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                
+                const data = await res.json();
+                console.log('✅ Data:', data);
+                
+                statusEl.className = 'status success';
+                statusEl.textContent = `✅ Erfolgreich! ${data.data.length} News geladen`;
+                
+                if (data.data.length === 0) {
+                    table.innerHTML = '<div style="padding: 40px; text-align: center; color: #666;">Keine News vorhanden</div>';
+                    return;
+                }
+                
+                let html = '<table style="width: 100%; border-collapse: collapse;"><thead><tr style="background: #f7fafc; border-bottom: 2px solid #e2e8f0;"><th style="padding: 12px; text-align: left;">Titel</th><th style="padding: 12px; text-align: left;">Typ</th><th style="padding: 12px; text-align: left;">Status</th></tr></thead><tbody>';
+                data.data.forEach(news => {
+                    html += `
+                        <tr style="border-bottom: 1px solid #e2e8f0;">
+                            <td style="padding: 12px;">${news.titel}</td>
+                            <td style="padding: 12px;"><span style="background: #bee3f8; padding: 4px 12px; border-radius: 6px; font-size: 13px;">${news.typ || '-'}</span></td>
+                            <td style="padding: 12px;"><span style="background: #${news.aktiv ? 'c6f6d5' : 'fed7d7'}; padding: 4px 12px; border-radius: 6px; font-size: 13px;">${news.aktiv ? 'Aktiv' : 'Inaktiv'}</span></td>
+                        </tr>
+                    `;
+                });
+                html += '</tbody></table>';
+                table.innerHTML = html;
+                
+            } catch (error) {
+                console.error('❌ Fehler:', error);
+                statusEl.className = 'status error';
+                statusEl.textContent = `❌ Fehler: ${error.message}`;
+                table.innerHTML = '<div style="padding: 40px; text-align: center; color: #c00;">Fehler beim Laden</div>';
+            }
+        }
+    </script>
+</body>
+</html>

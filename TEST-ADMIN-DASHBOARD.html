@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - Funktions-Test</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+            background: #f7fafc;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        h1 {
+            color: #1a202c;
+            margin-bottom: 20px;
+        }
+        .test-section {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .test-section h2 {
+            color: #2d3748;
+            margin-bottom: 16px;
+            font-size: 20px;
+        }
+        .status {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 12px;
+        }
+        .status.pending { background: #fed7d7; color: #742a2a; }
+        .status.testing { background: #feebc8; color: #7c2d12; }
+        .status.success { background: #c6f6d5; color: #22543d; }
+        .status.error { background: #fed7d7; color: #742a2a; }
+        
+        .test-button {
+            padding: 12px 24px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 14px;
+            margin-right: 12px;
+            margin-bottom: 12px;
+        }
+        .test-button:hover {
+            background: #5568d3;
+        }
+        .test-button:disabled {
+            background: #cbd5e0;
+            cursor: not-allowed;
+        }
+        .result {
+            margin-top: 12px;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 14px;
+            display: none;
+        }
+        .result.show { display: block; }
+        .result.success { background: #c6f6d5; color: #22543d; }
+        .result.error { background: #fed7d7; color: #742a2a; }
+        
+        .log {
+            background: #2d3748;
+            color: #e2e8f0;
+            padding: 16px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            max-height: 300px;
+            overflow-y: auto;
+            margin-top: 12px;
+        }
+        .log-entry {
+            margin-bottom: 4px;
+            padding: 4px 0;
+            border-bottom: 1px solid #4a5568;
+        }
+        .log-entry:last-child {
+            border-bottom: none;
+        }
+        
+        .open-dashboard {
+            display: inline-block;
+            padding: 16px 32px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-decoration: none;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 16px;
+            margin-top: 20px;
+            transition: transform 0.2s;
+        }
+        .open-dashboard:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 Admin Dashboard - Funktions-Test</h1>
+        <p style="color: #718096; margin-bottom: 24px;">Teste alle Funktionen nacheinander und überprüfe ob sie funktionieren.</p>
+        
+        <!-- Test 1: Page Load -->
+        <div class="test-section">
+            <h2>1. ⚡ Page Load Performance</h2>
+            <div class="status pending" id="status-load">⏳ Noch nicht getestet</div>
+            <p style="color: #718096; margin-bottom: 12px;">Teste wie schnell admin-dashboard.html lädt.</p>
+            <button class="test-button" onclick="testPageLoad()">Test starten</button>
+            <div class="result" id="result-load"></div>
+            <div class="log" id="log-load" style="display: none;"></div>
+        </div>
+        
+        <!-- Test 2: Partner-Verwaltung -->
+        <div class="test-section">
+            <h2>2. 👥 Partner-Verwaltung</h2>
+            <div class="status pending" id="status-partner">⏳ Noch nicht getestet</div>
+            <p style="color: #718096; margin-bottom: 12px;">Teste ob Partner-Verwaltung lädt und Partner-Cards angezeigt werden.</p>
+            <button class="test-button" onclick="testPartnerVerwaltung()">Test starten</button>
+            <div class="result" id="result-partner"></div>
+        </div>
+        
+        <!-- Test 3: Aufgaben & Projekte -->
+        <div class="test-section">
+            <h2>3. 📋 Aufgaben & Projekte</h2>
+            <div class="status pending" id="status-projekte">⏳ Noch nicht getestet</div>
+            <p style="color: #718096; margin-bottom: 12px;">Teste ob Projekte laden und Stats angezeigt werden.</p>
+            <button class="test-button" onclick="testProjekte()">Test starten</button>
+            <div class="result" id="result-projekte"></div>
+        </div>
+        
+        <!-- Test 4: News & Aktionen -->
+        <div class="test-section">
+            <h2>4. 📰 News & Aktionen</h2>
+            <div class="status pending" id="status-news">⏳ Noch nicht getestet</div>
+            <p style="color: #718096; margin-bottom: 12px;">Teste ob News laden und Bearbeiten/Löschen Buttons angezeigt werden.</p>
+            <button class="test-button" onclick="testNews()">Test starten</button>
+            <div class="result" id="result-news"></div>
+        </div>
+        
+        <!-- Test 5: Dashboard & Aktivitäten -->
+        <div class="test-section">
+            <h2>5. 🏠 Dashboard & Aktivitäten</h2>
+            <div class="status pending" id="status-dashboard">⏳ Noch nicht getestet</div>
+            <p style="color: #718096; margin-bottom: 12px;">Teste ob Dashboard-Stats und Letzte Aktivitäten laden.</p>
+            <button class="test-button" onclick="testDashboard()">Test starten</button>
+            <div class="result" id="result-dashboard"></div>
+        </div>
+        
+        <a href="admin-dashboard.html" class="open-dashboard" target="_blank">
+            🚀 Admin Dashboard öffnen
+        </a>
+    </div>
+    
+    <script>
+        async function testPageLoad() {
+            updateStatus('load', 'testing', '⏳ Teste...');
+            const log = document.getElementById('log-load');
+            log.style.display = 'block';
+            log.innerHTML = '';
+            
+            const startTime = performance.now();
+            
+            try {
+                addLog('load', '🚀 Starte Test...');
+                addLog('load', '📡 Fetching admin-dashboard.html...');
+                
+                const response = await fetch('admin-dashboard.html?_t=' + Date.now());
+                const html = await response.text();
+                
+                const endTime = performance.now();
+                const loadTime = ((endTime - startTime) / 1000).toFixed(2);
+                
+                addLog('load', `✅ HTML geladen (${html.length} bytes)`);
+                addLog('load', `⏱️ Ladezeit: ${loadTime} Sekunden`);
+                
+                if (loadTime < 5) {
+                    showResult('load', 'success', `✅ SEHR GUT! Ladezeit: ${loadTime}s (< 5s)`);
+                    updateStatus('load', 'success', '✅ Bestanden');
+                } else if (loadTime < 10) {
+                    showResult('load', 'success', `✅ OK! Ladezeit: ${loadTime}s (< 10s)`);
+                    updateStatus('load', 'success', '✅ Bestanden');
+                } else {
+                    showResult('load', 'error', `⚠️ LANGSAM! Ladezeit: ${loadTime}s (> 10s)`);
+                    updateStatus('load', 'error', '❌ Zu langsam');
+                }
+            } catch (error) {
+                addLog('load', `❌ ERROR: ${error.message}`);
+                showResult('load', 'error', `❌ FEHLER: ${error.message}`);
+                updateStatus('load', 'error', '❌ Fehler');
+            }
+        }
+        
+        async function testPartnerVerwaltung() {
+            updateStatus('partner', 'testing', '⏳ Teste...');
+            try {
+                // Teste API-Endpoint
+                const response = await fetch('tables/partners?limit=10');
+                const data = await response.json();
+                
+                if (data.data && data.data.length >= 0) {
+                    showResult('partner', 'success', `✅ Partner-API funktioniert! ${data.data.length} Partner gefunden.`);
+                    updateStatus('partner', 'success', '✅ Bestanden');
+                } else {
+                    showResult('partner', 'error', '❌ Keine Partner-Daten gefunden');
+                    updateStatus('partner', 'error', '❌ Fehler');
+                }
+            } catch (error) {
+                showResult('partner', 'error', `❌ FEHLER: ${error.message}`);
+                updateStatus('partner', 'error', '❌ Fehler');
+            }
+        }
+        
+        async function testProjekte() {
+            updateStatus('projekte', 'testing', '⏳ Teste...');
+            try {
+                // Teste API-Endpoints
+                const [projektResponse, taskResponse] = await Promise.all([
+                    fetch('tables/task_projekte?limit=10'),
+                    fetch('tables/tasks?limit=10')
+                ]);
+                
+                const projektData = await projektResponse.json();
+                const taskData = await taskResponse.json();
+                
+                const projekte = projektData.data.length;
+                const tasks = taskData.data.length;
+                
+                showResult('projekte', 'success', `✅ Projekte-API funktioniert! ${projekte} Projekte, ${tasks} Tasks gefunden.`);
+                updateStatus('projekte', 'success', '✅ Bestanden');
+            } catch (error) {
+                showResult('projekte', 'error', `❌ FEHLER: ${error.message}`);
+                updateStatus('projekte', 'error', '❌ Fehler');
+            }
+        }
+        
+        async function testNews() {
+            updateStatus('news', 'testing', '⏳ Teste...');
+            try {
+                const response = await fetch('tables/news?limit=10');
+                const data = await response.json();
+                
+                showResult('news', 'success', `✅ News-API funktioniert! ${data.data.length} News gefunden.`);
+                updateStatus('news', 'success', '✅ Bestanden');
+            } catch (error) {
+                showResult('news', 'error', `❌ FEHLER: ${error.message}`);
+                updateStatus('news', 'error', '❌ Fehler');
+            }
+        }
+        
+        async function testDashboard() {
+            updateStatus('dashboard', 'testing', '⏳ Teste...');
+            try {
+                // Teste mehrere API-Endpoints parallel
+                const [interessenten, partners, vertraege] = await Promise.all([
+                    fetch('tables/interessenten?limit=10'),
+                    fetch('tables/partners?limit=10'),
+                    fetch('tables/vertragsabschluesse?limit=10')
+                ]);
+                
+                const int = await interessenten.json();
+                const part = await partners.json();
+                const vert = await vertraege.json();
+                
+                showResult('dashboard', 'success', `✅ Dashboard-APIs funktionieren! Interessenten: ${int.data.length}, Partner: ${part.data.length}, Verträge: ${vert.data.length}`);
+                updateStatus('dashboard', 'success', '✅ Bestanden');
+            } catch (error) {
+                showResult('dashboard', 'error', `❌ FEHLER: ${error.message}`);
+                updateStatus('dashboard', 'error', '❌ Fehler');
+            }
+        }
+        
+        function updateStatus(test, type, text) {
+            const status = document.getElementById(`status-${test}`);
+            status.className = `status ${type}`;
+            status.textContent = text;
+        }
+        
+        function showResult(test, type, text) {
+            const result = document.getElementById(`result-${test}`);
+            result.className = `result ${type} show`;
+            result.textContent = text;
+        }
+        
+        function addLog(test, message) {
+            const log = document.getElementById(`log-${test}`);
+            const entry = document.createElement('div');
+            entry.className = 'log-entry';
+            entry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            log.appendChild(entry);
+            log.scrollTop = log.scrollHeight;
+        }
+    </script>
+</body>
+</html>

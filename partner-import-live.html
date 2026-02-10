@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🚀 Partner Import - LIVE</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #1e3a5f 0%, #2d5a87 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        .card {
+            background: white;
+            border-radius: 16px;
+            padding: 30px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+        }
+        h1 {
+            font-size: 28px;
+            color: #1e3a5f;
+            margin-bottom: 10px;
+        }
+        .subtitle {
+            color: #64748b;
+            margin-bottom: 20px;
+        }
+        .warning {
+            background: #fef3c7;
+            border: 2px solid #f59e0b;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        .warning h3 {
+            color: #92400e;
+            margin-bottom: 8px;
+        }
+        .warning p {
+            color: #a16207;
+            font-size: 14px;
+        }
+        .status-box {
+            background: #f8fafc;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        .status-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        .status-row:last-child { border-bottom: none; }
+        .status-label { font-weight: 600; color: #334155; }
+        .status-value { font-weight: 700; }
+        .status-value.success { color: #10b981; }
+        .status-value.error { color: #ef4444; }
+        .status-value.pending { color: #f59e0b; }
+        .btn {
+            padding: 16px 32px;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
+            color: white;
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(59, 130, 246, 0.4);
+        }
+        .btn-danger {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            color: white;
+        }
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        .progress-bar {
+            width: 100%;
+            height: 24px;
+            background: #e2e8f0;
+            border-radius: 12px;
+            overflow: hidden;
+            margin: 15px 0;
+        }
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(135deg, #10b981, #059669);
+            border-radius: 12px;
+            transition: width 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            font-size: 12px;
+        }
+        .log {
+            background: #1e293b;
+            color: #10b981;
+            border-radius: 12px;
+            padding: 20px;
+            max-height: 400px;
+            overflow-y: auto;
+            font-family: 'Monaco', 'Consolas', monospace;
+            font-size: 13px;
+            line-height: 1.6;
+        }
+        .log-entry { margin-bottom: 4px; }
+        .log-error { color: #ef4444; }
+        .log-success { color: #10b981; }
+        .log-info { color: #60a5fa; }
+        .log-warn { color: #fbbf24; }
+        .step-indicator {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 25px;
+        }
+        .step {
+            flex: 1;
+            padding: 15px;
+            background: #f1f5f9;
+            border-radius: 10px;
+            text-align: center;
+            font-weight: 600;
+            color: #64748b;
+        }
+        .step.active {
+            background: #3b82f6;
+            color: white;
+        }
+        .step.done {
+            background: #10b981;
+            color: white;
+        }
+        input[type="file"] {
+            display: none;
+        }
+        .file-upload {
+            border: 3px dashed #cbd5e1;
+            border-radius: 12px;
+            padding: 40px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-bottom: 20px;
+        }
+        .file-upload:hover {
+            border-color: #3b82f6;
+            background: #f8fafc;
+        }
+        .file-upload.has-file {
+            border-color: #10b981;
+            background: #f0fdf4;
+        }
+        .file-icon {
+            font-size: 48px;
+            margin-bottom: 15px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <h1>🚀 Partner Import - LIVE System</h1>
+            <p class="subtitle">Importiere die 300+ Affiliate-Partner in die Produktions-Datenbank</p>
+            
+            <div class="warning">
+                <h3>⚠️ Wichtig - Vor dem Import prüfen!</h3>
+                <p>Dieses Tool importiert Partner direkt in die LIVE-Datenbank. Stelle sicher, dass du die richtige CSV-Datei verwendest.</p>
+            </div>
+
+            <div class="step-indicator">
+                <div class="step active" id="step1">1. CSV laden</div>
+                <div class="step" id="step2">2. Prüfen</div>
+                <div class="step" id="step3">3. Importieren</div>
+                <div class="step" id="step4">4. Fertig</div>
+            </div>
+        </div>
+
+        <!-- Step 1: CSV Upload -->
+        <div class="card" id="upload-section">
+            <h2 style="margin-bottom: 20px;">📁 CSV-Datei hochladen</h2>
+            
+            <label class="file-upload" id="file-drop" for="csv-file">
+                <div class="file-icon">📄</div>
+                <p style="font-size: 18px; font-weight: 600; color: #334155; margin-bottom: 8px;">
+                    CSV-Datei hier ablegen oder klicken
+                </p>
+                <p style="color: #64748b; font-size: 14px;">
+                    affiliates-collection-20648.csv oder ähnliche Datei
+                </p>
+            </label>
+            <input type="file" id="csv-file" accept=".csv" onchange="handleFileSelect(event)">
+            
+            <div id="file-info" style="display: none; padding: 15px; background: #f0fdf4; border-radius: 10px; margin-bottom: 20px;">
+                <p><strong>✅ Datei geladen:</strong> <span id="file-name"></span></p>
+                <p><strong>📊 Gefundene Partner:</strong> <span id="partner-count"></span></p>
+            </div>
+        </div>
+
+        <!-- Step 2: Status -->
+        <div class="card">
+            <h2 style="margin-bottom: 20px;">📊 Datenbank-Status</h2>
+            
+            <div class="status-box">
+                <div class="status-row">
+                    <span class="status-label">🗄️ Datenbank-Verbindung</span>
+                    <span class="status-value" id="db-status">Prüfe...</span>
+                </div>
+                <div class="status-row">
+                    <span class="status-label">👥 Aktuelle Partner in DB</span>
+                    <span class="status-value" id="current-partners">-</span>
+                </div>
+                <div class="status-row">
+                    <span class="status-label">📄 Partner in CSV</span>
+                    <span class="status-value" id="csv-partners">-</span>
+                </div>
+                <div class="status-row">
+                    <span class="status-label">🆕 Neue Partner zum Import</span>
+                    <span class="status-value" id="new-partners">-</span>
+                </div>
+            </div>
+            
+            <button class="btn btn-primary" onclick="checkDatabase()" id="check-btn">
+                🔍 Datenbank prüfen
+            </button>
+        </div>
+
+        <!-- Step 3: Import -->
+        <div class="card" id="import-section" style="display: none;">
+            <h2 style="margin-bottom: 20px;">⚡ Import starten</h2>
+            
+            <div class="progress-bar">
+                <div class="progress-fill" id="progress-fill" style="width: 0%;">0%</div>
+            </div>
+            
+            <p style="margin-bottom: 20px; color: #64748b;" id="import-status">Bereit zum Import</p>
+            
+            <button class="btn btn-primary" onclick="startImport()" id="import-btn">
+                🚀 Jetzt importieren
+            </button>
+        </div>
+
+        <!-- Log -->
+        <div class="card">
+            <h2 style="margin-bottom: 20px;">📋 Import-Log</h2>
+            <div class="log" id="log">
+                <div class="log-entry log-info">[System] Partner Import Tool gestartet...</div>
+                <div class="log-entry log-info">[System] Bitte CSV-Datei hochladen.</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Globale Variablen
+        let csvData = [];
+        let existingEmails = new Set();
+        let partnersToImport = [];
+        
+        const DEFAULT_PASSWORD = 'Partner2026!';
+        
+        // Log-Funktion
+        function log(message, type = 'info') {
+            const logEl = document.getElementById('log');
+            const timestamp = new Date().toLocaleTimeString('de-DE');
+            const entry = document.createElement('div');
+            entry.className = `log-entry log-${type}`;
+            entry.textContent = `[${timestamp}] ${message}`;
+            logEl.appendChild(entry);
+            logEl.scrollTop = logEl.scrollHeight;
+        }
+        
+        // Drag & Drop
+        const fileDrop = document.getElementById('file-drop');
+        fileDrop.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            fileDrop.style.borderColor = '#3b82f6';
+            fileDrop.style.background = '#eff6ff';
+        });
+        fileDrop.addEventListener('dragleave', () => {
+            fileDrop.style.borderColor = '#cbd5e1';
+            fileDrop.style.background = 'white';
+        });
+        fileDrop.addEventListener('drop', (e) => {
+            e.preventDefault();
+            const file = e.dataTransfer.files[0];
+            if (file && file.name.endsWith('.csv')) {
+                processFile(file);
+            } else {
+                log('Bitte eine CSV-Datei verwenden!', 'error');
+            }
+        });
+        
+        // File Select
+        function handleFileSelect(event) {
+            const file = event.target.files[0];
+            if (file) {
+                processFile(file);
+            }
+        }
+        
+        // CSV verarbeiten
+        function processFile(file) {
+            log(`Datei geladen: ${file.name}`, 'success');
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const text = e.target.result;
+                parseCSV(text);
+                
+                // UI Update
+                document.getElementById('file-drop').classList.add('has-file');
+                document.getElementById('file-drop').innerHTML = `
+                    <div class="file-icon">✅</div>
+                    <p style="font-size: 18px; font-weight: 600; color: #10b981;">
+                        ${file.name}
+                    </p>
+                    <p style="color: #64748b;">${csvData.length} Partner gefunden</p>
+                `;
+                
+                document.getElementById('file-info').style.display = 'block';
+                document.getElementById('file-name').textContent = file.name;
+                document.getElementById('partner-count').textContent = csvData.length;
+                document.getElementById('csv-partners').textContent = csvData.length;
+                
+                // Step aktualisieren
+                document.getElementById('step1').classList.remove('active');
+                document.getElementById('step1').classList.add('done');
+                document.getElementById('step2').classList.add('active');
+            };
+            reader.readAsText(file);
+        }
+        
+        // CSV parsen
+        function parseCSV(text) {
+            const lines = text.split('\n');
+            const headers = parseCSVLine(lines[0]);
+            
+            log(`CSV Header: ${headers.slice(0, 5).join(', ')}...`, 'info');
+            
+            csvData = [];
+            for (let i = 1; i < lines.length; i++) {
+                if (!lines[i].trim()) continue;
+                
+                const values = parseCSVLine(lines[i]);
+                const row = {};
+                headers.forEach((h, idx) => {
+                    row[h.trim()] = values[idx] ? values[idx].trim() : '';
+                });
+                
+                if (row.Email && row.Email.includes('@')) {
+                    csvData.push(row);
+                }
+            }
+            
+            log(`${csvData.length} gültige Partner-Einträge gefunden`, 'success');
+        }
+        
+        // CSV-Zeile parsen (mit Komma in Anführungszeichen)
+        function parseCSVLine(line) {
+            const result = [];
+            let current = '';
+            let inQuotes = false;
+            
+            for (let i = 0; i < line.length; i++) {
+                const char = line[i];
+                
+                if (char === '"') {
+                    inQuotes = !inQuotes;
+                } else if (char === ',' && !inQuotes) {
+                    result.push(current);
+                    current = '';
+                } else {
+                    current += char;
+                }
+            }
+            result.push(current);
+            
+            return result.map(v => v.replace(/^"|"$/g, '').trim());
+        }
+        
+        // Datenbank prüfen
+        async function checkDatabase() {
+            const btn = document.getElementById('check-btn');
+            btn.disabled = true;
+            btn.innerHTML = '⏳ Prüfe...';
+            
+            try {
+                log('Verbinde mit Datenbank...', 'info');
+                
+                const response = await fetch('tables/partners?limit=1000');
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+                
+                const data = await response.json();
+                const partners = data.data || [];
+                
+                log(`Datenbank-Verbindung OK! ${partners.length} Partner gefunden.`, 'success');
+                
+                // Status aktualisieren
+                document.getElementById('db-status').textContent = '✅ Verbunden';
+                document.getElementById('db-status').classList.add('success');
+                document.getElementById('current-partners').textContent = partners.length;
+                
+                // Existierende E-Mails sammeln
+                existingEmails = new Set(partners.map(p => p.email?.toLowerCase()).filter(Boolean));
+                
+                // Neue Partner berechnen
+                if (csvData.length > 0) {
+                    partnersToImport = csvData.filter(p => !existingEmails.has(p.Email?.toLowerCase()));
+                    document.getElementById('new-partners').textContent = partnersToImport.length;
+                    
+                    if (partnersToImport.length > 0) {
+                        log(`${partnersToImport.length} neue Partner können importiert werden`, 'success');
+                        document.getElementById('import-section').style.display = 'block';
+                        
+                        // Step aktualisieren
+                        document.getElementById('step2').classList.remove('active');
+                        document.getElementById('step2').classList.add('done');
+                        document.getElementById('step3').classList.add('active');
+                    } else {
+                        log('Alle Partner sind bereits in der Datenbank!', 'warn');
+                    }
+                } else {
+                    log('Bitte zuerst CSV-Datei hochladen!', 'warn');
+                }
+                
+            } catch (error) {
+                log(`Datenbank-Fehler: ${error.message}`, 'error');
+                document.getElementById('db-status').textContent = '❌ Fehler';
+                document.getElementById('db-status').classList.add('error');
+            }
+            
+            btn.disabled = false;
+            btn.innerHTML = '🔍 Datenbank prüfen';
+        }
+        
+        // Import starten
+        async function startImport() {
+            const btn = document.getElementById('import-btn');
+            btn.disabled = true;
+            btn.innerHTML = '⏳ Importiere...';
+            
+            const progressFill = document.getElementById('progress-fill');
+            const statusEl = document.getElementById('import-status');
+            
+            log(`Starte Import von ${partnersToImport.length} Partnern...`, 'info');
+            
+            let imported = 0;
+            let errors = 0;
+            const batchSize = 10; // Kleinere Batches für Stabilität
+            
+            for (let i = 0; i < partnersToImport.length; i += batchSize) {
+                const batch = partnersToImport.slice(i, i + batchSize);
+                
+                for (const csvPartner of batch) {
+                    try {
+                        const partner = {
+                            email: csvPartner.Email?.toLowerCase(),
+                            vorname: csvPartner['First Name'] || '',
+                            nachname: csvPartner['Last Name'] || '',
+                            telefon: csvPartner.Phone || '',
+                            firma: csvPartner.Company || '',
+                            adresse: csvPartner.Address || '',
+                            stadt: csvPartner.City || '',
+                            plz: csvPartner.Zipcode || '',
+                            land: csvPartner.Country || 'DE',
+                            website: csvPartner.Website || '',
+                            facebook: csvPartner.Facebook || '',
+                            youtube: csvPartner.Youtube || '',
+                            instagram: csvPartner.Instagram || '',
+                            tiktok: csvPartner.Tiktok || '',
+                            referral_code: csvPartner['Referral code'] || '',
+                            standard_link: csvPartner['Standard link'] || '',
+                            shortlink: csvPartner.Shortlink || '',
+                            netzwerk_link: csvPartner['Network link'] || '',
+                            zahlungsmethode: csvPartner['Payment Method'] || '',
+                            zahlungsinfo: csvPartner['Payment Info'] || '',
+                            status: csvPartner.Status || 'Approved',
+                            parent_name: csvPartner['Parent name'] || '',
+                            parent_email: csvPartner['Parent email'] || '',
+                            zusatz_infos: csvPartner['Additional Infos'] || '',
+                            
+                            // Standard-Werte für Affiliates
+                            ist_affiliate: true,
+                            passwort_hash: DEFAULT_PASSWORD,
+                            passwort_muss_geaendert_werden: true,
+                            aktiv: true,
+                            tarif: 'Silber',
+                            onboarding_fortschritt: 20,
+                            onboarding_abgeschlossen: false,
+                            registriert_am: Date.now()
+                        };
+                        
+                        const response = await fetch('tables/partners', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(partner)
+                        });
+                        
+                        if (response.ok) {
+                            imported++;
+                        } else {
+                            errors++;
+                            console.error(`Fehler bei ${csvPartner.Email}:`, await response.text());
+                        }
+                        
+                    } catch (error) {
+                        errors++;
+                        console.error(`Fehler bei ${csvPartner.Email}:`, error);
+                    }
+                }
+                
+                // Progress aktualisieren
+                const progress = Math.round(((i + batch.length) / partnersToImport.length) * 100);
+                progressFill.style.width = progress + '%';
+                progressFill.textContent = progress + '%';
+                statusEl.textContent = `${imported} von ${partnersToImport.length} importiert...`;
+                
+                log(`Batch importiert: ${imported} erfolgreich, ${errors} Fehler`, 'info');
+                
+                // Kleine Pause zwischen Batches
+                await new Promise(r => setTimeout(r, 500));
+            }
+            
+            // Fertig
+            log(`✅ IMPORT ABGESCHLOSSEN! ${imported} Partner importiert, ${errors} Fehler`, 'success');
+            
+            progressFill.style.width = '100%';
+            progressFill.textContent = '100%';
+            progressFill.style.background = 'linear-gradient(135deg, #10b981, #059669)';
+            
+            statusEl.textContent = `✅ Fertig! ${imported} Partner importiert.`;
+            
+            // Steps aktualisieren
+            document.getElementById('step3').classList.remove('active');
+            document.getElementById('step3').classList.add('done');
+            document.getElementById('step4').classList.add('done');
+            
+            btn.innerHTML = '✅ Import abgeschlossen';
+            
+            // Datenbank nochmal prüfen
+            setTimeout(checkDatabase, 2000);
+        }
+        
+        // Beim Laden Datenbank prüfen
+        window.addEventListener('load', () => {
+            log('Tool bereit. Bitte CSV-Datei hochladen.', 'info');
+            checkDatabase();
+        });
+    </script>
+</body>
+</html>

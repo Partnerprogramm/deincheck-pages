@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tab Test - Admin Dashboard</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .test-container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        h1 {
+            color: #667eea;
+            margin-bottom: 20px;
+        }
+        .test-button {
+            padding: 12px 24px;
+            margin: 8px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 14px;
+        }
+        .test-button:hover {
+            background: #5568d3;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f7fafc;
+            border-left: 4px solid #48bb78;
+            border-radius: 4px;
+        }
+        .error {
+            border-left-color: #f56565;
+            background: #fff5f5;
+        }
+        iframe {
+            width: 100%;
+            height: 600px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+        .info {
+            background: #ebf8ff;
+            border-left: 4px solid #4299e1;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>🧪 Admin Dashboard Tab-Test</h1>
+        
+        <div class="info">
+            <strong>📌 Test-Anleitung:</strong><br>
+            1. Klicke auf "Admin Dashboard laden"<br>
+            2. Warte, bis das Dashboard geladen ist<br>
+            3. Klicke im Dashboard auf verschiedene Tabs<br>
+            4. Prüfe, ob die Tabs reagieren und Inhalte laden
+        </div>
+
+        <div>
+            <button class="test-button" onclick="loadDashboard()">🚀 Admin Dashboard laden</button>
+            <button class="test-button" onclick="checkConsole()">🔍 Konsole prüfen</button>
+            <button class="test-button" onclick="reloadDashboard()">🔄 Neu laden</button>
+        </div>
+
+        <div id="results"></div>
+
+        <iframe id="dashboardFrame" style="display: none;"></iframe>
+    </div>
+
+    <script>
+        let iframe;
+
+        function loadDashboard() {
+            iframe = document.getElementById('dashboardFrame');
+            iframe.style.display = 'block';
+            iframe.src = 'admin-dashboard.html';
+            
+            showResult('✅ Dashboard wird geladen...', false);
+
+            iframe.onload = function() {
+                showResult('✅ Dashboard geladen! Prüfe jetzt die Tabs im Dashboard.', false);
+                
+                // Nach 2 Sekunden Console-Logs checken
+                setTimeout(() => {
+                    checkConsole();
+                }, 2000);
+            };
+
+            iframe.onerror = function(error) {
+                showResult('❌ Fehler beim Laden: ' + error, true);
+            };
+        }
+
+        function checkConsole() {
+            try {
+                const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+                showResult('✅ Dashboard ist geladen. Bitte klicke manuell auf die Tabs und prüfe, ob sie reagieren:<br><br>' +
+                    '1. <strong>Aufgaben & Projekte</strong><br>' +
+                    '2. <strong>Partner-Verwaltung</strong><br>' +
+                    '3. <strong>Umsatz-Tracking</strong><br>' +
+                    '4. <strong>News & Aktionen</strong><br><br>' +
+                    'Öffne die Browser-Konsole (F12) für detaillierte Logs!', false);
+            } catch (e) {
+                showResult('⚠️ Konsole kann nicht gelesen werden (CORS). Öffne die Browser-Konsole (F12) manuell.', false);
+            }
+        }
+
+        function reloadDashboard() {
+            if (iframe) {
+                iframe.src = iframe.src;
+                showResult('🔄 Dashboard wird neu geladen...', false);
+            } else {
+                showResult('❌ Dashboard wurde noch nicht geladen', true);
+            }
+        }
+
+        function showResult(message, isError) {
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.innerHTML = `<div class="result ${isError ? 'error' : ''}">${message}</div>`;
+        }
+    </script>
+</body>
+</html>

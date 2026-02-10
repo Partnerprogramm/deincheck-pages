@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test-Daten Anzeigen - Verträge & Provisionen</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        h1 {
+            color: white;
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 28px;
+        }
+        .card {
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+        }
+        .card h2 {
+            color: #1a202c;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .badge {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 14px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+        th {
+            background: #f7fafc;
+            padding: 12px 8px;
+            text-align: left;
+            font-weight: 600;
+            color: #4a5568;
+            border-bottom: 2px solid #e2e8f0;
+        }
+        td {
+            padding: 12px 8px;
+            border-bottom: 1px solid #e2e8f0;
+            color: #2d3748;
+        }
+        tr:hover {
+            background: #f7fafc;
+        }
+        .status-neu {
+            background: linear-gradient(135deg, #ed64a6, #d53f8c);
+            color: white;
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+        .status-aktiviert {
+            background: linear-gradient(135deg, #48bb78, #38a169);
+            color: white;
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+        .status-pruefung {
+            background: linear-gradient(135deg, #667eea, #5a67d8);
+            color: white;
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+        .status-abgelehnt {
+            background: linear-gradient(135deg, #fc8181, #e53e3e);
+            color: white;
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+        .status-ausstehend {
+            background: linear-gradient(135deg, #ed8936, #dd6b20);
+            color: white;
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+        .status-ausgezahlt {
+            background: linear-gradient(135deg, #48bb78, #38a169);
+            color: white;
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+        .status-storniert {
+            background: linear-gradient(135deg, #a0aec0, #718096);
+            color: white;
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+        .provision {
+            font-weight: 700;
+            color: #38a169;
+        }
+        .btn {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            margin: 5px;
+        }
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+        .btn-success {
+            background: linear-gradient(135deg, #48bb78, #38a169);
+        }
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+        .stat-card {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+        }
+        .stat-value {
+            font-size: 32px;
+            font-weight: 700;
+        }
+        .stat-label {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #718096;
+        }
+        .error {
+            background: #fed7d7;
+            color: #c53030;
+            padding: 16px;
+            border-radius: 8px;
+            margin-bottom: 16px;
+        }
+        .success {
+            background: #c6f6d5;
+            color: #276749;
+            padding: 16px;
+            border-radius: 8px;
+            margin-bottom: 16px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📊 Test-Daten: Verträge & Provisionen</h1>
+        
+        <div class="card">
+            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                <button class="btn" onclick="loadData()">🔄 Daten neu laden</button>
+                <button class="btn btn-success" onclick="addMoreTestData()">➕ Mehr Test-Daten hinzufügen</button>
+            </div>
+        </div>
+        
+        <div id="stats" class="stats"></div>
+        
+        <div class="card">
+            <h2>📄 Verträge <span class="badge" id="vertraege-count">0</span></h2>
+            <div id="vertraege-container">
+                <div class="loading">⏳ Lade Verträge...</div>
+            </div>
+        </div>
+        
+        <div class="card">
+            <h2>💰 Provisionen <span class="badge" id="provisionen-count">0</span></h2>
+            <div id="provisionen-container">
+                <div class="loading">⏳ Lade Provisionen...</div>
+            </div>
+        </div>
+        
+        <div id="message"></div>
+    </div>
+
+    <script>
+        async function loadData() {
+            try {
+                // Verträge laden
+                const vResponse = await fetch('tables/vertragsabschluesse?limit=100');
+                const vResult = await vResponse.json();
+                const vertraege = vResult.data || [];
+                
+                // Provisionen laden
+                const pResponse = await fetch('tables/provisionen?limit=100');
+                const pResult = await pResponse.json();
+                const provisionen = pResult.data || [];
+                
+                console.log('Verträge geladen:', vertraege.length);
+                console.log('Provisionen geladen:', provisionen.length);
+                
+                // Stats anzeigen
+                renderStats(vertraege, provisionen);
+                
+                // Verträge anzeigen
+                renderVertraege(vertraege);
+                
+                // Provisionen anzeigen
+                renderProvisionen(provisionen);
+                
+            } catch (error) {
+                console.error('Fehler:', error);
+                document.getElementById('message').innerHTML = `<div class="error">❌ Fehler: ${error.message}</div>`;
+            }
+        }
+        
+        function renderStats(vertraege, provisionen) {
+            const gesamtProvision = provisionen.reduce((sum, p) => sum + parseFloat(p.betrag || 0), 0);
+            const ausstehend = provisionen.filter(p => p.status === 'ausstehend').reduce((sum, p) => sum + parseFloat(p.betrag || 0), 0);
+            const ausgezahlt = provisionen.filter(p => p.status === 'ausgezahlt').reduce((sum, p) => sum + parseFloat(p.betrag || 0), 0);
+            
+            document.getElementById('stats').innerHTML = `
+                <div class="stat-card">
+                    <div class="stat-value">${vertraege.length}</div>
+                    <div class="stat-label">Verträge gesamt</div>
+                </div>
+                <div class="stat-card" style="background: linear-gradient(135deg, #48bb78, #38a169);">
+                    <div class="stat-value">${gesamtProvision.toFixed(2)}€</div>
+                    <div class="stat-label">Provision gesamt</div>
+                </div>
+                <div class="stat-card" style="background: linear-gradient(135deg, #ed8936, #dd6b20);">
+                    <div class="stat-value">${ausstehend.toFixed(2)}€</div>
+                    <div class="stat-label">Ausstehend</div>
+                </div>
+                <div class="stat-card" style="background: linear-gradient(135deg, #38a169, #276749);">
+                    <div class="stat-value">${ausgezahlt.toFixed(2)}€</div>
+                    <div class="stat-label">Ausgezahlt</div>
+                </div>
+            `;
+        }
+        
+        function renderVertraege(vertraege) {
+            document.getElementById('vertraege-count').textContent = vertraege.length;
+            
+            if (vertraege.length === 0) {
+                document.getElementById('vertraege-container').innerHTML = '<div class="loading">Keine Verträge gefunden</div>';
+                return;
+            }
+            
+            const html = `
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Vertragsnr.</th>
+                            <th>Datum</th>
+                            <th>Partner</th>
+                            <th>Kunde</th>
+                            <th>Kategorie</th>
+                            <th>Anbieter</th>
+                            <th>Tarif</th>
+                            <th>Preis/Monat</th>
+                            <th>Provision</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${vertraege.map(v => {
+                            const datum = v.erstellt_am ? new Date(v.erstellt_am).toLocaleDateString('de-DE') : 'N/A';
+                            const kunde = v.kunde_name || ((v.kunde_vorname || '') + ' ' + (v.kunde_nachname || '')).trim() || 'N/A';
+                            const tarif = v.tarif || v.tarif_name || 'N/A';
+                            const provision = parseFloat(v.gesamt_provision || v.provision || v.provision_betrag || 0);
+                            const preis = parseFloat(v.tarif_preis || 0);
+                            
+                            let statusClass = 'status-neu';
+                            let statusText = v.vertrag_status || 'Unbekannt';
+                            if (v.vertrag_status === 'aktiviert') { statusClass = 'status-aktiviert'; statusText = 'AKTIVIERT'; }
+                            else if (v.vertrag_status === 'in_pruefung') { statusClass = 'status-pruefung'; statusText = 'IN PRÜFUNG'; }
+                            else if (v.vertrag_status === 'neu_eingegangen') { statusClass = 'status-neu'; statusText = 'NEU'; }
+                            else if (v.vertrag_status === 'abgelehnt') { statusClass = 'status-abgelehnt'; statusText = 'ABGELEHNT'; }
+                            
+                            return `
+                                <tr>
+                                    <td><strong>${v.vertragsnummer || 'N/A'}</strong></td>
+                                    <td>${datum}</td>
+                                    <td>${v.partner_name || v.partner_email || 'N/A'}</td>
+                                    <td>${kunde}</td>
+                                    <td>${v.kategorie || 'N/A'}</td>
+                                    <td>${v.anbieter || 'N/A'}</td>
+                                    <td>${tarif}</td>
+                                    <td>${preis.toFixed(2)}€</td>
+                                    <td class="provision">${provision.toFixed(2)}€</td>
+                                    <td><span class="${statusClass}">${statusText}</span></td>
+                                </tr>
+                            `;
+                        }).join('')}
+                    </tbody>
+                </table>
+            `;
+            
+            document.getElementById('vertraege-container').innerHTML = html;
+        }
+        
+        function renderProvisionen(provisionen) {
+            document.getElementById('provisionen-count').textContent = provisionen.length;
+            
+            if (provisionen.length === 0) {
+                document.getElementById('provisionen-container').innerHTML = '<div class="loading">Keine Provisionen gefunden</div>';
+                return;
+            }
+            
+            const html = `
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Datum</th>
+                            <th>Partner</th>
+                            <th>Kunde</th>
+                            <th>Typ</th>
+                            <th>Tarif</th>
+                            <th>Betrag</th>
+                            <th>Status</th>
+                            <th>Vertragsnr.</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${provisionen.map(p => {
+                            const datum = p.datum ? new Date(p.datum).toLocaleDateString('de-DE') : 'N/A';
+                            const betrag = parseFloat(p.betrag || 0);
+                            
+                            let statusClass = 'status-ausstehend';
+                            let statusText = p.status || 'Unbekannt';
+                            if (p.status === 'ausgezahlt') { statusClass = 'status-ausgezahlt'; statusText = 'AUSGEZAHLT'; }
+                            else if (p.status === 'ausstehend') { statusClass = 'status-ausstehend'; statusText = 'AUSSTEHEND'; }
+                            else if (p.status === 'storniert') { statusClass = 'status-storniert'; statusText = 'STORNIERT'; }
+                            
+                            return `
+                                <tr>
+                                    <td>${datum}</td>
+                                    <td>${p.partner_name || p.partner_email || 'N/A'}</td>
+                                    <td>${p.kunde_name || 'N/A'}</td>
+                                    <td>${p.typ || 'N/A'}</td>
+                                    <td>${p.tarif || 'N/A'}</td>
+                                    <td class="provision">${betrag.toFixed(2)}€</td>
+                                    <td><span class="${statusClass}">${statusText}</span></td>
+                                    <td>${p.vertragsnummer || 'N/A'}</td>
+                                </tr>
+                            `;
+                        }).join('')}
+                    </tbody>
+                </table>
+            `;
+            
+            document.getElementById('provisionen-container').innerHTML = html;
+        }
+        
+        async function addMoreTestData() {
+            try {
+                document.getElementById('message').innerHTML = '<div class="loading">⏳ Füge Test-Daten hinzu...</div>';
+                
+                // Neue Verträge hinzufügen
+                const neueVertraege = [
+                    {
+                        vertragsnummer: 'VTR-2025-008',
+                        partner_name: 'Sarah Berger',
+                        partner_email: 'sarah@partner.de',
+                        kunde_name: 'Michael Braun',
+                        kunde_vorname: 'Michael',
+                        kunde_nachname: 'Braun',
+                        kunde_email: 'michael@kunde.de',
+                        kategorie: 'mobilfunk',
+                        anbieter: 'Vodafone',
+                        tarif_name: 'Red XL',
+                        tarif: 'Red XL',
+                        tarif_preis: 79.99,
+                        provision: 320,
+                        gesamt_provision: 320,
+                        vertrag_status: 'neu_eingegangen',
+                        erstellt_am: new Date().toISOString()
+                    },
+                    {
+                        vertragsnummer: 'VTR-2025-009',
+                        partner_name: 'Sarah Berger',
+                        partner_email: 'sarah@partner.de',
+                        kunde_name: 'Andrea Schwarz',
+                        kunde_vorname: 'Andrea',
+                        kunde_nachname: 'Schwarz',
+                        kunde_email: 'andrea@kunde.de',
+                        kategorie: 'dsl',
+                        anbieter: 'Telekom',
+                        tarif_name: 'MagentaZuhause XL',
+                        tarif: 'MagentaZuhause XL',
+                        tarif_preis: 64.95,
+                        provision: 150,
+                        gesamt_provision: 150,
+                        vertrag_status: 'aktiviert',
+                        erstellt_am: new Date(Date.now() - 86400000).toISOString()
+                    }
+                ];
+                
+                for (const v of neueVertraege) {
+                    await fetch('tables/vertragsabschluesse', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(v)
+                    });
+                }
+                
+                // Neue Provisionen hinzufügen
+                const neueProvisionen = [
+                    {
+                        partner_name: 'Sarah Berger',
+                        partner_email: 'sarah@partner.de',
+                        betrag: 320,
+                        typ: 'mobilfunk',
+                        tarif: 'Red XL',
+                        datum: new Date().toISOString(),
+                        status: 'ausstehend',
+                        kunde_name: 'Michael Braun',
+                        vertragsnummer: 'VTR-2025-008'
+                    },
+                    {
+                        partner_name: 'Sarah Berger',
+                        partner_email: 'sarah@partner.de',
+                        betrag: 150,
+                        typ: 'dsl',
+                        tarif: 'MagentaZuhause XL',
+                        datum: new Date(Date.now() - 86400000).toISOString(),
+                        status: 'ausgezahlt',
+                        kunde_name: 'Andrea Schwarz',
+                        vertragsnummer: 'VTR-2025-009'
+                    }
+                ];
+                
+                for (const p of neueProvisionen) {
+                    await fetch('tables/provisionen', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(p)
+                    });
+                }
+                
+                document.getElementById('message').innerHTML = '<div class="success">✅ 2 neue Verträge und 2 neue Provisionen hinzugefügt!</div>';
+                
+                // Daten neu laden
+                loadData();
+                
+            } catch (error) {
+                console.error('Fehler:', error);
+                document.getElementById('message').innerHTML = `<div class="error">❌ Fehler: ${error.message}</div>`;
+            }
+        }
+        
+        // Beim Laden der Seite Daten abrufen
+        document.addEventListener('DOMContentLoaded', loadData);
+    </script>
+</body>
+</html>

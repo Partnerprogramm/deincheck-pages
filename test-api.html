@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>API Test</title>
+    <style>
+        body { font-family: Arial; padding: 40px; background: #f5f5f5; }
+        .test { background: white; padding: 20px; margin: 10px 0; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+        .test h3 { margin-top: 0; color: #333; }
+        .loading { color: #0066cc; }
+        .success { color: #00aa44; }
+        .error { color: #cc0000; }
+        pre { background: #f9f9f9; padding: 10px; border-radius: 4px; overflow: auto; max-height: 200px; }
+    </style>
+</head>
+<body>
+    <h1>🧪 API Funktions-Test</h1>
+    
+    <div class="test" id="test1">
+        <h3>1️⃣ Test: tables/task_projekte</h3>
+        <div class="loading">Lade...</div>
+    </div>
+    
+    <div class="test" id="test2">
+        <h3>2️⃣ Test: tables/tasks</h3>
+        <div class="loading">Lade...</div>
+    </div>
+    
+    <div class="test" id="test3">
+        <h3>3️⃣ Test: tables/partners</h3>
+        <div class="loading">Lade...</div>
+    </div>
+    
+    <div class="test" id="test4">
+        <h3>4️⃣ Test: tables/news</h3>
+        <div class="loading">Lade...</div>
+    </div>
+
+    <script>
+        async function testAPI(name, url, testId) {
+            const testDiv = document.getElementById(testId);
+            try {
+                console.log(`🔄 Testing: ${name}`);
+                const response = await fetch(url);
+                console.log(`📦 ${name} Response Status:`, response.status);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+                
+                const result = await response.json();
+                console.log(`✅ ${name} Data:`, result);
+                
+                testDiv.innerHTML = `
+                    <h3>✅ ${name}</h3>
+                    <div class="success">Status: ${response.status} OK</div>
+                    <div class="success">Datensätze: ${result.data ? result.data.length : 0}</div>
+                    <pre>${JSON.stringify(result, null, 2)}</pre>
+                `;
+            } catch (error) {
+                console.error(`❌ ${name} Error:`, error);
+                testDiv.innerHTML = `
+                    <h3>❌ ${name}</h3>
+                    <div class="error">Fehler: ${error.message}</div>
+                `;
+            }
+        }
+
+        // Tests starten
+        setTimeout(() => {
+            testAPI('Projekte (Task System)', 'tables/task_projekte?limit=10', 'test1');
+        }, 500);
+        
+        setTimeout(() => {
+            testAPI('Tasks', 'tables/tasks?limit=10', 'test2');
+        }, 1000);
+        
+        setTimeout(() => {
+            testAPI('Partners', 'tables/partners?limit=10', 'test3');
+        }, 1500);
+        
+        setTimeout(() => {
+            testAPI('News', 'tables/news?limit=10', 'test4');
+        }, 2000);
+    </script>
+</body>
+</html>

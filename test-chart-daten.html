@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+<head><title>Chart Daten Test</title></head>
+<body style="font-family:Arial;padding:20px;">
+<h1>📊 Chart Daten Test</h1>
+<div id="result"></div>
+<script>
+async function test() {
+    const out = document.getElementById('result');
+    out.innerHTML = 'Lade...';
+    
+    try {
+        // Lade alle relevanten Tabellen
+        const [vertraegeRes, provisionenRes, vertragsRes] = await Promise.all([
+            fetch('tables/vertraege?limit=100'),
+            fetch('tables/provisionen?limit=100'),
+            fetch('tables/vertragsabschluesse?limit=100')
+        ]);
+        
+        const vertraege = await vertraegeRes.json();
+        const provisionen = await provisionenRes.json();
+        const vertragsabschluesse = await vertragsRes.json();
+        
+        // Kategorien zählen
+        const kategorien = {};
+        (vertragsabschluesse.data || []).forEach(v => {
+            const kat = (v.kategorie || 'unbekannt').toLowerCase();
+            kategorien[kat] = (kategorien[kat] || 0) + 1;
+        });
+        
+        // Partner Provisionen
+        const partnerProv = {};
+        (vertragsabschluesse.data || []).forEach(v => {
+            const email = v.partner_email || 'unbekannt';
+            const prov = parseFloat(v.gesamt_provision || v.provision || 0);
+            partnerProv[email] = (partnerProv[email] || 0) + prov;
+        });
+        
+        // Top 5 Partner
+        const top5 = Object.entries(partnerProv)
+            .sort((a,b) => b[1] - a[1])
+            .slice(0, 5);
+        
+        out.innerHTML = `
+            <h2>Tabellen:</h2>
+            <p><b>vertraege:</b> ${vertraege.data?.length || 0} Einträge</p>
+            <p><b>provisionen:</b> ${provisionen.data?.length || 0} Einträge</p>
+            <p><b>vertragsabschluesse:</b> ${vertragsabschluesse.data?.length || 0} Einträge</p>
+            
+            <h2>Verträge pro Kategorie:</h2>
+            <pre>${JSON.stringify(kategorien, null, 2)}</pre>
+            
+            <h2>Top 5 Partner (Provision):</h2>
+            <pre>${JSON.stringify(top5, null, 2)}</pre>
+            
+            <h2>Beispiel vertragsabschluesse (erste 3):</h2>
+            <pre style="max-height:300px;overflow:auto;background:#f0f0f0;padding:10px;">${JSON.stringify(vertragsabschluesse.data?.slice(0,3), null, 2)}</pre>
+        `;
+    } catch(e) {
+        out.innerHTML = '<p style="color:red">Fehler: ' + e.message + '</p>';
+    }
+}
+test();
+</script>
+</body>
+</html>

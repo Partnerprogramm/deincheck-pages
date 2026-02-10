@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔗 Schnittstelle Visualisierung - Schnellzugriff ↔ Provisionen-Verträge-Sonstiges</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+        .container { max-width: 1400px; margin: 0 auto; }
+        h1 { 
+            color: white; 
+            text-align: center; 
+            margin-bottom: 40px; 
+            font-size: 2.5rem;
+            text-shadow: 0 4px 20px rgba(0,0,0,0.3);
+        }
+        .subtitle {
+            color: rgba(255,255,255,0.9);
+            text-align: center;
+            margin-bottom: 40px;
+            font-size: 1.1rem;
+        }
+        
+        /* Visualization Container */
+        .viz-container {
+            display: grid;
+            grid-template-columns: 1fr auto 1fr;
+            gap: 30px;
+            align-items: start;
+        }
+        
+        /* Dashboard Box */
+        .dashboard-box {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+        }
+        .dashboard-box h2 {
+            font-size: 1.3rem;
+            color: #2d3748;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .dashboard-box h2 i {
+            color: #667eea;
+        }
+        
+        /* Tab Label */
+        .tab-label {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 10px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            display: inline-block;
+        }
+        
+        /* Vertrags-Card im Schnellzugriff */
+        .vertrag-card {
+            background: #f8f9fc;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 15px;
+            border-left: 4px solid #48bb78;
+        }
+        .vertrag-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+        .kunde-name {
+            font-weight: 700;
+            color: #2d3748;
+        }
+        
+        /* Status Badges */
+        .badge {
+            padding: 6px 14px;
+            border-radius: 50px;
+            font-size: 12px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .badge:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+        .badge-neu { background: #48bb78; color: white; }
+        .badge-pruefung { background: #667eea; color: white; }
+        .badge-aktiviert { background: #4299e1; color: white; }
+        .badge-abgelehnt { background: #f56565; color: white; }
+        
+        /* Clickable Indicator */
+        .click-hint {
+            font-size: 10px;
+            opacity: 0.8;
+            margin-left: 4px;
+        }
+        
+        /* Arrow */
+        .arrow-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 20px;
+        }
+        .arrow {
+            font-size: 60px;
+            color: white;
+            text-shadow: 0 4px 20px rgba(0,0,0,0.3);
+            animation: pulse 2s infinite;
+        }
+        .arrow-text {
+            color: white;
+            font-weight: 700;
+            text-align: center;
+            margin-top: 15px;
+            font-size: 14px;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.3);
+        }
+        @keyframes pulse {
+            0%, 100% { transform: translateX(0); opacity: 1; }
+            50% { transform: translateX(10px); opacity: 0.7; }
+        }
+        
+        /* Filtered List */
+        .filtered-list {
+            background: #f8f9fc;
+            border-radius: 12px;
+            padding: 20px;
+        }
+        .filter-badge {
+            background: linear-gradient(135deg, #48bb78, #38a169);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 15px;
+        }
+        .filtered-vertrag {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-left: 4px solid #48bb78;
+        }
+        
+        /* Info Box */
+        .info-box {
+            background: linear-gradient(135deg, #e8f5e9, #c8e6c9);
+            border: 2px solid #48bb78;
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 30px;
+        }
+        .info-box h3 {
+            color: #2e7d32;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .info-box ul {
+            list-style: none;
+            color: #1b5e20;
+        }
+        .info-box li {
+            padding: 8px 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .info-box li i {
+            color: #48bb78;
+        }
+        
+        /* Flow Diagram */
+        .flow-diagram {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            margin-top: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+        }
+        .flow-diagram h2 {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #2d3748;
+        }
+        .flow-steps {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        .flow-step {
+            text-align: center;
+            flex: 1;
+            min-width: 150px;
+        }
+        .flow-step-icon {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            margin: 0 auto 15px;
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+        }
+        .flow-step-title {
+            font-weight: 700;
+            color: #2d3748;
+            margin-bottom: 8px;
+        }
+        .flow-step-desc {
+            font-size: 13px;
+            color: #718096;
+        }
+        .flow-arrow {
+            font-size: 30px;
+            color: #667eea;
+        }
+        
+        /* Responsive */
+        @media (max-width: 1000px) {
+            .viz-container {
+                grid-template-columns: 1fr;
+            }
+            .arrow-container {
+                padding: 20px;
+            }
+            .arrow {
+                transform: rotate(90deg);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔗 Schnittstelle: Schnellzugriff ↔ Provisionen-Verträge-Sonstiges</h1>
+        <p class="subtitle">So funktioniert die automatische Navigation zwischen den Dashboard-Bereichen</p>
+        
+        <div class="viz-container">
+            <!-- SCHNELLZUGRIFF -->
+            <div class="dashboard-box">
+                <div class="tab-label"><i class="fas fa-bolt"></i> Schnellzugriff - Neue Verträge</div>
+                <h2><i class="fas fa-inbox"></i> Hier sehen Sie neue Verträge</h2>
+                
+                <div class="vertrag-card">
+                    <div class="vertrag-header">
+                        <span class="kunde-name"><i class="fas fa-user"></i> Max Mustermann</span>
+                        <span class="badge badge-neu" title="KLICKBAR! → Springt zu Tab 'Provisionen-Verträge-Sonstiges' mit Filter">
+                            <i class="fas fa-star"></i> NEU EINGEGANGEN
+                            <span class="click-hint">👆</span>
+                        </span>
+                    </div>
+                    <div style="font-size: 14px; color: #718096;">
+                        <div><i class="fas fa-box"></i> Vodafone Red XL • <i class="fas fa-euro-sign"></i> 85€ Provision</div>
+                    </div>
+                </div>
+                
+                <div class="vertrag-card">
+                    <div class="vertrag-header">
+                        <span class="kunde-name"><i class="fas fa-user"></i> Anna Schmidt</span>
+                        <span class="badge badge-pruefung" title="KLICKBAR! → Springt zu Tab mit Filter 'In Prüfung'">
+                            <i class="fas fa-hourglass-half"></i> IN PRÜFUNG
+                            <span class="click-hint">👆</span>
+                        </span>
+                    </div>
+                    <div style="font-size: 14px; color: #718096;">
+                        <div><i class="fas fa-box"></i> Telekom Magenta M • <i class="fas fa-euro-sign"></i> 95€ Provision</div>
+                    </div>
+                </div>
+                
+                <div style="margin-top: 20px; padding: 15px; background: #fff3cd; border-radius: 10px; border-left: 4px solid #ffc107;">
+                    <strong>💡 So funktioniert's:</strong><br>
+                    <span style="font-size: 14px;">Klicken Sie auf einen Status-Badge (z.B. "NEU EINGEGANGEN"), um automatisch zum Tab "Provisionen-Verträge-Sonstiges" zu springen und nur Verträge mit diesem Status zu sehen.</span>
+                </div>
+            </div>
+            
+            <!-- ARROW -->
+            <div class="arrow-container">
+                <div class="arrow">→</div>
+                <div class="arrow-text">
+                    <strong>KLICK AUF BADGE</strong><br>
+                    springt automatisch<br>
+                    zum Tab mit Filter
+                </div>
+            </div>
+            
+            <!-- PROVISIONEN-VERTRÄGE-SONSTIGES -->
+            <div class="dashboard-box">
+                <div class="tab-label"><i class="fas fa-money-bill-wave"></i> Provisionen - Verträge - Sonstiges</div>
+                <h2><i class="fas fa-file-contract"></i> Gefilterte Verträge</h2>
+                
+                <div class="filtered-list">
+                    <div class="filter-badge">
+                        <i class="fas fa-filter"></i> Filter: NEU EINGEGANGEN
+                    </div>
+                    
+                    <div class="filtered-vertrag">
+                        <div>
+                            <strong>Max Mustermann</strong>
+                            <div style="font-size: 12px; color: #718096;">Vodafone Red XL</div>
+                        </div>
+                        <span class="badge badge-neu"><i class="fas fa-star"></i> NEU</span>
+                    </div>
+                    
+                    <div class="filtered-vertrag">
+                        <div>
+                            <strong>Peter Müller</strong>
+                            <div style="font-size: 12px; color: #718096;">O2 Free M</div>
+                        </div>
+                        <span class="badge badge-neu"><i class="fas fa-star"></i> NEU</span>
+                    </div>
+                    
+                    <div class="filtered-vertrag">
+                        <div>
+                            <strong>Lisa Weber</strong>
+                            <div style="font-size: 12px; color: #718096;">1&1 DSL 100</div>
+                        </div>
+                        <span class="badge badge-neu"><i class="fas fa-star"></i> NEU</span>
+                    </div>
+                </div>
+                
+                <div style="margin-top: 20px; padding: 15px; background: #e8f5e9; border-radius: 10px; border-left: 4px solid #48bb78;">
+                    <strong>✅ Automatisch gefiltert!</strong><br>
+                    <span style="font-size: 14px;">Der Status-Filter wurde automatisch gesetzt. Sie sehen jetzt nur Verträge mit dem angeklickten Status.</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Info Box -->
+        <div class="info-box">
+            <h3><i class="fas fa-info-circle"></i> Klickbare Status-Badges</h3>
+            <ul>
+                <li><i class="fas fa-check"></i> <span class="badge badge-neu" style="cursor: default;"><i class="fas fa-star"></i> NEU EINGEGANGEN</span> → Zeigt alle neuen Verträge</li>
+                <li><i class="fas fa-check"></i> <span class="badge badge-pruefung" style="cursor: default;"><i class="fas fa-hourglass-half"></i> IN PRÜFUNG</span> → Zeigt alle Verträge in Prüfung</li>
+                <li><i class="fas fa-check"></i> <span class="badge badge-aktiviert" style="cursor: default;"><i class="fas fa-check-circle"></i> AKTIVIERT</span> → Zeigt alle aktivierten Verträge</li>
+                <li><i class="fas fa-check"></i> <span class="badge badge-abgelehnt" style="cursor: default;"><i class="fas fa-times-circle"></i> ABGELEHNT</span> → Zeigt alle abgelehnten Verträge</li>
+            </ul>
+        </div>
+        
+        <!-- Flow Diagram -->
+        <div class="flow-diagram">
+            <h2><i class="fas fa-project-diagram"></i> Vollständiger Workflow</h2>
+            <div class="flow-steps">
+                <div class="flow-step">
+                    <div class="flow-step-icon"><i class="fas fa-file-contract"></i></div>
+                    <div class="flow-step-title">1. Partner erstellt Vertrag</div>
+                    <div class="flow-step-desc">Im Partner-Tool wird ein neuer Vertrag eingegeben</div>
+                </div>
+                <div class="flow-arrow">→</div>
+                <div class="flow-step">
+                    <div class="flow-step-icon"><i class="fas fa-bolt"></i></div>
+                    <div class="flow-step-title">2. Erscheint im Schnellzugriff</div>
+                    <div class="flow-step-desc">Admin sieht den neuen Vertrag im Schnellzugriff</div>
+                </div>
+                <div class="flow-arrow">→</div>
+                <div class="flow-step">
+                    <div class="flow-step-icon"><i class="fas fa-mouse-pointer"></i></div>
+                    <div class="flow-step-title">3. Klick auf Status-Badge</div>
+                    <div class="flow-step-desc">Admin klickt auf "NEU EINGEGANGEN"</div>
+                </div>
+                <div class="flow-arrow">→</div>
+                <div class="flow-step">
+                    <div class="flow-step-icon"><i class="fas fa-filter"></i></div>
+                    <div class="flow-step-title">4. Auto-Filter im Tab</div>
+                    <div class="flow-step-desc">Tab öffnet sich mit gefilterter Ansicht</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Synchronisation Info -->
+        <div class="flow-diagram" style="background: linear-gradient(135deg, #667eea, #764ba2); color: white;">
+            <h2 style="color: white;"><i class="fas fa-sync"></i> Automatische Synchronisation</h2>
+            <p style="text-align: center; margin-bottom: 30px; opacity: 0.9;">
+                Wenn Sie im Schnellzugriff einen Vertrag aktivieren/ablehnen, werden BEIDE Bereiche automatisch aktualisiert:
+            </p>
+            <div class="flow-steps">
+                <div class="flow-step">
+                    <div class="flow-step-icon" style="background: white; color: #667eea;">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <div class="flow-step-title" style="color: white;">Aktion im Schnellzugriff</div>
+                    <div class="flow-step-desc" style="color: rgba(255,255,255,0.8);">z.B. "Aktivieren" klicken</div>
+                </div>
+                <div class="flow-arrow" style="color: white;">→</div>
+                <div class="flow-step">
+                    <div class="flow-step-icon" style="background: white; color: #667eea;">
+                        <i class="fas fa-database"></i>
+                    </div>
+                    <div class="flow-step-title" style="color: white;">Datenbank Update</div>
+                    <div class="flow-step-desc" style="color: rgba(255,255,255,0.8);">Status wird gespeichert</div>
+                </div>
+                <div class="flow-arrow" style="color: white;">→</div>
+                <div class="flow-step">
+                    <div class="flow-step-icon" style="background: white; color: #667eea;">
+                        <i class="fas fa-sync"></i>
+                    </div>
+                    <div class="flow-step-title" style="color: white;">Auto-Reload</div>
+                    <div class="flow-step-desc" style="color: rgba(255,255,255,0.8);">Beide Bereiche aktualisieren</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

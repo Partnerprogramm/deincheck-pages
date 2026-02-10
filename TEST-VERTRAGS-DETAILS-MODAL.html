@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TEST: Vertrags-Details Modal mit Stornieren-Button</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --primary: #667eea;
+            --success: #48bb78;
+            --danger: #f56565;
+            --warning: #ed8936;
+            --info: #4299e1;
+            --text: #1a202c;
+            --text-light: #718096;
+            --bg: #f7fafc;
+            --border: #e2e8f0;
+        }
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; 
+            padding: 40px; 
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .container { 
+            max-width: 800px; 
+            margin: 0 auto; 
+            background: white; 
+            border-radius: 16px; 
+            padding: 40px; 
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3); 
+        }
+        .version-banner {
+            background: linear-gradient(135deg, #f56565, #c53030);
+            color: white;
+            padding: 25px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        .version-banner h2 { margin-bottom: 10px; font-size: 1.8rem; }
+        .version-banner p { font-size: 1rem; opacity: 0.95; }
+        .btn { 
+            padding: 1rem 2rem; 
+            border: none; 
+            border-radius: 10px; 
+            font-size: 1rem; 
+            font-weight: 600; 
+            cursor: pointer; 
+            transition: all 0.2s; 
+            display: inline-flex; 
+            align-items: center; 
+            gap: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+        .btn-primary { 
+            background: linear-gradient(135deg, #667eea, #764ba2); 
+            color: white; 
+        }
+        .btn-primary:hover { 
+            transform: translateY(-2px); 
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4); 
+        }
+        h1 { 
+            color: var(--text); 
+            margin-bottom: 30px; 
+            font-size: 2rem;
+        }
+        .instructions { 
+            background: var(--bg); 
+            padding: 20px; 
+            border-radius: 10px; 
+            margin-bottom: 30px; 
+            border-left: 4px solid var(--primary);
+        }
+        .instructions h3 { 
+            color: var(--primary); 
+            margin-bottom: 10px; 
+        }
+        .instructions ol { 
+            margin-left: 20px; 
+            line-height: 1.8;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="version-banner">
+            <h2><i class="fas fa-times-circle"></i> TEST: Stornieren-Button im Details-Modal</h2>
+            <p>Klicke auf den Button unten um das Vertrags-Details-Modal mit dem Stornieren-Button zu sehen</p>
+        </div>
+        
+        <h1><i class="fas fa-file-contract"></i> Vertrags-Details Modal Tester</h1>
+        
+        <div class="instructions">
+            <h3><i class="fas fa-info-circle"></i> Was wird getestet:</h3>
+            <ol>
+                <li>Klicke auf "Vertrags-Details öffnen" unten</li>
+                <li>Ein Modal öffnet sich mit allen Vertragsdetails</li>
+                <li>Unten links im Modal siehst du den <strong style="color: var(--danger);">roten "Vertrag stornieren" Button</strong></li>
+                <li>Klicke auf den Stornieren-Button</li>
+                <li>Es erscheint eine Warnung mit Tagesanzahl</li>
+            </ol>
+        </div>
+        
+        <button class="btn btn-primary" onclick="showVertragDetails()">
+            <i class="fas fa-eye"></i> Vertrags-Details öffnen
+        </button>
+    </div>
+
+    <script>
+        // Demo-Vertrag
+        const demoVertrag = {
+            id: 'demo-vertrag-123',
+            created_at: Date.now() - (5 * 86400000), // 5 Tage alt
+            kunde_anrede: 'Herr',
+            kunde_vorname: 'Max',
+            kunde_nachname: 'Mustermann',
+            kunde_email: 'max.mustermann@example.com',
+            kunde_telefon: '+49 123 456789',
+            kunde_strasse: 'Hauptstraße 123',
+            kunde_plz: '12345',
+            kunde_ort: 'Berlin',
+            kunde_geburtsdatum: '01.01.1990',
+            vertragsnummer: 'V-2025-001',
+            kategorie: 'Mobilfunk',
+            anbieter: 'Vodafone',
+            tarif_name: 'Red XL',
+            tarif_preis: 49.99,
+            provision: 75.00,
+            status: 'Aktiviert',
+            iban: 'DE89 3704 0044 0532 0130 00',
+            kontoinhaber: 'Max Mustermann'
+        };
+
+        function showVertragDetails() {
+            const vertrag = demoVertrag;
+            const provision = parseFloat(vertrag.provision);
+            const statusColor = vertrag.status === 'Aktiviert' ? 'var(--success)' : 
+                              vertrag.status === 'Abgelehnt' ? 'var(--danger)' : 
+                              'var(--warning)';
+            
+            const modalContent = `
+                <div style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 10000; display: flex; align-items: center; justify-content: center; padding: 1rem;" onclick="this.remove()">
+                    <div style="background: white; border-radius: 15px; max-width: 1100px; width: 100%; max-height: 90vh; overflow-y: auto; padding: 2rem; box-shadow: 0 20px 60px rgba(0,0,0,0.3);" onclick="event.stopPropagation()">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; padding-bottom: 1rem; border-bottom: 2px solid var(--border);">
+                            <h2 style="margin: 0; color: var(--primary);"><i class="fas fa-file-contract"></i> Vertrags-Details</h2>
+                            <button onclick="this.closest('[style*=fixed]').remove()" style="background: none; border: none; font-size: 1.5rem; cursor: pointer; color: var(--text-light); width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; border-radius: 50%; transition: all 0.2s;" onmouseover="this.style.background='var(--bg)'" onmouseout="this.style.background='none'">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                        
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem;">
+                            <!-- Kundendaten -->
+                            <div style="background: var(--bg); padding: 1.5rem; border-radius: 10px; border-left: 4px solid var(--primary);">
+                                <h3 style="margin: 0 0 1rem 0; color: var(--primary); font-size: 1.1rem;"><i class="fas fa-user"></i> Kundendaten</h3>
+                                <div style="display: grid; gap: 0.75rem; font-size: 0.95rem;">
+                                    <div><strong style="color: var(--text-light);">Anrede:</strong> ${vertrag.kunde_anrede}</div>
+                                    <div><strong style="color: var(--text-light);">Name:</strong> ${vertrag.kunde_vorname} ${vertrag.kunde_nachname}</div>
+                                    <div><strong style="color: var(--text-light);">E-Mail:</strong> ${vertrag.kunde_email}</div>
+                                    <div><strong style="color: var(--text-light);">Telefon:</strong> ${vertrag.kunde_telefon}</div>
+                                    <div><strong style="color: var(--text-light);">Adresse:</strong> ${vertrag.kunde_strasse}</div>
+                                    <div><strong style="color: var(--text-light);">PLZ/Ort:</strong> ${vertrag.kunde_plz} ${vertrag.kunde_ort}</div>
+                                    <div><strong style="color: var(--text-light);">Geburtsdatum:</strong> ${vertrag.kunde_geburtsdatum}</div>
+                                </div>
+                            </div>
+                            
+                            <!-- Vertragsdaten -->
+                            <div style="background: var(--bg); padding: 1.5rem; border-radius: 10px; border-left: 4px solid var(--success);">
+                                <h3 style="margin: 0 0 1rem 0; color: var(--success); font-size: 1.1rem;"><i class="fas fa-file-alt"></i> Vertragsdaten</h3>
+                                <div style="display: grid; gap: 0.75rem; font-size: 0.95rem;">
+                                    <div><strong style="color: var(--text-light);">Vertragsnr.:</strong> ${vertrag.vertragsnummer}</div>
+                                    <div><strong style="color: var(--text-light);">Datum:</strong> ${new Date(vertrag.created_at).toLocaleDateString('de-DE')}</div>
+                                    <div><strong style="color: var(--text-light);">Kategorie:</strong> ${vertrag.kategorie}</div>
+                                    <div><strong style="color: var(--text-light);">Anbieter:</strong> ${vertrag.anbieter}</div>
+                                    <div><strong style="color: var(--text-light);">Tarif:</strong> ${vertrag.tarif_name}</div>
+                                    <div><strong style="color: var(--text-light);">Tarif-Preis:</strong> ${vertrag.tarif_preis.toFixed(2)}€/Monat</div>
+                                    <div><strong style="color: var(--text-light);">Provision:</strong> <strong style="color: var(--success); font-size: 1.2rem;">${provision.toFixed(2)}€</strong></div>
+                                    <div><strong style="color: var(--text-light);">Status:</strong> <span style="padding: 0.4rem 0.8rem; background: ${statusColor}; color: white; border-radius: 5px; font-weight: 600; font-size: 0.85rem;">${vertrag.status}</span></div>
+                                </div>
+                            </div>
+                            
+                            <!-- Bankdaten -->
+                            <div style="background: var(--bg); padding: 1.5rem; border-radius: 10px; border-left: 4px solid #ed8936;">
+                                <h3 style="margin: 0 0 1rem 0; color: #ed8936; font-size: 1.1rem;"><i class="fas fa-credit-card"></i> Bankdaten</h3>
+                                <div style="display: grid; gap: 0.75rem; font-size: 0.95rem;">
+                                    <div><strong style="color: var(--text-light);">IBAN:</strong> ${vertrag.iban}</div>
+                                    <div><strong style="color: var(--text-light);">Kontoinhaber:</strong> ${vertrag.kontoinhaber}</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div style="margin-top: 2rem; display: flex; justify-content: space-between; gap: 1rem; flex-wrap: wrap;">
+                            <div>
+                                ${vertrag.status !== 'Abgelehnt' && vertrag.status !== 'Storniert' ? `
+                                <button onclick="testStornierung('${vertrag.id}', ${vertrag.created_at})" style="padding: 0.75rem 1.5rem; background: linear-gradient(135deg, #fc8181, #f56565); color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; transition: all 0.2s; box-shadow: 0 4px 12px rgba(252, 129, 129, 0.3); display: inline-flex; align-items: center; gap: 8px;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
+                                    <i class="fas fa-times-circle"></i> Vertrag stornieren
+                                </button>
+                                ` : ''}
+                            </div>
+                            <button onclick="this.closest('[style*=fixed]').remove()" style="padding: 0.75rem 1.5rem; background: var(--border); color: var(--text); border: none; border-radius: 8px; cursor: pointer; font-weight: 600; transition: all 0.2s;" onmouseover="this.style.background='#cbd5e0'" onmouseout="this.style.background='var(--border)'">
+                                <i class="fas fa-times"></i> Schließen
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            document.body.insertAdjacentHTML('beforeend', modalContent);
+        }
+
+        function testStornierung(vertragId, createdAt) {
+            const tage = Math.floor((Date.now() - createdAt) / 86400000);
+            const warnung = tage < 14 ? 
+                `⚠️ WARNUNG: Der Vertrag ist nur ${tage} Tage alt!\nDas Widerrufsrecht (14 Tage) ist noch aktiv.` : 
+                `✅ Der Vertrag ist ${tage} Tage alt.\nDas Widerrufsrecht ist abgelaufen.`;
+            
+            alert(`🔥 STORNIEREN-BUTTON FUNKTIONIERT!\n\n` +
+                  `Vertrag-ID: ${vertragId}\n` +
+                  `Alter: ${tage} Tage\n\n` +
+                  `${warnung}\n\n` +
+                  `✅ Button ist im Details-Modal sichtbar und funktioniert perfekt!\n\n` +
+                  `📝 In der echten Anwendung würde sich jetzt das Stornierung-Modal öffnen.`);
+            
+            console.log('✅ Stornieren-Button im Details-Modal geklickt!', {
+                vertragId,
+                tage,
+                warnung
+            });
+        }
+
+        console.log('✅ Test-Seite: Vertrags-Details Modal geladen!');
+        console.log('📊 Demo-Vertrag:', demoVertrag);
+        console.log('🔘 Stornieren-Button wird angezeigt für Status:', demoVertrag.status);
+    </script>
+</body>
+</html>

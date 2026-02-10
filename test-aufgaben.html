@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Test Aufgaben</title>
+    <script>
+        // Redirect nach 2 Sekunden und klicke "Aufgaben"-Tab
+        setTimeout(() => {
+            window.location.href = 'admin-dashboard.html';
+            // Dann manuell in der Konsole: switchTab('aufgaben')
+        }, 2000);
+    </script>
+</head>
+<body>
+    <h1>Teste jetzt "Aufgaben & Projekte":</h1>
+    <ol>
+        <li>Öffne <strong>admin-dashboard.html</strong></li>
+        <li>Melde dich als Admin an</li>
+        <li>Klicke auf "<strong>Aufgaben & Projekte</strong>" in der Sidebar</li>
+        <li>Öffne die Konsole (F12) und suche nach:
+            <ul>
+                <li><code>📋 Lade Projekte...</code></li>
+                <li><code>🌐 Fetching task_projekte...</code></li>
+                <li><code>✅ Projekte Data: X</code></li>
+            </ul>
+        </li>
+    </ol>
+    
+    <h2>Was Du sehen solltest:</h2>
+    <p>✅ Stats-Header: "X Projekte | X Offene Tasks | X Erledigt"</p>
+    <p>✅ Buttons: "+ Neues Projekt", "Quick Add Task", Filter-Buttons</p>
+    <p>✅ Projekt-Cards im Grid (falls Projekte existieren)</p>
+    
+    <h2>Fehler beheben:</h2>
+    <p>🔄 <strong>HARD REFRESH</strong> machen: <code>Ctrl + Shift + R</code> (Windows) oder <code>Cmd + Shift + R</code> (Mac)</p>
+    <p>🕵️ Falls immer noch nicht lädt: Konsole (F12) Screenshot senden!</p>
+</body>
+</html>

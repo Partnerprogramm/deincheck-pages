@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🧪 Test: Partner-Verwaltung</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background: #f5f5f7;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        }
+        h1 {
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+        button {
+            padding: 12px 24px;
+            margin: 8px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 14px;
+        }
+        button:hover {
+            background: #5568d3;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f7fafc;
+            border-left: 4px solid #48bb78;
+            border-radius: 4px;
+        }
+        .error {
+            border-left-color: #f56565;
+            background: #fff5f5;
+        }
+        pre {
+            background: #1a202c;
+            color: #f7fafc;
+            padding: 15px;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-size: 12px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        th {
+            background: #f7fafc;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 Partner-Verwaltung Test</h1>
+        <p style="color: #718096;">Dieser Test lädt Partner-Daten direkt von der API</p>
+
+        <div>
+            <button onclick="testAPI()">🚀 Partner-API Testen</button>
+            <button onclick="testVertraege()">📄 Verträge-API Testen</button>
+            <button onclick="testDokumente()">📁 Dokumente-API Testen</button>
+        </div>
+
+        <div id="results"></div>
+    </div>
+
+    <script>
+        async function testAPI() {
+            try {
+                showResult('🔄 Lade Partner...', 'info');
+                
+                // Parallel laden
+                const [partnersRes, vertraegeRes, dokumenteRes] = await Promise.all([
+                    fetch('tables/partners?limit=1000'),
+                    fetch('tables/vertragsabschluesse?limit=5000'),
+                    fetch('tables/dokumente?limit=5000')
+                ]);
+                
+                const partnersData = await partnersRes.json();
+                
+                // Verträge & Dokumente können fehlschlagen (422)
+                let vertraegeData = { data: [] };
+                let dokumenteData = { data: [] };
+                
+                try {
+                    if (vertraegeRes.ok) {
+                        vertraegeData = await vertraegeRes.json();
+                    } else {
+                        console.warn('⚠️ Verträge API Error:', vertraegeRes.status);
+                    }
+                } catch (e) {
+                    console.error('❌ Verträge Parse Error:', e);
+                }
+                
+                try {
+                    if (dokumenteRes.ok) {
+                        dokumenteData = await dokumenteRes.json();
+                    } else {
+                        console.warn('⚠️ Dokumente API Error:', dokumenteRes.status);
+                    }
+                } catch (e) {
+                    console.error('❌ Dokumente Parse Error:', e);
+                }
+                
+                const allPartners = partnersData.data || [];
+                const allVertraege = vertraegeData.data || [];
+                const allDokumente = dokumenteData.data || [];
+                
+                console.log('✅ Partner:', allPartners.length);
+                console.log('✅ Verträge:', allVertraege.length);
+                console.log('✅ Dokumente:', allDokumente.length);
+                
+                // Tabelle erstellen
+                let html = `
+                    <div class="result">
+                        <strong>✅ ${allPartners.length} Partner geladen!</strong><br>
+                        <strong>✅ ${allVertraege.length} Verträge geladen!</strong><br>
+                        <strong>✅ ${allDokumente.length} Dokumente geladen!</strong>
+                    </div>
+                    
+                    <h3>Partner-Tabelle:</h3>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Partner</th>
+                                <th>Status</th>
+                                <th>Modell</th>
+                                <th>IBAN</th>
+                                <th>Verträge</th>
+                                <th>Dokumente</th>
+                                <th>Akademie</th>
+                                <th>Onboarding</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                `;
+                
+                allPartners.slice(0, 20).forEach(partner => {
+                    const partnerVertraege = allVertraege.filter(v => v.partner_email === partner.email);
+                    const partnerDokumente = allDokumente.filter(d => d.partner_id === partner.id);
+                    const iban = partner.iban ? partner.iban.substring(0, 8) + '****' : '❌';
+                    const akademie = partner.onboarding_akademie ? '✅' : '❌';
+                    
+                    const onboardingSteps = [
+                        partner.onboarding_termin,
+                        partner.onboarding_dokumente,
+                        partner.onboarding_ausweis,
+                        partner.onboarding_bank,
+                        partner.onboarding_akademie
+                    ];
+                    const completed = onboardingSteps.filter(Boolean).length;
+                    const progress = Math.round((completed / 5) * 100);
+                    
+                    html += `
+                        <tr>
+                            <td><strong>${partner.vorname} ${partner.nachname}</strong><br><small>${partner.email}</small></td>
+                            <td>${partner.status}</td>
+                            <td>${partner.modell || '-'}</td>
+                            <td style="font-family: monospace;">${iban}</td>
+                            <td>${partnerVertraege.length}</td>
+                            <td>${partnerDokumente.length}</td>
+                            <td>${akademie}</td>
+                            <td>${progress}%</td>
+                        </tr>
+                    `;
+                });
+                
+                html += `
+                        </tbody>
+                    </table>
+                    
+                    <h3>Erste 3 Partner (Debug):</h3>
+                    <pre>${JSON.stringify(allPartners.slice(0, 3), null, 2)}</pre>
+                `;
+                
+                document.getElementById('results').innerHTML = html;
+                
+            } catch (error) {
+                showResult(`❌ Fehler: ${error.message}`, 'error');
+                console.error(error);
+            }
+        }
+
+        async function testVertraege() {
+            try {
+                showResult('🔄 Lade Verträge...', 'info');
+                
+                const response = await fetch('tables/vertragsabschluesse?limit=1000');
+                const data = await response.json();
+                const vertraege = data.data || [];
+                
+                let html = `
+                    <div class="result">
+                        <strong>✅ ${vertraege.length} Verträge gefunden!</strong>
+                    </div>
+                    <pre>${JSON.stringify(vertraege.slice(0, 5), null, 2)}</pre>
+                `;
+                
+                document.getElementById('results').innerHTML = html;
+                
+            } catch (error) {
+                showResult(`❌ Fehler: ${error.message}`, 'error');
+            }
+        }
+
+        async function testDokumente() {
+            try {
+                showResult('🔄 Lade Dokumente...', 'info');
+                
+                const response = await fetch('tables/dokumente?limit=1000');
+                const data = await response.json();
+                const dokumente = data.data || [];
+                
+                let html = `
+                    <div class="result">
+                        <strong>✅ ${dokumente.length} Dokumente gefunden!</strong>
+                    </div>
+                    <pre>${JSON.stringify(dokumente.slice(0, 5), null, 2)}</pre>
+                `;
+                
+                document.getElementById('results').innerHTML = html;
+                
+            } catch (error) {
+                showResult(`❌ Fehler: ${error.message}`, 'error');
+            }
+        }
+
+        function showResult(message, type = 'info') {
+            const className = type === 'error' ? 'result error' : 'result';
+            document.getElementById('results').innerHTML = `<div class="${className}">${message}</div>`;
+        }
+
+        // Auto-load
+        window.addEventListener('DOMContentLoaded', () => {
+            testAPI();
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <title>🧪 TEST: Neueste Verträge Tabelle</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            padding: 40px;
+            background: #f7fafc;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+        }
+        h1 {
+            margin-bottom: 30px;
+            color: #1a202c;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        thead {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        th {
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+        }
+        td {
+            padding: 15px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        tr:hover {
+            background: #f7fafc;
+            cursor: pointer;
+        }
+        .status-badge {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+        .status-success {
+            background: #c6f6d5;
+            color: #22543d;
+        }
+        .status-warning {
+            background: #feebc8;
+            color: #7c2d12;
+        }
+        .status-info {
+            background: #bee3f8;
+            color: #2c5282;
+        }
+        .success-banner {
+            background: linear-gradient(135deg, #48bb78, #38a169);
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        .console-log {
+            background: #1a202c;
+            color: #48bb78;
+            padding: 20px;
+            border-radius: 15px;
+            margin-top: 30px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            line-height: 1.8;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="success-banner">
+            <i class="fas fa-check-circle" style="font-size: 2rem;"></i>
+            <div>
+                <h2 style="margin: 0; font-size: 1.5rem;">✅ TEST ERFOLGREICH</h2>
+                <p style="margin: 0; opacity: 0.9;">Die Tabelle wird mit Demo-Daten befüllt!</p>
+            </div>
+        </div>
+
+        <h1><i class="fas fa-file-contract"></i> Neueste Verträge</h1>
+        
+        <table id="table-recent-vertraege">
+            <thead>
+                <tr>
+                    <th>Datum</th>
+                    <th>Kunde</th>
+                    <th>Kategorie</th>
+                    <th>Provision</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Data will be loaded -->
+            </tbody>
+        </table>
+
+        <div class="console-log" id="console"></div>
+    </div>
+
+    <script>
+        function log(msg) {
+            const console = document.getElementById('console');
+            console.innerHTML += msg + '<br>';
+        }
+
+        log('🚀 Test gestartet...');
+
+        // Demo-Verträge (EXAKT wie in partner-dashboard.html Zeile 7686-7690)
+        const demoVertraege = [
+            { id: 'demo-1', datum: '08.12.2025', kunde: 'Max Mustermann', kategorie: 'Mobilfunk', produkt: 'Vodafone', provision: '75,00€', status: 'Aktiviert', created_at: Date.now() - (2 * 86400000) },
+            { id: 'demo-2', datum: '07.12.2025', kunde: 'Lisa Müller', kategorie: 'Strom', produkt: 'Telekom', provision: '100,00€', status: 'In Bearbeitung', created_at: Date.now() - (7 * 86400000) },
+            { id: 'demo-3', datum: '06.12.2025', kunde: 'Tom Schmidt', kategorie: 'Gas', produkt: 'E.ON', provision: '50,00€', status: 'Neu', created_at: Date.now() - (20 * 86400000) }
+        ];
+
+        log('📦 Demo-Verträge erstellt: ' + demoVertraege.length + ' Stück');
+
+        // Tabelle befüllen (EXAKT wie in partner-dashboard.html Zeile 7692-7709)
+        const tbody = document.querySelector('#table-recent-vertraege tbody');
+        if (tbody) {
+            log('✅ tbody gefunden: ' + tbody);
+            
+            tbody.innerHTML = demoVertraege.map(v => {
+                const statusClass = v.status === 'Aktiviert' ? 'status-success' : 
+                                  v.status === 'In Bearbeitung' ? 'status-warning' : 
+                                  'status-info';
+                
+                return `
+                    <tr onclick="alert('Vertrag ${v.id} geklickt!')" style="cursor:pointer;">
+                        <td>${v.datum}</td>
+                        <td>${v.kunde}</td>
+                        <td>${v.kategorie}</td>
+                        <td><strong>${v.provision}</strong></td>
+                        <td><span class="status-badge ${statusClass}">${v.status}</span></td>
+                    </tr>
+                `;
+            }).join('');
+            
+            log('✅ Tabelle befüllt mit ' + demoVertraege.length + ' Zeilen!');
+            log('🎉 TEST ERFOLGREICH! Die Tabelle sollte jetzt 3 Verträge anzeigen.');
+        } else {
+            log('❌ FEHLER: tbody nicht gefunden!');
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🧪 Test: Vertrag-Synchronisation</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+            padding: 20px;
+            background: #f5f5f7;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        }
+        h1 {
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+        .info {
+            background: #ebf8ff;
+            border-left: 4px solid #4299e1;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 6px;
+        }
+        button {
+            padding: 12px 24px;
+            margin: 8px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 14px;
+        }
+        button:hover {
+            background: #5568d3;
+        }
+        .success {
+            background: #f0fff4;
+            border-left-color: #48bb78;
+        }
+        .error {
+            background: #fff5f5;
+            border-left-color: #f56565;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        th {
+            background: #f7fafc;
+            font-weight: 600;
+            color: #2d3748;
+        }
+        .status-badge {
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        .status-neu { background: #ffd700; color: #000; }
+        .status-aktiviert { background: #48bb78; color: white; }
+        .status-abgelehnt { background: #f56565; color: white; }
+        pre {
+            background: #1a202c;
+            color: #f7fafc;
+            padding: 15px;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 Vertrag-Synchronisation Test</h1>
+        <p style="color: #718096;">Dieser Test prüft, ob Verträge aus dem Partner-Tool im Admin-Dashboard sichtbar sind</p>
+
+        <div class="info">
+            <strong>📌 Was wird getestet:</strong><br>
+            1. Anzahl Verträge in Datenbank<br>
+            2. Letzter Vertrag (Partner-Name, IBAN, Unterschrift)<br>
+            3. Ob Änderungen im Partner-Tool sofort sichtbar sind
+        </div>
+
+        <div>
+            <button onclick="loadAllVertraege()">📄 Alle Verträge laden</button>
+            <button onclick="createTestVertrag()">✨ Test-Vertrag erstellen</button>
+            <button onclick="updateTestVertrag()">✏️ Test-Vertrag aktualisieren (IBAN)</button>
+            <button onclick="clearResults()">🗑️ Ergebnisse löschen</button>
+        </div>
+
+        <div id="results"></div>
+    </div>
+
+    <script>
+        let testVertragId = null;
+
+        async function loadAllVertraege() {
+            try {
+                showResult('🔄 Lade Verträge...', 'info');
+                
+                const response = await fetch('tables/vertragsabschluesse?limit=100');
+                const data = await response.json();
+                
+                console.log('✅ API Response:', data);
+                
+                const vertraege = data.data || [];
+                
+                let html = `
+                    <div class="info success">
+                        <strong>✅ ${vertraege.length} Verträge gefunden!</strong>
+                    </div>
+                    
+                    <h3>Letzte 10 Verträge:</h3>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Partner</th>
+                                <th>Kunde</th>
+                                <th>Kategorie</th>
+                                <th>IBAN</th>
+                                <th>Unterschrift</th>
+                                <th>Status</th>
+                                <th>Erstellt</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                `;
+                
+                vertraege.slice(0, 10).forEach(v => {
+                    const ibanDisplay = v.iban ? v.iban.substring(0, 8) + '****' : '❌ Keine';
+                    const unterschriftDisplay = v.unterschrift_data ? '✅ Vorhanden' : '❌ Fehlt';
+                    const status = v.vertrag_status || 'neu';
+                    
+                    html += `
+                        <tr>
+                            <td><strong>${v.partner_name || v.partner_email || 'Unbekannt'}</strong></td>
+                            <td>${v.kunde_vorname} ${v.kunde_nachname}</td>
+                            <td>${v.kategorie || '-'}</td>
+                            <td style="font-family: monospace;">${ibanDisplay}</td>
+                            <td>${unterschriftDisplay}</td>
+                            <td><span class="status-badge status-${status}">${status}</span></td>
+                            <td>${new Date(v.erstellt_am || v.created_at).toLocaleString('de-DE')}</td>
+                        </tr>
+                    `;
+                });
+                
+                html += `
+                        </tbody>
+                    </table>
+                    
+                    <h3>Beispiel-Vertrag (neuester):</h3>
+                    <pre>${JSON.stringify(vertraege[0], null, 2)}</pre>
+                `;
+                
+                showResult(html, 'success', false);
+                
+            } catch (error) {
+                showResult(`❌ Fehler: ${error.message}`, 'error');
+                console.error(error);
+            }
+        }
+
+        async function createTestVertrag() {
+            try {
+                showResult('✨ Erstelle Test-Vertrag...', 'info');
+                
+                const testData = {
+                    partner_email: 'test@partner.de',
+                    partner_name: 'Test Partner',
+                    vertragsnummer: 'TEST-' + Date.now(),
+                    kategorie: 'simOnly',
+                    anbieter: 'Telekom',
+                    tarif_name: 'MagentaMobil S',
+                    tarif_preis: 39.99,
+                    provision_betrag: 50,
+                    gesamt_provision: 50,
+                    kunde_vorname: 'Max',
+                    kunde_nachname: 'Mustermann',
+                    kunde_email: 'max@example.com',
+                    kunde_telefon: '0123456789',
+                    kunde_strasse: 'Musterstr. 1',
+                    kunde_plz: '12345',
+                    kunde_ort: 'Berlin',
+                    iban: 'DE89370400440532013000',
+                    kontoinhaber: 'Max Mustermann',
+                    unterschrift_data: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUA',
+                    vertrag_status: 'neu',
+                    provision_status: 'ausstehend'
+                };
+                
+                const response = await fetch('tables/vertragsabschluesse', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(testData)
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+                
+                const result = await response.json();
+                testVertragId = result.id;
+                
+                showResult(`
+                    <div class="info success">
+                        <strong>✅ Test-Vertrag erstellt!</strong><br>
+                        ID: ${result.id}<br>
+                        Partner: ${testData.partner_name}<br>
+                        Kunde: ${testData.kunde_vorname} ${testData.kunde_nachname}<br>
+                        IBAN: ${testData.iban}<br>
+                        Unterschrift: ✅ Vorhanden
+                    </div>
+                    <pre>${JSON.stringify(result, null, 2)}</pre>
+                `, 'success', false);
+                
+            } catch (error) {
+                showResult(`❌ Fehler: ${error.message}`, 'error');
+                console.error(error);
+            }
+        }
+
+        async function updateTestVertrag() {
+            if (!testVertragId) {
+                showResult('⚠️ Bitte erst einen Test-Vertrag erstellen!', 'error');
+                return;
+            }
+            
+            try {
+                showResult('✏️ Aktualisiere IBAN...', 'info');
+                
+                const newIBAN = 'DE89999999999999999999';
+                
+                const response = await fetch(`tables/vertragsabschluesse/${testVertragId}`, {
+                    method: 'PATCH',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        iban: newIBAN
+                    })
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+                
+                const result = await response.json();
+                
+                showResult(`
+                    <div class="info success">
+                        <strong>✅ IBAN aktualisiert!</strong><br>
+                        Neue IBAN: ${newIBAN}<br><br>
+                        <strong>🧪 Jetzt im Admin-Dashboard prüfen:</strong><br>
+                        1. Öffne admin-dashboard.html<br>
+                        2. Gehe zu "Verträge"<br>
+                        3. Suche nach "Test Partner"<br>
+                        4. IBAN sollte jetzt ${newIBAN.substring(0, 8)}**** sein
+                    </div>
+                    <pre>${JSON.stringify(result, null, 2)}</pre>
+                `, 'success', false);
+                
+            } catch (error) {
+                showResult(`❌ Fehler: ${error.message}`, 'error');
+                console.error(error);
+            }
+        }
+
+        function showResult(message, type = 'info', escape = true) {
+            const resultsDiv = document.getElementById('results');
+            const className = type === 'error' ? 'info error' : type === 'success' ? 'info success' : 'info';
+            
+            if (escape) {
+                resultsDiv.innerHTML = `<div class="${className}">${message}</div>`;
+            } else {
+                resultsDiv.innerHTML = message;
+            }
+        }
+
+        function clearResults() {
+            document.getElementById('results').innerHTML = '';
+        }
+
+        // Auto-load on page load
+        window.addEventListener('DOMContentLoaded', () => {
+            loadAllVertraege();
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🧪 API Update Test</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 2rem;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 16px;
+            padding: 2rem;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        h1 { color: #667eea; margin-bottom: 1rem; }
+        .section {
+            background: #f7fafc;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+        .section h2 {
+            color: #2d3748;
+            font-size: 1.25rem;
+            margin-bottom: 1rem;
+        }
+        .form-group {
+            margin-bottom: 1rem;
+        }
+        label {
+            display: block;
+            font-weight: 600;
+            color: #2d3748;
+            margin-bottom: 0.5rem;
+        }
+        input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 1rem;
+        }
+        input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        button:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+        }
+        button:disabled {
+            background: #cbd5e0;
+            cursor: not-allowed;
+            transform: none;
+        }
+        .log {
+            background: #1a202c;
+            color: #a0aec0;
+            border-radius: 8px;
+            padding: 1rem;
+            font-family: 'Courier New', monospace;
+            font-size: 0.875rem;
+            max-height: 400px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+        .log-success { color: #48bb78; }
+        .log-error { color: #f56565; }
+        .log-info { color: #4299e1; }
+        .log-warning { color: #ed8936; }
+        .status {
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            font-weight: 600;
+        }
+        .status-success { background: #c6f6d5; color: #22543d; }
+        .status-error { background: #fed7d7; color: #742a2a; }
+        .status-warning { background: #feebc8; color: #7c2d12; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 Partner API Update Test</h1>
+        <p style="color: #718096; margin-bottom: 2rem;">
+            Test-Tool zum Debuggen von PATCH-Requests zur Partner-API
+        </p>
+
+        <!-- Partner Email -->
+        <div class="section">
+            <h2>1️⃣ Partner Email festlegen</h2>
+            <div class="form-group">
+                <label>Partner Email (aus localStorage)</label>
+                <input type="email" id="partnerEmail" placeholder="partner@example.com">
+            </div>
+            <button onclick="setEmail()">Email setzen</button>
+            <div id="emailStatus" style="margin-top: 1rem;"></div>
+        </div>
+
+        <!-- Test: Partner laden -->
+        <div class="section">
+            <h2>2️⃣ Partner aus DB laden</h2>
+            <button onclick="loadPartner()">Partner laden</button>
+            <div id="partnerStatus" style="margin-top: 1rem;"></div>
+        </div>
+
+        <!-- Test: Profil aktualisieren -->
+        <div class="section">
+            <h2>3️⃣ Profil aktualisieren (PATCH)</h2>
+            <div class="form-group">
+                <label>Vorname</label>
+                <input type="text" id="vorname" placeholder="Max">
+            </div>
+            <div class="form-group">
+                <label>Nachname</label>
+                <input type="text" id="nachname" placeholder="Mustermann">
+            </div>
+            <div class="form-group">
+                <label>Telefon</label>
+                <input type="tel" id="telefon" placeholder="0123456789">
+            </div>
+            <button onclick="updateProfil()" id="updateBtn" disabled>Profil aktualisieren</button>
+            <div id="updateStatus" style="margin-top: 1rem;"></div>
+        </div>
+
+        <!-- Test: Bankdaten aktualisieren -->
+        <div class="section">
+            <h2>4️⃣ Bankdaten aktualisieren (PATCH)</h2>
+            <div class="form-group">
+                <label>IBAN</label>
+                <input type="text" id="iban" placeholder="DE89 3704 0044 0532 0130 00">
+            </div>
+            <div class="form-group">
+                <label>Kontoinhaber</label>
+                <input type="text" id="kontoinhaber" placeholder="Max Mustermann">
+            </div>
+            <button onclick="updateBankdaten()" id="bankBtn" disabled>Bankdaten aktualisieren</button>
+            <div id="bankStatus" style="margin-top: 1rem;"></div>
+        </div>
+
+        <!-- Console Log -->
+        <div class="section">
+            <h2>📋 Console Log</h2>
+            <div class="log" id="log"></div>
+            <button onclick="clearLog()" style="margin-top: 1rem; background: #718096;">Log löschen</button>
+        </div>
+    </div>
+
+    <script>
+        let currentPartner = null;
+        let logs = [];
+
+        function log(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const logEntry = `[${timestamp}] ${message}`;
+            logs.push({ message: logEntry, type });
+            
+            const logEl = document.getElementById('log');
+            const span = document.createElement('div');
+            span.className = `log-${type}`;
+            span.textContent = logEntry;
+            logEl.appendChild(span);
+            logEl.scrollTop = logEl.scrollHeight;
+            
+            console.log(message);
+        }
+
+        function clearLog() {
+            logs = [];
+            document.getElementById('log').innerHTML = '';
+            log('Log gelöscht', 'info');
+        }
+
+        function setEmail() {
+            const email = document.getElementById('partnerEmail').value.trim();
+            if (!email) {
+                alert('Bitte Email eingeben!');
+                return;
+            }
+            
+            localStorage.setItem('partnerEmail', email);
+            log(`✅ Email gesetzt: ${email}`, 'success');
+            
+            document.getElementById('emailStatus').innerHTML = `
+                <div class="status status-success">
+                    ✅ Partner-Email gesetzt: ${email}
+                </div>
+            `;
+        }
+
+        async function loadPartner() {
+            const email = localStorage.getItem('partnerEmail');
+            if (!email) {
+                log('❌ Keine Email in localStorage!', 'error');
+                document.getElementById('partnerStatus').innerHTML = `
+                    <div class="status status-error">
+                        ❌ Bitte zuerst Email setzen!
+                    </div>
+                `;
+                return;
+            }
+
+            log(`🔍 Lade Partner: ${email}`, 'info');
+
+            try {
+                const response = await fetch('tables/partners?limit=1000');
+                log(`📥 Response Status: ${response.status} ${response.statusText}`, 'info');
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+
+                const result = await response.json();
+                log(`📊 Total Partners: ${result.data?.length || 0}`, 'info');
+
+                const partner = result.data.find(p => p.email === email);
+                
+                if (!partner) {
+                    log(`❌ Partner nicht gefunden: ${email}`, 'error');
+                    document.getElementById('partnerStatus').innerHTML = `
+                        <div class="status status-error">
+                            ❌ Partner nicht in DB gefunden!<br>
+                            Verfügbare Emails (erste 5):<br>
+                            ${result.data.slice(0, 5).map(p => p.email).join('<br>')}
+                        </div>
+                    `;
+                    return;
+                }
+
+                currentPartner = partner;
+                log(`✅ Partner gefunden!`, 'success');
+                log(`   ID: ${partner.id}`, 'info');
+                log(`   Email: ${partner.email}`, 'info');
+                log(`   Name: ${partner.vorname} ${partner.nachname}`, 'info');
+
+                document.getElementById('partnerStatus').innerHTML = `
+                    <div class="status status-success">
+                        ✅ Partner geladen!<br>
+                        <strong>ID:</strong> ${partner.id}<br>
+                        <strong>Name:</strong> ${partner.vorname} ${partner.nachname}<br>
+                        <strong>Email:</strong> ${partner.email}
+                    </div>
+                `;
+
+                // Buttons aktivieren
+                document.getElementById('updateBtn').disabled = false;
+                document.getElementById('bankBtn').disabled = false;
+
+                // Felder vorausfüllen
+                document.getElementById('vorname').value = partner.vorname || '';
+                document.getElementById('nachname').value = partner.nachname || '';
+                document.getElementById('telefon').value = partner.telefon || partner.phone || '';
+                document.getElementById('iban').value = partner.iban || '';
+                document.getElementById('kontoinhaber').value = partner.kontoinhaber || '';
+
+            } catch (error) {
+                log(`❌ Fehler beim Laden: ${error.message}`, 'error');
+                document.getElementById('partnerStatus').innerHTML = `
+                    <div class="status status-error">
+                        ❌ Fehler: ${error.message}
+                    </div>
+                `;
+            }
+        }
+
+        async function updateProfil() {
+            if (!currentPartner) {
+                alert('Bitte zuerst Partner laden!');
+                return;
+            }
+
+            const vorname = document.getElementById('vorname').value.trim();
+            const nachname = document.getElementById('nachname').value.trim();
+            const telefon = document.getElementById('telefon').value.trim();
+
+            if (!vorname || !nachname) {
+                alert('Vorname und Nachname sind Pflichtfelder!');
+                return;
+            }
+
+            const updateData = {
+                vorname: vorname,
+                nachname: nachname,
+                telefon: telefon
+            };
+
+            log('📤 Sende PATCH Request für Profil', 'info');
+            log(`   URL: tables/partners/${currentPartner.id}`, 'info');
+            log(`   Data: ${JSON.stringify(updateData, null, 2)}`, 'info');
+
+            try {
+                const response = await fetch(`tables/partners/${currentPartner.id}`, {
+                    method: 'PATCH',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(updateData)
+                });
+
+                log(`📥 Response Status: ${response.status} ${response.statusText}`, response.ok ? 'success' : 'error');
+
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    log(`❌ Error Body: ${errorText}`, 'error');
+                    throw new Error(`HTTP ${response.status}: ${errorText || response.statusText}`);
+                }
+
+                const updatedPartner = await response.json();
+                log(`✅ Profil erfolgreich aktualisiert!`, 'success');
+                log(`   Response: ${JSON.stringify(updatedPartner, null, 2)}`, 'info');
+
+                document.getElementById('updateStatus').innerHTML = `
+                    <div class="status status-success">
+                        ✅ Profil erfolgreich aktualisiert!
+                    </div>
+                `;
+
+                // Reload Partner
+                await loadPartner();
+
+            } catch (error) {
+                log(`❌ Fehler beim Update: ${error.message}`, 'error');
+                document.getElementById('updateStatus').innerHTML = `
+                    <div class="status status-error">
+                        ❌ Fehler: ${error.message}
+                    </div>
+                `;
+            }
+        }
+
+        async function updateBankdaten() {
+            if (!currentPartner) {
+                alert('Bitte zuerst Partner laden!');
+                return;
+            }
+
+            const iban = document.getElementById('iban').value.trim();
+            const kontoinhaber = document.getElementById('kontoinhaber').value.trim();
+
+            if (!iban || !kontoinhaber) {
+                alert('IBAN und Kontoinhaber sind Pflichtfelder!');
+                return;
+            }
+
+            const updateData = {
+                iban: iban,
+                kontoinhaber: kontoinhaber,
+                onboarding_bank: true,
+                bankdaten_hinterlegt: true
+            };
+
+            log('📤 Sende PATCH Request für Bankdaten', 'info');
+            log(`   URL: tables/partners/${currentPartner.id}`, 'info');
+            log(`   Data: ${JSON.stringify(updateData, null, 2)}`, 'info');
+
+            try {
+                const response = await fetch(`tables/partners/${currentPartner.id}`, {
+                    method: 'PATCH',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(updateData)
+                });
+
+                log(`📥 Response Status: ${response.status} ${response.statusText}`, response.ok ? 'success' : 'error');
+
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    log(`❌ Error Body: ${errorText}`, 'error');
+                    throw new Error(`HTTP ${response.status}: ${errorText || response.statusText}`);
+                }
+
+                const updatedPartner = await response.json();
+                log(`✅ Bankdaten erfolgreich aktualisiert!`, 'success');
+                log(`   Response: ${JSON.stringify(updatedPartner, null, 2)}`, 'info');
+
+                document.getElementById('bankStatus').innerHTML = `
+                    <div class="status status-success">
+                        ✅ Bankdaten erfolgreich aktualisiert!
+                    </div>
+                `;
+
+                // Reload Partner
+                await loadPartner();
+
+            } catch (error) {
+                log(`❌ Fehler beim Update: ${error.message}`, 'error');
+                document.getElementById('bankStatus').innerHTML = `
+                    <div class="status status-error">
+                        ❌ Fehler: ${error.message}
+                    </div>
+                `;
+            }
+        }
+
+        // Auto-Load Partner Email on page load
+        window.addEventListener('DOMContentLoaded', () => {
+            const storedEmail = localStorage.getItem('partnerEmail');
+            if (storedEmail) {
+                document.getElementById('partnerEmail').value = storedEmail;
+                log(`ℹ️ Email aus localStorage geladen: ${storedEmail}`, 'info');
+            }
+        });
+    </script>
+</body>
+</html>

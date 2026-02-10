@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registrierung erfolgreich! 🎉 - DeinCheck Partner</title>
+    <link rel="icon" type="image/png" href="images/favicon-partner.png">
+    <link rel="apple-touch-icon" href="images/favicon-partner.png">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #3b82f6 0%, #60a5fa 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+
+        .success-container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 800px;
+            width: 100%;
+            overflow: hidden;
+            animation: slideUp 0.5s ease-out;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .success-header {
+            background: linear-gradient(135deg, #3b82f6 0%, #60a5fa 100%);
+            color: white;
+            padding: 3rem 2rem;
+            text-align: center;
+        }
+
+        .success-icon {
+            width: 100px;
+            height: 100px;
+            background: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1.5rem;
+            font-size: 3rem;
+            color: #48bb78;
+            animation: scaleIn 0.5s ease-out 0.2s backwards;
+        }
+
+        @keyframes scaleIn {
+            from {
+                transform: scale(0);
+            }
+            to {
+                transform: scale(1);
+            }
+        }
+
+        .success-header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            font-weight: 800;
+        }
+
+        .success-header p {
+            font-size: 1.1rem;
+            opacity: 0.95;
+        }
+
+        .success-body {
+            padding: 2.5rem 2rem;
+        }
+
+        .login-info {
+            background: #f7fafc;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            border-left: 4px solid #3b82f6;
+        }
+
+        .login-info h3 {
+            color: #3b82f6;
+            margin-bottom: 1rem;
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .login-info p {
+            color: #4a5568;
+            line-height: 1.6;
+            margin-bottom: 0.5rem;
+        }
+
+        .login-info strong {
+            color: #2d3748;
+            font-weight: 600;
+        }
+
+        .options-title {
+            text-align: center;
+            color: #2d3748;
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin-bottom: 2rem;
+        }
+
+        .options-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .option-card {
+            background: #f7fafc;
+            border-radius: 15px;
+            padding: 2rem;
+            text-align: center;
+            transition: all 0.3s;
+            cursor: pointer;
+            border: 2px solid transparent;
+        }
+
+        .option-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.2);
+            border-color: #3b82f6;
+        }
+
+        .option-card.primary {
+            background: linear-gradient(135deg, #3b82f6 0%, #60a5fa 100%);
+            color: white;
+        }
+
+        .option-card.primary:hover {
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+        }
+
+        .option-icon {
+            width: 70px;
+            height: 70px;
+            background: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1.5rem;
+            font-size: 2rem;
+        }
+
+        .option-card.primary .option-icon {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+        }
+
+        .option-card.secondary .option-icon {
+            background: #3b82f6;
+            color: white;
+        }
+
+        .option-card h3 {
+            font-size: 1.3rem;
+            margin-bottom: 0.75rem;
+            font-weight: 700;
+        }
+
+        .option-card p {
+            opacity: 0.9;
+            line-height: 1.6;
+            margin-bottom: 1.5rem;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 0.75rem 2rem;
+            border-radius: 10px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.3s;
+            border: none;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+
+        .btn-primary {
+            background: white;
+            color: #3b82f6;
+        }
+
+        .btn-primary:hover {
+            background: #f7fafc;
+            transform: scale(1.05);
+        }
+
+        .btn-secondary {
+            background: #3b82f6;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #5568d3;
+            transform: scale(1.05);
+        }
+
+        .footer-note {
+            text-align: center;
+            color: #718096;
+            font-size: 0.9rem;
+            padding-top: 2rem;
+            border-top: 1px solid #e2e8f0;
+        }
+
+        @media (max-width: 768px) {
+            .success-header h1 {
+                font-size: 2rem;
+            }
+
+            .options-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .success-container {
+                margin: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="success-container">
+        <div class="success-header">
+            <div class="success-icon">
+                <i class="fas fa-check"></i>
+            </div>
+            <h1>Willkommen an Bord! 🎉</h1>
+            <p>Deine Registrierung war erfolgreich</p>
+        </div>
+
+        <div class="success-body">
+            <div class="login-info">
+                <h3>
+                    <i class="fas fa-key"></i>
+                    Deine Login-Daten
+                </h3>
+                <p><strong>E-Mail:</strong> <span id="userEmail">Wird geladen...</span></p>
+                <p><strong>Passwort:</strong> Das von dir gewählte Passwort</p>
+                <p style="margin-top: 1rem; font-size: 0.9rem;">
+                    <i class="fas fa-envelope"></i> Du erhältst außerdem eine Bestätigungs-E-Mail mit allen Details.
+                </p>
+            </div>
+
+            <h2 class="options-title">Was möchtest du als Nächstes tun?</h2>
+
+            <div class="options-grid">
+                <!-- Option A: Termin vereinbaren -->
+                <div class="option-card primary" onclick="openCalendly()">
+                    <div class="option-icon">
+                        <i class="fas fa-calendar-check"></i>
+                    </div>
+                    <h3>Termin vereinbaren</h3>
+                    <p>Buche jetzt einen 15-minütigen Call mit uns und lass dich persönlich beraten!</p>
+                    <button class="btn btn-primary">
+                        <i class="fas fa-calendar-alt"></i> Termin buchen
+                    </button>
+                </div>
+
+                <!-- Option B: Dashboard erkunden -->
+                <div class="option-card secondary" onclick="goToDashboard()">
+                    <div class="option-icon">
+                        <i class="fas fa-tachometer-alt"></i>
+                    </div>
+                    <h3>Dashboard erkunden</h3>
+                    <p>Schau dich in Ruhe um und entdecke alle Features deines Partner-Dashboards!</p>
+                    <button class="btn btn-secondary">
+                        <i class="fas fa-arrow-right"></i> Zum Dashboard
+                    </button>
+                </div>
+            </div>
+
+            <div class="footer-note">
+                <p>
+                    <i class="fas fa-info-circle"></i>
+                    Du kannst jederzeit einen Termin über das Dashboard buchen oder dich direkt bei uns melden.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Get partner email from URL parameter
+        const urlParams = new URLSearchParams(window.location.search);
+        const partnerEmail = urlParams.get('email');
+        
+        if (partnerEmail) {
+            document.getElementById('userEmail').textContent = partnerEmail;
+            // Save to localStorage for automatic login
+            localStorage.setItem('partnerEmail', partnerEmail);
+            console.log('✅ Partner Email gespeichert:', partnerEmail);
+        } else {
+            document.getElementById('userEmail').textContent = 'Nicht gefunden - Bitte Login nutzen';
+            console.warn('⚠️ Keine Email im URL-Parameter gefunden');
+        }
+
+        // Option A: Termin vereinbaren (Calendly)
+        function openCalendly() {
+            console.log('📅 Öffne Calendly...');
+            window.open('https://calendly.com/deincheck-info/15min', '_blank');
+            
+            // Optional: Nach 2 Sekunden trotzdem zum Dashboard
+            setTimeout(() => {
+                if (confirm('Termin wurde in neuem Tab geöffnet.\n\nMöchtest du auch direkt ins Dashboard?')) {
+                    goToDashboard();
+                }
+            }, 2000);
+        }
+
+        // Option B: Direkt ins Dashboard
+        function goToDashboard() {
+            console.log('🚀 Weiterleitung zum Dashboard...');
+            
+            if (!partnerEmail) {
+                alert('Fehler: Keine Email gefunden.\nBitte nutze die Login-Seite.');
+                window.location.href = 'partner-login.html';
+                return;
+            }
+
+            // Partner ist bereits eingeloggt (localStorage wurde oben gesetzt)
+            window.location.href = 'partner-dashboard.html';
+        }
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', function(e) {
+            // '1' für Calendly
+            if (e.key === '1') {
+                openCalendly();
+            }
+            // '2' für Dashboard
+            if (e.key === '2') {
+                goToDashboard();
+            }
+            // Enter für Dashboard (Standard-Aktion)
+            if (e.key === 'Enter') {
+                goToDashboard();
+            }
+        });
+
+        // Auto-redirect nach 30 Sekunden (optional)
+        let countdown = 30;
+        const autoRedirectTimer = setInterval(() => {
+            countdown--;
+            if (countdown <= 0) {
+                clearInterval(autoRedirectTimer);
+                goToDashboard();
+            }
+        }, 1000);
+
+        console.log('📊 Success Page loaded successfully');
+        console.log('Partner Email:', partnerEmail);
+    </script>
+</body>
+</html>

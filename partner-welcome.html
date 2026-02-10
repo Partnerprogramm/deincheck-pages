@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎉 Willkommen im Partner-Programm! - DeinCheck</title>
+    <link rel="icon" type="image/png" href="images/favicon-partner.png">
+    <link rel="apple-touch-icon" href="images/favicon-partner.png">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'SF Pro Display', sans-serif;
+            background: linear-gradient(135deg, #3b82f6 0%, #60a5fa 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* Animated Background Particles */
+        .particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            z-index: 0;
+        }
+
+        .particle {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            animation: float 15s infinite ease-in-out;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0) translateX(0) scale(1); opacity: 0; }
+            50% { opacity: 0.3; }
+            100% { transform: translateY(-100vh) translateX(50px) scale(1.2); opacity: 0; }
+        }
+
+        .welcome-container {
+            background: white;
+            border-radius: 24px;
+            width: 100%;
+            max-width: 600px;
+            box-shadow: 0 30px 90px rgba(0, 0, 0, 0.4);
+            overflow: hidden;
+            position: relative;
+            z-index: 1;
+            animation: slideUp 0.6s ease-out;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Header with Gradient */
+        .welcome-header {
+            background: linear-gradient(135deg, #3b82f6 0%, #60a5fa 100%);
+            padding: 50px 40px;
+            text-align: center;
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .welcome-header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            animation: pulse 4s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 0.5; }
+            50% { transform: scale(1.1); opacity: 0.8; }
+        }
+
+        .welcome-emoji {
+            font-size: 80px;
+            margin-bottom: 20px;
+            display: inline-block;
+            animation: bounce 2s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
+        }
+
+        .welcome-header h1 {
+            font-size: 36px;
+            font-weight: 700;
+            margin-bottom: 15px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .welcome-header p {
+            font-size: 18px;
+            opacity: 0.95;
+            line-height: 1.6;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Content */
+        .welcome-content {
+            padding: 40px;
+        }
+
+        .welcome-text {
+            text-align: center;
+            margin-bottom: 35px;
+        }
+
+        .welcome-text h2 {
+            font-size: 24px;
+            color: #2d3748;
+            margin-bottom: 15px;
+        }
+
+        .welcome-text p {
+            font-size: 16px;
+            color: #718096;
+            line-height: 1.6;
+        }
+
+        /* Feature List */
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 35px;
+        }
+
+        .feature-item {
+            display: flex;
+            align-items: start;
+            gap: 15px;
+            padding: 15px;
+            background: #f7fafc;
+            border-radius: 12px;
+            transition: all 0.3s;
+        }
+
+        .feature-item:hover {
+            background: #edf2f7;
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+        }
+
+        .feature-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #3b82f6 0%, #60a5fa 100%);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 20px;
+            flex-shrink: 0;
+        }
+
+        .feature-text {
+            flex: 1;
+        }
+
+        .feature-text h3 {
+            font-size: 16px;
+            color: #2d3748;
+            margin-bottom: 5px;
+            font-weight: 600;
+        }
+
+        .feature-text p {
+            font-size: 14px;
+            color: #718096;
+            line-height: 1.4;
+        }
+
+        /* AGB Container */
+        .agb-container {
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.08) 0%, rgba(118, 75, 162, 0.08) 100%);
+            border: 2px solid #3b82f6;
+            border-radius: 16px;
+            padding: 25px;
+            margin-bottom: 30px;
+            transition: all 0.3s;
+        }
+
+        .agb-container.checked {
+            background: linear-gradient(135deg, rgba(72, 187, 120, 0.08) 0%, rgba(56, 161, 105, 0.08) 100%);
+            border-color: #48bb78;
+        }
+
+        .agb-label {
+            display: flex;
+            align-items: start;
+            cursor: pointer;
+            font-size: 15px;
+            color: #2d3748;
+            line-height: 1.6;
+        }
+
+        .agb-checkbox {
+            margin-right: 15px;
+            margin-top: 3px;
+            width: 22px;
+            height: 22px;
+            cursor: pointer;
+            accent-color: #3b82f6;
+            flex-shrink: 0;
+        }
+
+        .agb-text {
+            flex: 1;
+        }
+
+        .agb-text a {
+            color: #3b82f6;
+            text-decoration: underline;
+            font-weight: 600;
+            transition: color 0.3s;
+        }
+
+        .agb-text a:hover {
+            color: #60a5fa;
+        }
+
+        /* Button */
+        .btn-continue {
+            width: 100%;
+            padding: 18px;
+            background: linear-gradient(135deg, #cbd5e0 0%, #a0aec0 100%);
+            color: white;
+            border: none;
+            border-radius: 14px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: not-allowed;
+            transition: all 0.4s;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-continue::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            transition: left 0.6s;
+        }
+
+        .btn-continue:hover::before {
+            left: 100%;
+        }
+
+        .btn-continue.active {
+            background: linear-gradient(135deg, #3b82f6 0%, #60a5fa 100%);
+            cursor: pointer;
+            box-shadow: 0 8px 24px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-continue.active:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 32px rgba(102, 126, 234, 0.5);
+        }
+
+        .btn-continue:disabled {
+            opacity: 0.6;
+        }
+
+        .btn-icon {
+            margin-left: 10px;
+            transition: transform 0.3s;
+        }
+
+        .btn-continue.active:hover .btn-icon {
+            transform: translateX(5px);
+        }
+
+        /* Status Message */
+        .status-message {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 14px;
+            color: #a0aec0;
+            transition: all 0.3s;
+        }
+
+        .status-message.ready {
+            color: #48bb78;
+            font-weight: 600;
+        }
+
+        /* Loading Animation */
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .loading.active {
+            display: block;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #3b82f6;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Mobile Responsive */
+        @media (max-width: 768px) {
+            .welcome-header {
+                padding: 40px 30px;
+            }
+
+            .welcome-header h1 {
+                font-size: 28px;
+            }
+
+            .welcome-content {
+                padding: 30px 25px;
+            }
+
+            .features {
+                grid-template-columns: 1fr;
+            }
+
+            .welcome-emoji {
+                font-size: 60px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Animated Background -->
+    <div class="particles" id="particles"></div>
+
+    <div class="welcome-container">
+        <!-- Header -->
+        <div class="welcome-header">
+            <div class="welcome-emoji">🎉</div>
+            <h1>Herzlich Willkommen!</h1>
+            <p>Schön, dass du Teil unseres Partner-Programms wirst</p>
+        </div>
+
+        <!-- Content -->
+        <div class="welcome-content">
+            <div class="welcome-text">
+                <h2>Los geht's! 🚀</h2>
+                <p>
+                    Du bist nur noch einen Schritt davon entfernt, dein Partner-Dashboard zu nutzen. 
+                    Dort erwarten dich spannende Tools und Verdienstmöglichkeiten!
+                </p>
+            </div>
+
+            <!-- Features -->
+            <div class="features">
+                <div class="feature-item">
+                    <div class="feature-icon">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <div class="feature-text">
+                        <h3>Provisionen tracken</h3>
+                        <p>Verfolge deine Einnahmen in Echtzeit</p>
+                    </div>
+                </div>
+
+                <div class="feature-item">
+                    <div class="feature-icon">
+                        <i class="fas fa-file-contract"></i>
+                    </div>
+                    <div class="feature-text">
+                        <h3>Verträge verwalten</h3>
+                        <p>Alle Verträge auf einen Blick</p>
+                    </div>
+                </div>
+
+                <div class="feature-item">
+                    <div class="feature-icon">
+                        <i class="fas fa-graduation-cap"></i>
+                    </div>
+                    <div class="feature-text">
+                        <h3>Partner Akademie</h3>
+                        <p>Lerne und entwickle dich weiter</p>
+                    </div>
+                </div>
+
+                <div class="feature-item">
+                    <div class="feature-icon">
+                        <i class="fas fa-headset"></i>
+                    </div>
+                    <div class="feature-text">
+                        <h3>Support 24/7</h3>
+                        <p>Wir sind immer für dich da</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- AGB Container -->
+            <div class="agb-container" id="agbContainer">
+                <label class="agb-label">
+                    <input type="checkbox" class="agb-checkbox" id="agbCheckbox">
+                    <span class="agb-text">
+                        Ich habe die <a href="agb.html" target="_blank">Allgemeinen Geschäftsbedingungen (AGB)</a> 
+                        und die <a href="datenschutz.html" target="_blank">Datenschutzerklärung</a> gelesen und akzeptiere diese.
+                    </span>
+                </label>
+            </div>
+
+            <!-- Continue Button -->
+            <button class="btn-continue" id="continueBtn" disabled>
+                <span id="btnText">Bitte AGB akzeptieren</span>
+                <i class="fas fa-arrow-right btn-icon"></i>
+            </button>
+
+            <div class="status-message" id="statusMessage">
+                Aktiviere die Checkbox, um fortzufahren
+            </div>
+
+            <!-- Loading Animation -->
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                <p>Dashboard wird geladen...</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Generate Animated Particles
+        const particlesContainer = document.getElementById('particles');
+        for (let i = 0; i < 30; i++) {
+            const particle = document.createElement('div');
+            particle.className = 'particle';
+            particle.style.width = `${Math.random() * 100 + 50}px`;
+            particle.style.height = particle.style.width;
+            particle.style.left = `${Math.random() * 100}%`;
+            particle.style.animationDelay = `${Math.random() * 5}s`;
+            particle.style.animationDuration = `${Math.random() * 10 + 10}s`;
+            particlesContainer.appendChild(particle);
+        }
+
+        // AGB Checkbox Handler
+        const agbCheckbox = document.getElementById('agbCheckbox');
+        const agbContainer = document.getElementById('agbContainer');
+        const continueBtn = document.getElementById('continueBtn');
+        const btnText = document.getElementById('btnText');
+        const statusMessage = document.getElementById('statusMessage');
+        const loading = document.getElementById('loading');
+
+        console.log('🎉 Welcome-Seite initialisiert');
+        console.log('📧 Partner-Email:', localStorage.getItem('partnerEmail'));
+
+        // Checkbox Event
+        agbCheckbox.addEventListener('change', function() {
+            console.log('✅ AGB-Checkbox geändert:', this.checked);
+
+            if (this.checked) {
+                // Aktiviert
+                agbContainer.classList.add('checked');
+                continueBtn.classList.add('active');
+                continueBtn.disabled = false;
+                btnText.textContent = 'Weiter zum Dashboard';
+                statusMessage.textContent = '✅ Perfekt! Du kannst jetzt fortfahren';
+                statusMessage.classList.add('ready');
+            } else {
+                // Deaktiviert
+                agbContainer.classList.remove('checked');
+                continueBtn.classList.remove('active');
+                continueBtn.disabled = true;
+                btnText.textContent = 'Bitte AGB akzeptieren';
+                statusMessage.textContent = 'Aktiviere die Checkbox, um fortzufahren';
+                statusMessage.classList.remove('ready');
+            }
+        });
+
+        // Continue Button Event
+        continueBtn.addEventListener('click', function() {
+            if (!agbCheckbox.checked) {
+                alert('⚠️ Bitte akzeptiere zuerst die AGB!');
+                return;
+            }
+
+            console.log('🚀 Weiter zum Dashboard geklickt');
+
+            // AGB-Akzeptanz speichern
+            localStorage.setItem('agb_accepted', 'true');
+            localStorage.setItem('welcome_completed', 'true');
+            console.log('💾 AGB-Akzeptanz gespeichert');
+
+            // Loading anzeigen
+            document.querySelector('.welcome-content').style.display = 'none';
+            loading.classList.add('active');
+
+            // Weiterleitung nach 1.5s (für Animation)
+            setTimeout(() => {
+                console.log('→ Weiterleitung zu partner-dashboard.html');
+                window.location.href = 'partner-dashboard.html';
+            }, 1500);
+        });
+
+        // Prüfen ob bereits akzeptiert wurde (sollte nicht der Fall sein, aber sicher ist sicher)
+        if (localStorage.getItem('welcome_completed') === 'true') {
+            console.log('⚠️ Welcome bereits abgeschlossen - Weiterleitung zu Dashboard');
+            window.location.href = 'partner-dashboard.html';
+        }
+
+        // Prüfen ob Partner-Email existiert
+        const partnerEmail = localStorage.getItem('partnerEmail');
+        if (!partnerEmail) {
+            console.error('❌ Keine Partner-Email gefunden - Weiterleitung zu index.html');
+            alert('⚠️ Bitte registriere dich zuerst!');
+            window.location.href = 'index.html';
+        }
+    </script>
+</body>
+</html>

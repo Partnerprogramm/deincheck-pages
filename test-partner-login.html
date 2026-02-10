@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🧪 Partner-Login Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background: #f5f5f7;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        }
+        h1 {
+            color: #667eea;
+            margin-bottom: 20px;
+        }
+        button {
+            padding: 12px 24px;
+            margin: 8px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+        button:hover {
+            background: #5568d3;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f7fafc;
+            border-left: 4px solid #48bb78;
+            border-radius: 4px;
+        }
+        .error {
+            border-left-color: #f56565;
+            background: #fff5f5;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        th {
+            background: #f7fafc;
+            font-weight: 600;
+        }
+        .badge {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        .badge-aktiv { background: #48bb78; color: white; }
+        .badge-neu { background: #ed8936; color: white; }
+        pre {
+            background: #1a202c;
+            color: #f7fafc;
+            padding: 15px;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 Partner-Login Test</h1>
+        <p style="color: #718096;">Zeigt alle Partner-Accounts in der Datenbank</p>
+
+        <div>
+            <button onclick="loadAllPartner()">👥 Alle Partner laden</button>
+            <button onclick="searchPartner()">🔍 demo@test.de suchen</button>
+            <button onclick="createTestPartner()">✨ Test-Partner erstellen</button>
+        </div>
+
+        <div id="results"></div>
+    </div>
+
+    <script>
+        async function loadAllPartner() {
+            try {
+                showResult('🔄 Lade Partner...', 'info');
+                
+                const response = await fetch('tables/partners?limit=100');
+                const data = await response.json();
+                const partners = data.data || [];
+                
+                console.log('✅ Partner geladen:', partners.length);
+                
+                let html = `
+                    <div class="result">
+                        <strong>✅ ${partners.length} Partner gefunden!</strong>
+                    </div>
+                    
+                    <h3>Alle Partner:</h3>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>E-Mail</th>
+                                <th>Status</th>
+                                <th>Registriert</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                `;
+                
+                partners.forEach(p => {
+                    const regDate = p.registriert_am ? new Date(p.registriert_am).toLocaleDateString('de-DE') : '-';
+                    html += `
+                        <tr>
+                            <td><strong>${p.vorname} ${p.nachname}</strong></td>
+                            <td style="font-family: monospace;">${p.email}</td>
+                            <td><span class="badge badge-${p.status}">${p.status}</span></td>
+                            <td>${regDate}</td>
+                        </tr>
+                    `;
+                });
+                
+                html += `
+                        </tbody>
+                    </table>
+                    
+                    <h3>Test-Login-Daten:</h3>
+                    <div style="background: #ebf8ff; padding: 15px; border-radius: 8px; margin-top: 15px;">
+                        <strong>Partner-Dashboard Login:</strong><br>
+                        E-Mail: <code>${partners[0]?.email || 'Keine Partner vorhanden'}</code><br>
+                        Passwort: <code>demo123</code> oder <code>123456</code>
+                    </div>
+                `;
+                
+                document.getElementById('results').innerHTML = html;
+                
+            } catch (error) {
+                showResult(`❌ Fehler: ${error.message}`, 'error');
+                console.error(error);
+            }
+        }
+
+        async function searchPartner() {
+            try {
+                showResult('🔍 Suche demo@test.de...', 'info');
+                
+                const response = await fetch('tables/partners?search=demo@test.de&limit=1');
+                const data = await response.json();
+                const partner = data.data?.[0];
+                
+                if (partner) {
+                    document.getElementById('results').innerHTML = `
+                        <div class="result">
+                            <strong>✅ Partner gefunden!</strong>
+                        </div>
+                        <pre>${JSON.stringify(partner, null, 2)}</pre>
+                        
+                        <div style="background: #f0fff4; padding: 15px; border-radius: 8px; margin-top: 15px;">
+                            <strong>✅ Login-Daten:</strong><br>
+                            E-Mail: <code>${partner.email}</code><br>
+                            Name: <code>${partner.vorname} ${partner.nachname}</code><br>
+                            Status: <code>${partner.status}</code><br><br>
+                            <strong>⚠️ Passwort ist gehashed! Du kannst:</strong><br>
+                            1. Demo-Modus nutzen: <code>partner-dashboard.html?demo=1</code><br>
+                            2. Neuen Test-Partner erstellen
+                        </div>
+                    `;
+                } else {
+                    document.getElementById('results').innerHTML = `
+                        <div class="result error">
+                            <strong>❌ Partner "demo@test.de" nicht gefunden!</strong>
+                        </div>
+                        
+                        <div style="background: #fff5f5; padding: 15px; border-radius: 8px; margin-top: 15px;">
+                            <strong>Lösungen:</strong><br>
+                            1. Klick "Alle Partner laden" um zu sehen welche es gibt<br>
+                            2. Klick "Test-Partner erstellen" um demo@test.de zu erstellen<br>
+                            3. Nutze Demo-Modus: <code>partner-dashboard.html?demo=1</code>
+                        </div>
+                    `;
+                }
+                
+            } catch (error) {
+                showResult(`❌ Fehler: ${error.message}`, 'error');
+            }
+        }
+
+        async function createTestPartner() {
+            try {
+                showResult('✨ Erstelle Test-Partner...', 'info');
+                
+                const testPartner = {
+                    email: 'demo@test.de',
+                    passwort: 'demo123',
+                    vorname: 'Demo',
+                    nachname: 'Partner',
+                    phone: '0123456789',
+                    status: 'aktiv',
+                    modell: 'ladenlokal',
+                    onboarding_completed: false,
+                    onboarding_termin: false,
+                    onboarding_dokumente: false,
+                    onboarding_ausweis: false,
+                    onboarding_bank: false,
+                    onboarding_akademie: false
+                };
+                
+                const response = await fetch('tables/partners', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(testPartner)
+                });
+                
+                if (!response.ok) {
+                    const text = await response.text();
+                    throw new Error(`HTTP ${response.status}: ${text}`);
+                }
+                
+                const result = await response.json();
+                
+                document.getElementById('results').innerHTML = `
+                    <div class="result">
+                        <strong>✅ Test-Partner erstellt!</strong>
+                    </div>
+                    
+                    <div style="background: #f0fff4; padding: 15px; border-radius: 8px; margin-top: 15px;">
+                        <strong>Login-Daten:</strong><br>
+                        E-Mail: <code>demo@test.de</code><br>
+                        Passwort: <code>demo123</code><br><br>
+                        
+                        <strong>🚀 Jetzt testen:</strong><br>
+                        1. Öffne <code>partner-login.html</code><br>
+                        2. Login mit demo@test.de / demo123<br>
+                        3. Oder nutze Demo-Modus: <code>partner-dashboard.html?demo=1</code>
+                    </div>
+                    
+                    <pre>${JSON.stringify(result, null, 2)}</pre>
+                `;
+                
+            } catch (error) {
+                showResult(`❌ Fehler: ${error.message}`, 'error');
+                console.error(error);
+            }
+        }
+
+        function showResult(message, type = 'info') {
+            const className = type === 'error' ? 'result error' : 'result';
+            document.getElementById('results').innerHTML = `<div class="${className}">${message}</div>`;
+        }
+
+        // Auto-load
+        window.addEventListener('DOMContentLoaded', () => {
+            loadAllPartner();
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <title>Test Dashboard Login</title>
+</head>
+<body>
+    <h1>Test: Login + Redirect zum Dashboard</h1>
+    <p>Dieser Test simuliert einen Login und leitet dich zum Dashboard weiter.</p>
+    
+    <script>
+        // Simuliere Login: Setze Email in localStorage
+        localStorage.setItem('partnerEmail', 'info@deincheck.de');
+        console.log('✅ Test-Email gesetzt:', localStorage.getItem('partnerEmail'));
+        
+        // Redirect zum Dashboard
+        setTimeout(() => {
+            console.log('🔄 Redirect zum Dashboard...');
+            window.location.href = 'partner-dashboard.html';
+        }, 1000);
+    </script>
+</body>
+</html>

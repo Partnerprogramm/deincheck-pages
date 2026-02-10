@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>🔍 Verträge Daten-Analyse</title>
+    <style>
+        body { font-family: monospace; padding: 20px; background: #000; color: #0f0; }
+        h1 { color: #0ff; }
+        pre { background: #111; padding: 10px; border: 1px solid #0f0; }
+        .success { color: #0f0; }
+        .error { color: #f00; }
+        .warning { color: #ff0; }
+    </style>
+</head>
+<body>
+    <h1>🔍 VERTRÄGE DATEN-ANALYSE</h1>
+    <div id="output"></div>
+
+    <script>
+        async function analyzeData() {
+            const output = document.getElementById('output');
+            
+            try {
+                output.innerHTML += '<h2 class="success">🔄 Lade Verträge...</h2>';
+                
+                const res = await fetch('tables/vertragsabschluesse?limit=100');
+                const data = await res.json();
+                
+                output.innerHTML += `<h2 class="success">✅ ${data.data.length} Verträge geladen</h2>`;
+                
+                if (data.data.length > 0) {
+                    // Zeige ersten Vertrag
+                    output.innerHTML += '<h3>📄 ERSTER VERTRAG (Alle Felder):</h3>';
+                    output.innerHTML += '<pre>' + JSON.stringify(data.data[0], null, 2) + '</pre>';
+                    
+                    // Analysiere Datums-Felder
+                    output.innerHTML += '<h3>📅 DATUMS-FELDER ANALYSE:</h3>';
+                    data.data.slice(0, 5).forEach((v, i) => {
+                        output.innerHTML += `<h4>Vertrag ${i + 1}:</h4>`;
+                        output.innerHTML += `<pre>
+erstellt_am: ${v.erstellt_am} (Typ: ${typeof v.erstellt_am})
+created_at: ${v.created_at} (Typ: ${typeof v.created_at})
+datum: ${v.datum} (Typ: ${typeof v.datum})
+partner_email: ${v.partner_email}
+provision_betrag: ${v.provision_betrag}
+gesamt_provision: ${v.gesamt_provision}
+</pre>`;
+                    });
+                    
+                    // Teste Datums-Parsing
+                    output.innerHTML += '<h3>🧪 DATUMS-PARSING TEST:</h3>';
+                    const testVertrag = data.data[0];
+                    const dateStr = testVertrag.erstellt_am || testVertrag.created_at || testVertrag.datum;
+                    
+                    output.innerHTML += `<pre>
+Original Wert: ${dateStr}
+Typ: ${typeof dateStr}
+new Date(dateStr): ${new Date(dateStr)}
+Ist gültig? ${!isNaN(new Date(dateStr).getTime())}
+</pre>`;
+                    
+                    // Zeige heutige Verträge
+                    output.innerHTML += '<h3>📊 HEUTIGE VERTRÄGE:</h3>';
+                    const now = new Date();
+                    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+                    const todayEnd = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
+                    
+                    output.innerHTML += `<pre>
+Heute Start: ${today}
+Heute Ende: ${todayEnd}
+Heute ISO: ${today.toISOString().split('T')[0]}
+</pre>`;
+                    
+                    const heuteVertraege = data.data.filter(v => {
+                        const vDate = new Date(v.erstellt_am || v.created_at || v.datum);
+                        return vDate >= today && vDate < todayEnd;
+                    });
+                    
+                    output.innerHTML += `<h4 class="${heuteVertraege.length > 0 ? 'success' : 'error'}">
+                        ${heuteVertraege.length} Verträge von HEUTE gefunden
+                    </h4>`;
+                    
+                    if (heuteVertraege.length > 0) {
+                        heuteVertraege.forEach(v => {
+                            output.innerHTML += `<pre>
+Vertragsnr: ${v.vertragsnummer}
+Datum: ${v.erstellt_am || v.created_at || v.datum}
+Parsed: ${new Date(v.erstellt_am || v.created_at || v.datum)}
+Provision: ${v.provision_betrag || v.gesamt_provision}€
+Partner: ${v.partner_email}
+</pre>`;
+                        });
+                        
+                        const totalHeute = heuteVertraege.reduce((sum, v) => {
+                            return sum + (parseFloat(v.provision_betrag) || parseFloat(v.gesamt_provision) || 0);
+                        }, 0);
+                        
+                        output.innerHTML += `<h2 class="success">💰 HEUTE GESAMT: ${totalHeute.toFixed(2)}€</h2>`;
+                    }
+                }
+                
+            } catch (err) {
+                output.innerHTML += `<h2 class="error">❌ FEHLER: ${err.message}</h2>`;
+                output.innerHTML += `<pre>${err.stack}</pre>`;
+            }
+        }
+        
+        analyzeData();
+    </script>
+</body>
+</html>

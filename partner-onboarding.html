@@ -1,0 +1,951 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Onboarding - DeinCheck Partnerprogramm</title>
+    <link rel="icon" type="image/png" href="images/favicon-partner.png">
+    <link rel="apple-touch-icon" href="images/favicon-partner.png">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #3b82f6;
+            --primary-dark: #5568d3;
+            --success: #48bb78;
+            --text: #2d3748;
+            --text-light: #718096;
+            --bg: #f7fafc;
+            --white: #ffffff;
+            --border: #e2e8f0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'SF Pro Display', sans-serif;
+            background: linear-gradient(135deg, #3b82f6 0%, #60a5fa 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .onboarding-container {
+            background: var(--white);
+            border-radius: 20px;
+            width: 100%;
+            max-width: 800px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+
+        /* Progress Bar */
+        .progress-header {
+            background: linear-gradient(135deg, var(--primary), #60a5fa);
+            padding: 30px;
+            color: white;
+        }
+
+        .progress-steps {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        .progress-line {
+            position: absolute;
+            top: 20px;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: rgba(255, 255, 255, 0.3);
+            z-index: 0;
+        }
+
+        .progress-line-fill {
+            height: 100%;
+            background: white;
+            transition: width 0.5s ease;
+            width: 0%;
+        }
+
+        .step {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .step-circle {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            border: 3px solid transparent;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            transition: all 0.3s ease;
+        }
+
+        .step.active .step-circle {
+            background: white;
+            color: var(--primary);
+            border-color: white;
+            transform: scale(1.1);
+        }
+
+        .step.completed .step-circle {
+            background: var(--success);
+            border-color: var(--success);
+        }
+
+        .step-label {
+            font-size: 12px;
+            text-align: center;
+            opacity: 0.8;
+        }
+
+        .step.active .step-label {
+            opacity: 1;
+            font-weight: 600;
+        }
+
+        .progress-title {
+            font-size: 24px;
+            font-weight: 700;
+            text-align: center;
+        }
+
+        /* Content Area */
+        .content-area {
+            padding: 40px;
+        }
+
+        .step-content {
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .step-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .step-icon {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary), #60a5fa);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 36px;
+            margin: 0 auto 30px;
+        }
+
+        .step-title {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--text);
+            text-align: center;
+            margin-bottom: 15px;
+        }
+
+        .step-description {
+            font-size: 16px;
+            color: var(--text-light);
+            text-align: center;
+            margin-bottom: 30px;
+            line-height: 1.6;
+        }
+
+        /* Form Elements */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text);
+            margin-bottom: 8px;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid var(--border);
+            border-radius: 10px;
+            font-size: 15px;
+            transition: all 0.3s ease;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        /* Upload Area */
+        .upload-area {
+            border: 2px dashed var(--border);
+            border-radius: 15px;
+            padding: 40px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 20px;
+        }
+
+        .upload-area:hover {
+            border-color: var(--primary);
+            background: rgba(102, 126, 234, 0.05);
+        }
+
+        .upload-icon {
+            font-size: 48px;
+            color: var(--primary);
+            margin-bottom: 15px;
+        }
+
+        .upload-text {
+            font-size: 16px;
+            color: var(--text);
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .upload-hint {
+            font-size: 14px;
+            color: var(--text-light);
+        }
+
+        .uploaded-files {
+            margin-top: 20px;
+        }
+
+        .file-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px;
+            background: var(--bg);
+            border-radius: 10px;
+            margin-bottom: 10px;
+        }
+
+        .file-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .file-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            background: var(--primary);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .file-name {
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .file-status {
+            color: var(--success);
+            font-size: 14px;
+        }
+
+        /* Checklist */
+        .checklist {
+            margin: 30px 0;
+        }
+
+        .checklist-item {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 15px;
+            background: var(--bg);
+            border-radius: 12px;
+            margin-bottom: 12px;
+        }
+
+        .check-icon {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: var(--success);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+        }
+
+        .checklist-text {
+            flex: 1;
+            font-size: 15px;
+            color: var(--text);
+        }
+
+        /* Buttons */
+        .button-group {
+            display: flex;
+            gap: 15px;
+            justify-content: space-between;
+            margin-top: 40px;
+        }
+
+        .btn {
+            padding: 14px 30px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+            flex: 1;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-secondary {
+            background: var(--border);
+            color: var(--text);
+        }
+
+        .btn-secondary:hover {
+            background: #cbd5e0;
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* Responsive - MOBILE SCROLL FIX */
+        @media (max-width: 768px) {
+            /* === KRITISCH: Body SCROLL ERLAUBEN === */
+            html, body {
+                overflow-y: auto !important;
+                overflow-x: hidden !important;
+                -webkit-overflow-scrolling: touch !important;
+                height: auto !important;
+                min-height: 100vh !important;
+                min-height: 100dvh !important;
+            }
+
+            body {
+                padding: 10px;
+                align-items: flex-start;
+            }
+
+            .onboarding-container {
+                margin: 10px 0;
+                max-height: none !important;
+                overflow: visible !important;
+            }
+
+            .content-area {
+                padding: 20px 15px;
+                overflow: visible !important;
+            }
+
+            .progress-header {
+                padding: 20px;
+            }
+
+            .progress-steps {
+                gap: 5px;
+            }
+
+            .step-label {
+                font-size: 9px;
+                white-space: nowrap;
+            }
+
+            .step-circle {
+                width: 32px;
+                height: 32px;
+                font-size: 14px;
+            }
+
+            .progress-title {
+                font-size: 18px;
+            }
+
+            .step-icon {
+                width: 60px;
+                height: 60px;
+                font-size: 28px;
+            }
+
+            .step-title {
+                font-size: 20px;
+            }
+
+            .step-description {
+                font-size: 14px;
+            }
+
+            .checklist-item {
+                padding: 12px;
+                gap: 10px;
+            }
+
+            .check-icon {
+                width: 24px;
+                height: 24px;
+                font-size: 12px;
+            }
+
+            .upload-area {
+                padding: 25px 15px;
+            }
+
+            .upload-icon {
+                font-size: 36px;
+            }
+
+            .upload-text {
+                font-size: 14px;
+            }
+
+            /* KRITISCH: Form Grid auf Mobile */
+            [style*="grid-template-columns: 1fr 2fr"] {
+                grid-template-columns: 1fr !important;
+                gap: 10px !important;
+            }
+
+            /* Inputs Touch-freundlich */
+            input, select, textarea {
+                font-size: 16px !important; /* Verhindert iOS Zoom */
+                min-height: 48px !important;
+                padding: 12px !important;
+            }
+
+            .btn {
+                min-height: 48px !important;
+                font-size: 16px !important;
+                padding: 12px 20px !important;
+            }
+
+            .button-group {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .button-group .btn {
+                width: 100%;
+            }
+        }
+
+        /* Extra kleine Phones */
+        @media (max-width: 375px) {
+            .step-label {
+                display: none;
+            }
+
+            .progress-title {
+                font-size: 16px;
+            }
+
+            .step-title {
+                font-size: 18px;
+            }
+
+            .content-area {
+                padding: 15px 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="onboarding-container">
+        <!-- Progress Header -->
+        <div class="progress-header">
+            <div class="progress-steps">
+                <div class="progress-line">
+                    <div class="progress-line-fill" id="progressLineFill"></div>
+                </div>
+                <div class="step active" data-step="1">
+                    <div class="step-circle">1</div>
+                    <div class="step-label">Willkommen</div>
+                </div>
+                <div class="step" data-step="2">
+                    <div class="step-circle">2</div>
+                    <div class="step-label">Dokumente</div>
+                </div>
+                <div class="step" data-step="3">
+                    <div class="step-circle">3</div>
+                    <div class="step-label">Profil</div>
+                </div>
+                <div class="step" data-step="4">
+                    <div class="step-circle">4</div>
+                    <div class="step-label">Fertig</div>
+                </div>
+            </div>
+            <h2 class="progress-title" id="progressTitle">Willkommen bei uns!</h2>
+        </div>
+
+        <!-- Content Area -->
+        <div class="content-area">
+            <!-- Step 1: Willkommen -->
+            <div class="step-content active" data-step="1">
+                <div class="step-icon">
+                    <i class="fas fa-hands-helping"></i>
+                </div>
+                <h2 class="step-title">Willkommen, <span id="partnerName">Partner</span>! 🎉</h2>
+                <p class="step-description">
+                    Schön, dass du dabei bist! Lass uns gemeinsam dein Konto einrichten. 
+                    Das dauert nur wenige Minuten und dann kannst du direkt loslegen.
+                </p>
+                
+                <div class="checklist">
+                    <div class="checklist-item">
+                        <div class="check-icon"><i class="fas fa-check"></i></div>
+                        <div class="checklist-text">
+                            <strong>Schritt 1:</strong> Wichtige Dokumente hochladen
+                        </div>
+                    </div>
+                    <div class="checklist-item">
+                        <div class="check-icon"><i class="fas fa-check"></i></div>
+                        <div class="checklist-text">
+                            <strong>Schritt 2:</strong> Profil vervollständigen
+                        </div>
+                    </div>
+                    <div class="checklist-item">
+                        <div class="check-icon"><i class="fas fa-check"></i></div>
+                        <div class="checklist-text">
+                            <strong>Schritt 3:</strong> Dashboard erkunden
+                        </div>
+                    </div>
+                </div>
+
+                <div class="button-group">
+                    <button class="btn btn-primary" onclick="nextStep()">
+                        Los geht's! <i class="fas fa-arrow-right"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Step 2: Dokumente hochladen -->
+            <div class="step-content" data-step="2">
+                <div class="step-icon">
+                    <i class="fas fa-file-upload"></i>
+                </div>
+                <h2 class="step-title">Dokumente hochladen</h2>
+                <p class="step-description">
+                    Bitte lade folgende Dokumente hoch, damit wir deine Registrierung abschließen können.
+                </p>
+
+                <div class="form-group">
+                    <label>Personalausweis / Reisepass *</label>
+                    <div class="upload-area" onclick="document.getElementById('file-ausweis').click()">
+                        <div class="upload-icon">
+                            <i class="fas fa-cloud-upload-alt"></i>
+                        </div>
+                        <div class="upload-text">Klicke hier zum Hochladen</div>
+                        <div class="upload-hint">oder ziehe die Datei hierher</div>
+                    </div>
+                    <input type="file" id="file-ausweis" style="display: none;" accept=".pdf,.jpg,.jpeg,.png" onchange="handleFileUpload(this, 'ausweis')">
+                </div>
+
+                <div class="form-group" id="gewerbeschein-group" style="display: none;">
+                    <label>Gewerbeschein (falls vorhanden)</label>
+                    <div class="upload-area" onclick="document.getElementById('file-gewerbeschein').click()">
+                        <div class="upload-icon">
+                            <i class="fas fa-cloud-upload-alt"></i>
+                        </div>
+                        <div class="upload-text">Klicke hier zum Hochladen</div>
+                        <div class="upload-hint">optional</div>
+                    </div>
+                    <input type="file" id="file-gewerbeschein" style="display: none;" accept=".pdf,.jpg,.jpeg,.png" onchange="handleFileUpload(this, 'gewerbeschein')">
+                </div>
+
+                <div class="uploaded-files" id="uploadedFilesList"></div>
+
+                <div class="button-group">
+                    <button class="btn btn-secondary" onclick="prevStep()">
+                        <i class="fas fa-arrow-left"></i> Zurück
+                    </button>
+                    <button class="btn btn-primary" onclick="nextStep()">
+                        Weiter <i class="fas fa-arrow-right"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Step 3: Profil vervollständigen -->
+            <div class="step-content" data-step="3">
+                <div class="step-icon">
+                    <i class="fas fa-user-edit"></i>
+                </div>
+                <h2 class="step-title">Profil vervollständigen</h2>
+                <p class="step-description">
+                    Noch ein paar Details zu deinem Geschäft, damit wir dich optimal unterstützen können.
+                </p>
+
+                <div class="form-group">
+                    <label>Telefonnummer *</label>
+                    <input type="tel" id="phone" placeholder="0171 1234567" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Adresse *</label>
+                    <input type="text" id="strasse" placeholder="Straße & Hausnummer" required>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 15px;">
+                    <div class="form-group">
+                        <label>PLZ *</label>
+                        <input type="text" id="plz" placeholder="12345" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Ort *</label>
+                        <input type="text" id="ort" placeholder="Berlin" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Wie hast du von uns erfahren?</label>
+                    <select id="herkunft">
+                        <option value="">Bitte wählen...</option>
+                        <option value="google">Google Suche</option>
+                        <option value="social">Social Media</option>
+                        <option value="empfehlung">Empfehlung</option>
+                        <option value="messe">Messe/Event</option>
+                        <option value="sonstiges">Sonstiges</option>
+                    </select>
+                </div>
+
+                <div class="button-group">
+                    <button class="btn btn-secondary" onclick="prevStep()">
+                        <i class="fas fa-arrow-left"></i> Zurück
+                    </button>
+                    <button class="btn btn-primary" onclick="nextStep()">
+                        Weiter <i class="fas fa-arrow-right"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Step 4: Fertig -->
+            <div class="step-content" data-step="4">
+                <div class="step-icon" style="background: var(--success);">
+                    <i class="fas fa-check"></i>
+                </div>
+                <h2 class="step-title">Alles erledigt! 🎉</h2>
+                <p class="step-description">
+                    Dein Konto ist jetzt eingerichtet. Wir prüfen deine Dokumente und melden uns innerhalb von 24 Stunden bei dir.
+                </p>
+
+                <div class="checklist">
+                    <div class="checklist-item">
+                        <div class="check-icon"><i class="fas fa-check"></i></div>
+                        <div class="checklist-text">
+                            <strong>Provisionen verfolgen:</strong> Sieh deine Einnahmen in Echtzeit
+                        </div>
+                    </div>
+                    <div class="checklist-item">
+                        <div class="check-icon"><i class="fas fa-check"></i></div>
+                        <div class="checklist-text">
+                            <strong>Verträge hochladen:</strong> Lade abgeschlossene Verträge hoch
+                        </div>
+                    </div>
+                    <div class="checklist-item">
+                        <div class="check-icon"><i class="fas fa-check"></i></div>
+                        <div class="checklist-text">
+                            <strong>Support nutzen:</strong> Bei Fragen sind wir für dich da
+                        </div>
+                    </div>
+                    <div class="checklist-item">
+                        <div class="check-icon"><i class="fas fa-check"></i></div>
+                        <div class="checklist-text">
+                            <strong>Partner-Tool nutzen:</strong> Finde die besten Tarife für deine Kunden
+                        </div>
+                    </div>
+                </div>
+
+                <div class="button-group">
+                    <button class="btn btn-primary" onclick="finishOnboarding()" style="width: 100%;">
+                        Zum Dashboard <i class="fas fa-arrow-right"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentStep = 1;
+        const totalSteps = 4;
+        let uploadedFiles = [];
+
+        // Partner-Daten laden
+        const partnerData = JSON.parse(localStorage.getItem('partnerData') || '{}');
+        if (partnerData.vorname) {
+            document.getElementById('partnerName').textContent = partnerData.vorname;
+        }
+
+        // Schritt wechseln
+        async function nextStep() {
+            // Wenn wir von Step 3 zu Step 4 gehen, Profildaten speichern
+            if (currentStep === 3) {
+                await saveProfilData();
+            }
+            
+            if (currentStep < totalSteps) {
+                currentStep++;
+                updateStep();
+            }
+        }
+        
+        // Profildaten speichern
+        async function saveProfilData() {
+            try {
+                const partnerEmail = localStorage.getItem('partnerEmail');
+                const phone = document.getElementById('phone').value;
+                const strasse = document.getElementById('strasse').value;
+                const plz = document.getElementById('plz').value;
+                const ort = document.getElementById('ort').value;
+                const herkunft = document.getElementById('herkunft').value;
+                
+                // Validierung
+                if (!phone || !strasse || !plz || !ort) {
+                    alert('Bitte fülle alle Pflichtfelder aus!');
+                    return;
+                }
+                
+                // Partner in Datenbank suchen und aktualisieren
+                const response = await fetch(`tables/partners?search=${encodeURIComponent(partnerEmail)}&limit=1`);
+                const result = await response.json();
+                
+                if (result.data && result.data.length > 0) {
+                    const partnerId = result.data[0].id;
+                    
+                    await fetch(`tables/partners/${partnerId}`, {
+                        method: 'PATCH',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify({
+                            phone: phone,
+                            // Optional: Adresse in Notizen oder separates Feld
+                            firma: result.data[0].firma || `${strasse}, ${plz} ${ort}`
+                        })
+                    });
+                    
+                    console.log('✅ Profildaten gespeichert');
+                }
+            } catch (error) {
+                console.error('❌ Fehler beim Speichern der Profildaten:', error);
+            }
+        }
+
+        function prevStep() {
+            if (currentStep > 1) {
+                currentStep--;
+                updateStep();
+            }
+        }
+
+        function updateStep() {
+            // Content aktualisieren
+            document.querySelectorAll('.step-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            document.querySelector(`.step-content[data-step="${currentStep}"]`).classList.add('active');
+
+            // Progress Steps aktualisieren
+            document.querySelectorAll('.step').forEach((step, index) => {
+                step.classList.remove('active', 'completed');
+                if (index + 1 < currentStep) {
+                    step.classList.add('completed');
+                    step.querySelector('.step-circle').innerHTML = '<i class="fas fa-check"></i>';
+                } else if (index + 1 === currentStep) {
+                    step.classList.add('active');
+                    step.querySelector('.step-circle').textContent = index + 1;
+                } else {
+                    step.querySelector('.step-circle').textContent = index + 1;
+                }
+            });
+
+            // Progress Line
+            const progress = ((currentStep - 1) / (totalSteps - 1)) * 100;
+            document.getElementById('progressLineFill').style.width = progress + '%';
+
+            // Title aktualisieren
+            const titles = {
+                1: 'Willkommen bei uns!',
+                2: 'Dokumente hochladen',
+                3: 'Profil vervollständigen',
+                4: 'Alles erledigt!'
+            };
+            document.getElementById('progressTitle').textContent = titles[currentStep];
+        }
+
+        // Datei-Upload mit Cloudinary
+        async function handleFileUpload(input, type) {
+            const file = input.files[0];
+            if (!file) return;
+            
+            // WICHTIG: Cloudinary Credentials einsetzen
+            const cloudName = 'DEIN_CLOUD_NAME';
+            const uploadPreset = 'DEIN_UPLOAD_PRESET';
+            
+            if (cloudName === 'DEIN_CLOUD_NAME') {
+                // Fallback: Simulierter Upload für Demo
+                uploadedFiles.push({
+                    type: type,
+                    name: file.name,
+                    size: file.size,
+                    url: 'DEMO_URL'
+                });
+                updateUploadedFilesList();
+                console.log('📤 Demo-Upload:', file.name);
+                return;
+            }
+            
+            // Echter Upload zu Cloudinary
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('upload_preset', uploadPreset);
+            formData.append('folder', 'partner_onboarding');
+            
+            try {
+                const response = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/auto/upload`, {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const data = await response.json();
+                
+                if (data.secure_url) {
+                    uploadedFiles.push({
+                        type: type,
+                        name: file.name,
+                        size: file.size,
+                        url: data.secure_url
+                    });
+                    
+                    // In Datenbank speichern
+                    await fetch('tables/dokumente', {
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify({
+                            partner_id: localStorage.getItem('partnerId') || partnerEmail,
+                            dokument_typ: type === 'ausweis' ? 'ausweis' : 'gewerbeschein',
+                            dateiname: file.name,
+                            cloudinary_url: data.secure_url,
+                            cloudinary_id: data.public_id,
+                            status: 'hochgeladen',
+                            admin_notiz: '',
+                            hochgeladen_am: Date.now()
+                        })
+                    });
+                    
+                    updateUploadedFilesList();
+                    console.log('✅ Datei hochgeladen:', data.secure_url);
+                }
+            } catch (error) {
+                console.error('❌ Upload-Fehler:', error);
+                alert('Fehler beim Upload. Bitte versuche es erneut.');
+            }
+        }
+
+        function updateUploadedFilesList() {
+            const list = document.getElementById('uploadedFilesList');
+            list.innerHTML = uploadedFiles.map(file => `
+                <div class="file-item">
+                    <div class="file-info">
+                        <div class="file-icon">
+                            <i class="fas fa-file-pdf"></i>
+                        </div>
+                        <div>
+                            <div class="file-name">${file.name}</div>
+                            <small style="color: var(--text-light);">${(file.size / 1024).toFixed(1)} KB</small>
+                        </div>
+                    </div>
+                    <div class="file-status">
+                        <i class="fas fa-check-circle"></i> Hochgeladen
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Onboarding abschließen
+        async function finishOnboarding() {
+            try {
+                const partnerEmail = localStorage.getItem('partnerEmail');
+                
+                // Partner-Status auf "onboarding_completed" setzen
+                const response = await fetch(`tables/partners?search=${encodeURIComponent(partnerEmail)}&limit=1`);
+                const result = await response.json();
+                
+                if (result.data && result.data.length > 0) {
+                    const partnerId = result.data[0].id;
+                    
+                    await fetch(`tables/partners/${partnerId}`, {
+                        method: 'PATCH',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify({
+                            status: 'aktiv',
+                            onboarding_completed: true
+                        })
+                    });
+                }
+                
+                // Zum Dashboard
+                window.location.href = 'partner-dashboard.html';
+                
+            } catch (error) {
+                console.error('Fehler beim Abschließen:', error);
+                // Trotzdem weiterleiten
+                window.location.href = 'partner-dashboard.html';
+            }
+        }
+
+        // Prüfen ob Partner bereits Onboarding gemacht hat
+        window.addEventListener('DOMContentLoaded', function() {
+            const partnerEmail = localStorage.getItem('partnerEmail');
+            if (!partnerEmail) {
+                window.location.href = 'partner-login.html';
+            }
+        });
+    </script>
+</body>
+</html>
