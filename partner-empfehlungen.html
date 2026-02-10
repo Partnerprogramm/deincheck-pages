@@ -1,0 +1,714 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Empfehlungs-Programm - DeinCheck</title>
+    <link rel="icon" type="image/png" href="images/favicon-partner.png">
+    <link rel="apple-touch-icon" href="images/favicon-partner.png">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css">
+    <style>
+        /* Navigation Hover Effects */
+        nav a:not([style*="background: linear-gradient"]):not([style*="background: #f56565"]):hover {
+            background: #f7fafc !important;
+            color: #3b82f6 !important;
+        }
+
+        nav a[style*="background: linear-gradient"]:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        nav a[style*="background: #f56565"]:hover {
+            background: #e53e3e !important;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #f7fafc;
+            color: #2d3748;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 30px auto;
+            padding: 0 20px;
+        }
+
+        /* Referral Hero Section */
+        .hero-section {
+            background: linear-gradient(135deg, #3b82f6 0%, #60a5fa 100%);
+            border-radius: 20px;
+            padding: 50px 40px;
+            color: white;
+            text-align: center;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+        }
+
+        .hero-section h1 {
+            font-size: 42px;
+            margin-bottom: 15px;
+            font-weight: 800;
+        }
+
+        .hero-section p {
+            font-size: 18px;
+            opacity: 0.95;
+            max-width: 700px;
+            margin: 0 auto 30px;
+            line-height: 1.6;
+        }
+
+        .hero-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 20px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .hero-stat {
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            padding: 20px;
+            border-radius: 12px;
+        }
+
+        .hero-stat-value {
+            font-size: 32px;
+            font-weight: 700;
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .hero-stat-label {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        /* Referral Link Box */
+        .referral-box {
+            background: white;
+            border-radius: 16px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+        }
+
+        .referral-box h2 {
+            margin-bottom: 20px;
+            color: #2d3748;
+            font-size: 24px;
+        }
+
+        .link-display {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .link-input {
+            flex: 1;
+            padding: 15px 20px;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            font-size: 16px;
+            font-family: monospace;
+            background: #f7fafc;
+        }
+
+        .btn {
+            padding: 15px 25px;
+            border: none;
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #3b82f6 0%, #60a5fa 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: #48bb78;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #38a169;
+            transform: translateY(-2px);
+        }
+
+        .share-buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .share-btn {
+            padding: 12px 20px;
+            border-radius: 10px;
+            border: none;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 14px;
+        }
+
+        .share-btn i {
+            margin-right: 8px;
+        }
+
+        .share-btn.whatsapp {
+            background: #25D366;
+        }
+
+        .share-btn.email {
+            background: #3b82f6;
+        }
+
+        .share-btn.facebook {
+            background: #1877f2;
+        }
+
+        .share-btn.linkedin {
+            background: #0077b5;
+        }
+
+        .share-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Empfehlungs-Liste */
+        .empfehlungen-grid {
+            display: grid;
+            gap: 20px;
+            margin-top: 30px;
+        }
+
+        .empfehlung-card {
+            background: white;
+            border-radius: 16px;
+            padding: 25px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+            border-left: 4px solid #3b82f6;
+            transition: all 0.3s;
+        }
+
+        .empfehlung-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
+        }
+
+        .empfehlung-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 15px;
+        }
+
+        .empfehlung-name {
+            font-size: 20px;
+            font-weight: 700;
+            color: #2d3748;
+        }
+
+        .status-badge {
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .status-badge.angemeldet {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .status-badge.aktiv {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .status-badge.abgelehnt {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .empfehlung-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .detail-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #718096;
+            font-size: 14px;
+        }
+
+        .detail-item i {
+            color: #3b82f6;
+            width: 20px;
+        }
+
+        .empfehlung-provision {
+            margin-top: 15px;
+            padding: 15px;
+            background: #f7fafc;
+            border-radius: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .provision-label {
+            font-size: 13px;
+            color: #718096;
+        }
+
+        .provision-amount {
+            font-size: 24px;
+            font-weight: 700;
+            color: #48bb78;
+        }
+
+        /* Wie funktioniert's */
+        .how-it-works {
+            background: white;
+            border-radius: 16px;
+            padding: 40px;
+            margin-top: 30px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+        }
+
+        .how-it-works h2 {
+            text-align: center;
+            margin-bottom: 40px;
+            font-size: 32px;
+            color: #2d3748;
+        }
+
+        .steps {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 30px;
+        }
+
+        .step {
+            text-align: center;
+            padding: 20px;
+        }
+
+        .step-number {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #3b82f6 0%, #60a5fa 100%);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            font-weight: 700;
+            margin: 0 auto 20px;
+        }
+
+        .step h3 {
+            margin-bottom: 10px;
+            color: #2d3748;
+        }
+
+        .step p {
+            color: #718096;
+            line-height: 1.6;
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #a0aec0;
+        }
+
+        .empty-state i {
+            font-size: 80px;
+            opacity: 0.3;
+            margin-bottom: 20px;
+        }
+
+        .empty-state h3 {
+            margin-bottom: 10px;
+            color: #718096;
+        }
+
+        @media (max-width: 768px) {
+            .hero-section h1 {
+                font-size: 32px;
+            }
+
+            .hero-section p {
+                font-size: 16px;
+            }
+
+            .link-display {
+                flex-direction: column;
+            }
+
+            .share-buttons {
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav style="background: white; padding: 15px 30px; box-shadow: 0 2px 10px rgba(0,0,0,0.08); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 20px; position: sticky; top: 0; z-index: 1000;">
+        <div style="display: flex; align-items: center; gap: 12px; font-size: 20px; font-weight: 700; color: #3b82f6;">
+            <i class="fas fa-gift"></i>
+            <span>Empfehlungs-Programm</span>
+        </div>
+        <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+            <a href="partner-dashboard.html" style="padding: 10px 18px; color: #718096; text-decoration: none; border-radius: 8px; font-weight: 600; transition: all 0.2s; display: inline-flex; align-items: center; gap: 8px; font-size: 14px;">
+                <i class="fas fa-home"></i> Dashboard
+            </a>
+            <a href="partner-provisionen.html" style="padding: 10px 18px; color: #718096; text-decoration: none; border-radius: 8px; font-weight: 600; transition: all 0.2s; display: inline-flex; align-items: center; gap: 8px; font-size: 14px;">
+                <i class="fas fa-money-bill-wave"></i> Provisionen
+            </a>
+            <a href="partner-akademie.html" style="padding: 10px 18px; color: #718096; text-decoration: none; border-radius: 8px; font-weight: 600; transition: all 0.2s; display: inline-flex; align-items: center; gap: 8px; font-size: 14px;">
+                <i class="fas fa-graduation-cap"></i> Akademie
+            </a>
+            <a href="partner-kalender.html" style="padding: 10px 18px; color: #718096; text-decoration: none; border-radius: 8px; font-weight: 600; transition: all 0.2s; display: inline-flex; align-items: center; gap: 8px; font-size: 14px;">
+                <i class="fas fa-calendar-alt"></i> Termine
+            </a>
+            <a href="partner-empfehlungen.html" style="padding: 10px 18px; background: linear-gradient(135deg, #3b82f6 0%, #60a5fa 100%); color: white; text-decoration: none; border-radius: 8px; font-weight: 600; transition: all 0.2s; display: inline-flex; align-items: center; gap: 8px; font-size: 14px;">
+                <i class="fas fa-gift"></i> Empfehlungen
+            </a>
+            <a href="partner-qr-codes.html" style="padding: 10px 18px; color: #718096; text-decoration: none; border-radius: 8px; font-weight: 600; transition: all 0.2s; display: inline-flex; align-items: center; gap: 8px; font-size: 14px;">
+                <i class="fas fa-qrcode"></i> QR-Codes
+            </a>
+            <a href="index.html" style="padding: 10px 18px; background: #f56565; color: white; text-decoration: none; border-radius: 8px; font-weight: 600; transition: all 0.2s; display: inline-flex; align-items: center; gap: 8px; font-size: 14px; margin-left: 12px;">
+                <i class="fas fa-sign-out-alt"></i> Logout
+            </a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <!-- Hero Section - Coming Soon -->
+        <div class="hero-section" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+            <div style="font-size: 80px; margin-bottom: 20px;">🎁</div>
+            <h1>Empfehlungs-Programm – Bald verfügbar!</h1>
+            <p>
+                Wir arbeiten an einem großartigen Empfehlungs-Programm, bei dem du <strong>zusätzliche Provision</strong> verdienst, 
+                wenn du neue Partner wirbst. Das Feature wird sehr bald freigeschaltet!
+            </p>
+            <p style="margin-top: 20px; font-size: 16px; opacity: 0.9;">
+                💰 5% Provision aus den Umsätzen deiner geworbenen Partner<br>
+                📅 12 Monate lang verdienen<br>
+                🔗 Persönlicher Empfehlungslink<br>
+                📊 Live-Tracking deiner Empfehlungen
+            </p>
+        </div>
+
+        <!-- Original Hero (ausgeblendet) -->
+        <div class="hero-section" style="display: none;">
+            <h1><i class="fas fa-gift"></i> Partner Empfehlen & Verdienen!</h1>
+            <p>Verdiene zusätzliche Provision, indem du neue Partner wirbst. Du erhältst <strong>5% der Umsätze</strong> deiner geworbenen Partner für <strong>12 Monate</strong>!</p>
+            
+            <div class="hero-stats">
+                <div class="hero-stat">
+                    <span class="hero-stat-value" id="anzahlEmpfehlungen">0</span>
+                    <span class="hero-stat-label">Empfehlungen</span>
+                </div>
+                <div class="hero-stat">
+                    <span class="hero-stat-value" id="aktivePartner">0</span>
+                    <span class="hero-stat-label">Aktive Partner</span>
+                </div>
+                <div class="hero-stat">
+                    <span class="hero-stat-value" id="gesamtProvision">0€</span>
+                    <span class="hero-stat-label">Verdient</span>
+                </div>
+                <div class="hero-stat">
+                    <span class="hero-stat-value" id="dieserMonat">0€</span>
+                    <span class="hero-stat-label">Dieser Monat</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Referral Link Box (ausgeblendet) -->
+        <div class="referral-box" style="display: none;">
+            <h2><i class="fas fa-link"></i> Dein Empfehlungslink</h2>
+            <p style="color: #718096; margin-bottom: 20px;">Teile diesen Link mit potenziellen Partnern. Jeder der sich über deinen Link anmeldet, wird automatisch dir zugeordnet.</p>
+            
+            <div class="link-display">
+                <input type="text" class="link-input" id="referralLink" readonly value="Wird geladen...">
+                <button class="btn btn-primary" onclick="copyLink()">
+                    <i class="fas fa-copy"></i> Kopieren
+                </button>
+            </div>
+
+            <h3 style="margin: 25px 0 15px 0; font-size: 16px;">Teilen via:</h3>
+            <div class="share-buttons">
+                <button class="share-btn whatsapp" onclick="shareViaWhatsApp()">
+                    <i class="fab fa-whatsapp"></i> WhatsApp
+                </button>
+                <button class="share-btn email" onclick="shareViaEmail()">
+                    <i class="fas fa-envelope"></i> E-Mail
+                </button>
+                <button class="share-btn facebook" onclick="shareViaFacebook()">
+                    <i class="fab fa-facebook"></i> Facebook
+                </button>
+                <button class="share-btn linkedin" onclick="shareViaLinkedIn()">
+                    <i class="fab fa-linkedin"></i> LinkedIn
+                </button>
+            </div>
+        </div>
+
+        <!-- Meine Empfehlungen (ausgeblendet) -->
+        <div class="referral-box" style="display: none;">
+            <h2><i class="fas fa-users"></i> Meine Empfehlungen</h2>
+            <div id="empfehlungenList"></div>
+        </div>
+
+        <!-- Wie funktioniert's -->
+        <div class="how-it-works">
+            <h2>So funktioniert's</h2>
+            <div class="steps">
+                <div class="step">
+                    <div class="step-number">1</div>
+                    <h3>Link teilen</h3>
+                    <p>Teile deinen persönlichen Empfehlungslink mit Interessenten über WhatsApp, E-Mail oder Social Media.</p>
+                </div>
+                <div class="step">
+                    <div class="step-number">2</div>
+                    <h3>Partner meldet sich an</h3>
+                    <p>Der geworbene Partner meldet sich über deinen Link an und durchläuft das Onboarding.</p>
+                </div>
+                <div class="step">
+                    <div class="step-number">3</div>
+                    <h3>Du verdienst mit</h3>
+                    <p>Sobald der Partner aktiv ist, erhältst du 5% seiner Umsätze für 12 Monate als zusätzliche Provision!</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Chat & Ticket Widget -->
+    <script src="js/chat-ticket-widget.js"></script>
+
+    <script>
+        const partnerEmail = localStorage.getItem('partnerEmail');
+        const partnerData = JSON.parse(localStorage.getItem('partnerData') || '{}');
+        let myReferralCode = '';
+        let empfehlungen = [];
+
+        // Empfehlungs-Code generieren
+        function generateReferralCode() {
+            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+            let code = '';
+            for (let i = 0; i < 6; i++) {
+                code += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            return code;
+        }
+
+        // Partner-Code laden oder erstellen
+        async function initReferralCode() {
+            try {
+                // Prüfen ob Partner bereits Code hat
+                const response = await fetch(`tables/partners?limit=1000`);
+                const result = await response.json();
+                const partner = result.data.find(p => p.email === partnerEmail);
+
+                if (partner && partner.referral_code) {
+                    myReferralCode = partner.referral_code;
+                } else {
+                    // Neuen Code generieren
+                    myReferralCode = generateReferralCode();
+                    
+                    // Code speichern (falls Tabelle das Feld hat)
+                    // await fetch(`tables/partners/${partner.id}`, {
+                    //     method: 'PATCH',
+                    //     headers: {'Content-Type': 'application/json'},
+                    //     body: JSON.stringify({ referral_code: myReferralCode })
+                    // });
+                }
+
+                // Link anzeigen
+                const baseUrl = window.location.origin;
+                const referralLink = `${baseUrl}/partner-onboarding.html?ref=${myReferralCode}`;
+                document.getElementById('referralLink').value = referralLink;
+
+            } catch (error) {
+                console.error('Fehler:', error);
+                myReferralCode = generateReferralCode();
+                const baseUrl = window.location.origin;
+                document.getElementById('referralLink').value = `${baseUrl}/partner-onboarding.html?ref=${myReferralCode}`;
+            }
+        }
+
+        // Empfehlungen laden
+        async function loadEmpfehlungen() {
+            try {
+                const response = await fetch('tables/empfehlungen?limit=1000');
+                const result = await response.json();
+                empfehlungen = result.data.filter(e => e.empfehler_email === partnerEmail);
+
+                // Statistiken berechnen
+                const anzahl = empfehlungen.length;
+                const aktiv = empfehlungen.filter(e => e.status === 'aktiv').length;
+                const gesamt = empfehlungen.reduce((sum, e) => sum + (e.gesamte_provision_verdient || 0), 0);
+                
+                // Dieser Monat
+                const aktuellerMonat = new Date().toISOString().substring(0, 7);
+                const provisionenRes = await fetch('tables/empfehlungs_provisionen?limit=1000');
+                const provisionenData = await provisionenRes.json();
+                const dieserMonat = provisionenData.data
+                    .filter(p => p.empfehler_email === partnerEmail && p.monat === aktuellerMonat)
+                    .reduce((sum, p) => sum + (p.provision_betrag || 0), 0);
+
+                // Anzeigen
+                document.getElementById('anzahlEmpfehlungen').textContent = anzahl;
+                document.getElementById('aktivePartner').textContent = aktiv;
+                document.getElementById('gesamtProvision').textContent = gesamt.toFixed(2) + '€';
+                document.getElementById('dieserMonat').textContent = dieserMonat.toFixed(2) + '€';
+
+                // Liste rendern
+                renderEmpfehlungenList();
+
+            } catch (error) {
+                console.error('Fehler:', error);
+            }
+        }
+
+        // Empfehlungen-Liste rendern
+        function renderEmpfehlungenList() {
+            const container = document.getElementById('empfehlungenList');
+
+            if (empfehlungen.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-user-plus"></i>
+                        <h3>Noch keine Empfehlungen</h3>
+                        <p>Teile deinen Link und verdiene mit!</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = `
+                <div class="empfehlungen-grid">
+                    ${empfehlungen.map(emp => `
+                        <div class="empfehlung-card">
+                            <div class="empfehlung-header">
+                                <div class="empfehlung-name">
+                                    <i class="fas fa-user-circle"></i> ${emp.geworbener_name}
+                                </div>
+                                <span class="status-badge ${emp.status}">${emp.status}</span>
+                            </div>
+                            
+                            <div class="empfehlung-details">
+                                <div class="detail-item">
+                                    <i class="fas fa-envelope"></i>
+                                    <span>${emp.geworbener_email}</span>
+                                </div>
+                                <div class="detail-item">
+                                    <i class="fas fa-calendar-alt"></i>
+                                    <span>${new Date(emp.erstellt_am).toLocaleDateString('de-DE')}</span>
+                                </div>
+                                <div class="detail-item">
+                                    <i class="fas fa-percent"></i>
+                                    <span>${emp.provision_prozent || 5}% Provision</span>
+                                </div>
+                                <div class="detail-item">
+                                    <i class="fas fa-clock"></i>
+                                    <span>${emp.provision_dauer_monate || 12} Monate</span>
+                                </div>
+                            </div>
+
+                            ${emp.status === 'aktiv' && emp.gesamte_provision_verdient > 0 ? `
+                                <div class="empfehlung-provision">
+                                    <span class="provision-label">Verdient aus dieser Empfehlung:</span>
+                                    <span class="provision-amount">${emp.gesamte_provision_verdient.toFixed(2)}€</span>
+                                </div>
+                            ` : ''}
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        }
+
+        // Link kopieren
+        function copyLink() {
+            const input = document.getElementById('referralLink');
+            input.select();
+            document.execCommand('copy');
+            alert('✅ Link wurde kopiert!');
+        }
+
+        // Share-Funktionen
+        function shareViaWhatsApp() {
+            const link = document.getElementById('referralLink').value;
+            const text = `Hey! 👋\n\nIch bin Partner und verdiene super mit diesem Programm. Interesse? Melde dich hier an:\n\n${link}`;
+            window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
+        }
+
+        function shareViaEmail() {
+            const link = document.getElementById('referralLink').value;
+            const subject = 'Partner-Programm Empfehlung';
+            const body = `Hey!\n\nIch möchte dich gerne als Partner empfehlen. Das Programm ist super und du kannst direkt loslegen.\n\nMelde dich hier an:\n${link}\n\nBei Fragen melde dich gerne!\n\nViele Grüße`;
+            window.location.href = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+        }
+
+        function shareViaFacebook() {
+            const link = document.getElementById('referralLink').value;
+            window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(link)}`, '_blank');
+        }
+
+        function shareViaLinkedIn() {
+            const link = document.getElementById('referralLink').value;
+            window.open(`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(link)}`, '_blank');
+        }
+
+        // Initial laden
+        if (!partnerEmail) {
+            window.location.href = 'index.html';
+        } else {
+            initReferralCode();
+            loadEmpfehlungen();
+            
+            // Chat-Widget initialisieren
+            if (window.initChatTicketWidget) {
+                initChatTicketWidget();
+            }
+
+            // Auto-refresh alle 30 Sekunden
+            setInterval(loadEmpfehlungen, 30000);
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🆕 Neuen Partner erstellen</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+
+        h1 {
+            color: #2d3748;
+            margin-bottom: 10px;
+            font-size: 32px;
+        }
+
+        .subtitle {
+            color: #718096;
+            margin-bottom: 30px;
+            font-size: 16px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            color: #4a5568;
+            font-weight: 600;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        button {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .result {
+            margin-top: 30px;
+            padding: 20px;
+            background: #f0fdf4;
+            border: 2px solid #86efac;
+            border-radius: 10px;
+            display: none;
+        }
+
+        .result h3 {
+            color: #22c55e;
+            margin-bottom: 10px;
+        }
+
+        .result code {
+            background: #1a202c;
+            color: #e2e8f0;
+            padding: 15px;
+            border-radius: 8px;
+            display: block;
+            margin-top: 10px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .warning {
+            background: #fffbeb;
+            border-left: 4px solid #f59e0b;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+        }
+
+        .warning strong {
+            color: #92400e;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🆕 Neuen Partner erstellen</h1>
+        <p class="subtitle">Erstellt einen komplett frischen Partner mit €0,00 Provisionen</p>
+
+        <div class="warning">
+            <strong>⚠️ Wichtig:</strong> Dieser Partner hat GARANTIERT keine alten Daten! Perfekt für Tests.
+        </p>
+
+        <form id="partnerForm">
+            <div class="form-group">
+                <label for="email">E-Mail-Adresse *</label>
+                <input type="email" id="email" required placeholder="partner@beispiel.de">
+            </div>
+
+            <div class="form-group">
+                <label for="passwort">Passwort *</label>
+                <input type="text" id="passwort" required placeholder="Mindestens 6 Zeichen" value="Test1234">
+            </div>
+
+            <div class="form-group">
+                <label for="vorname">Vorname *</label>
+                <input type="text" id="vorname" required placeholder="Max">
+            </div>
+
+            <div class="form-group">
+                <label for="nachname">Nachname *</label>
+                <input type="text" id="nachname" required placeholder="Mustermann">
+            </div>
+
+            <div class="form-group">
+                <label for="firma">Firma (optional)</label>
+                <input type="text" id="firma" placeholder="Muster GmbH">
+            </div>
+
+            <div class="form-group">
+                <label for="phone">Telefon (optional)</label>
+                <input type="tel" id="phone" placeholder="+49 123 456789">
+            </div>
+
+            <div class="form-group">
+                <label for="tarif">Tarif *</label>
+                <select id="tarif" required>
+                    <option value="basic">Basic</option>
+                    <option value="standard" selected>Standard</option>
+                    <option value="premium">Premium</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="onboarding">Onboarding-Status *</label>
+                <select id="onboarding" required>
+                    <option value="false" selected>⏳ Im Onboarding (empfohlen für Tests)</option>
+                    <option value="true">✅ Vollzugriff</option>
+                </select>
+            </div>
+
+            <button type="submit">🚀 Partner erstellen</button>
+        </form>
+
+        <div style="margin-top: 20px; padding: 15px; background: #fef2f2; border: 2px solid #fecaca; border-radius: 10px;">
+            <strong style="color: #dc2626;">🗑️ Alle Test-Partner löschen:</strong>
+            <p style="margin: 10px 0; font-size: 14px; color: #7f1d1d;">Löscht alle Partner außer admin@system.de und admin@deincheck.de</p>
+            <button type="button" onclick="deleteAllTestPartners()" style="background: #dc2626; width: auto; padding: 10px 20px;">
+                🗑️ Alle Test-Partner löschen
+            </button>
+        </div>
+
+        <div class="result" id="result">
+            <h3>✅ Partner erfolgreich erstellt!</h3>
+            <p><strong>Login-Daten:</strong></p>
+            <code id="loginData"></code>
+            <p style="margin-top: 15px;"><strong>💡 Nächster Schritt:</strong></p>
+            <p>1. Öffnen Sie ein <strong>Private/Inkognito-Fenster</strong></p>
+            <p>2. Gehen Sie zu: <strong>partner-login.html</strong></p>
+            <p>3. Loggen Sie sich mit diesen Daten ein</p>
+            <p>4. <strong>Garantiert €0,00 Provisionen überall!</strong></p>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('partnerForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const button = e.target.querySelector('button');
+            button.disabled = true;
+            button.textContent = '⏳ Erstelle Partner...';
+
+            // Formular-Daten sammeln
+            const email = document.getElementById('email').value.trim().toLowerCase();
+            const passwort = document.getElementById('passwort').value;
+            const vorname = document.getElementById('vorname').value.trim();
+            const nachname = document.getElementById('nachname').value.trim();
+            const firma = document.getElementById('firma').value.trim();
+            const phone = document.getElementById('phone').value.trim();
+            const tarif = document.getElementById('tarif').value;
+            const onboarding = document.getElementById('onboarding').value === 'true';
+
+            try {
+                // Prüfen ob Partner bereits existiert (EXAKT diese E-Mail)
+                const checkResponse = await fetch(`tables/partners?limit=1000`);
+                const checkResult = await checkResponse.json();
+                
+                const existingPartner = checkResult.data ? checkResult.data.find(p => p.email.toLowerCase() === email.toLowerCase()) : null;
+                
+                if (existingPartner) {
+                    const confirmed = confirm(`⚠️ Ein Partner mit dieser E-Mail existiert bereits!\n\nE-Mail: ${existingPartner.email}\nName: ${existingPartner.vorname} ${existingPartner.nachname}\n\nMöchten Sie diesen Partner ÜBERSCHREIBEN?\n\n✅ JA = Überschreiben\n❌ NEIN = Abbrechen`);
+                    
+                    if (!confirmed) {
+                        button.disabled = false;
+                        button.textContent = '🚀 Partner erstellen';
+                        return;
+                    }
+                    
+                    // Lösche alten Partner
+                    await fetch(`tables/partners/${existingPartner.id}`, {
+                        method: 'DELETE'
+                    });
+                    
+                    console.log('🗑️ Alter Partner gelöscht:', existingPartner.email);
+                }
+
+                // Neuen Partner erstellen
+                const response = await fetch('tables/partners', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        email: email,
+                        passwort: passwort,
+                        vorname: vorname,
+                        nachname: nachname,
+                        firma: firma || 'Nicht angegeben',
+                        phone: phone || 'Nicht angegeben',
+                        tarif: tarif,
+                        status: onboarding ? 'aktiv' : 'neu',
+                        modell: 'provisionspartner',
+                        
+                        // Onboarding-Flags
+                        onboarding_completed: onboarding,
+                        vertrag_unterschrieben: onboarding,
+                        dokumente_hochgeladen: onboarding,
+                        schulung_absolviert: onboarding,
+                        bankdaten_hinterlegt: onboarding,
+                        erster_vertrag_abgeschlossen: false,
+                        
+                        // Timestamps
+                        registriert_am: Date.now(),
+                        onboarding_started_at: new Date().toISOString(),
+                        vollzugriff_seit: onboarding ? Date.now() : null,
+                        letzter_login: null,
+                        
+                        // Banking (leer)
+                        iban: null,
+                        kontoinhaber: null,
+                        
+                        // Optional
+                        profilbild_url: null
+                    })
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    // Erfolg!
+                    document.getElementById('result').style.display = 'block';
+                    document.getElementById('loginData').textContent = 
+                        `E-Mail: ${email}\nPasswort: ${passwort}\nStatus: ${onboarding ? '✅ Vollzugriff' : '⏳ Im Onboarding'}\nTarif: ${tarif.toUpperCase()}`;
+                    
+                    // Formular zurücksetzen
+                    e.target.reset();
+                    
+                    console.log('✅ Partner erstellt:', result);
+                    
+                    // Scroll to result
+                    document.getElementById('result').scrollIntoView({ behavior: 'smooth', block: 'start' });
+                } else {
+                    alert('❌ Fehler beim Erstellen: ' + (result.message || 'Unbekannter Fehler'));
+                }
+
+            } catch (error) {
+                console.error('Fehler:', error);
+                alert('❌ Fehler beim Erstellen: ' + error.message);
+            }
+
+            button.disabled = false;
+            button.textContent = '🚀 Partner erstellen';
+        });
+
+        // Alle Test-Partner löschen
+        async function deleteAllTestPartners() {
+            const confirmed = confirm('⚠️ ACHTUNG!\n\nDies löscht ALLE Partner außer:\n- admin@system.de\n- admin@deincheck.de\n\nSind Sie sicher?');
+            
+            if (!confirmed) return;
+            
+            try {
+                // Alle Partner laden
+                const response = await fetch('tables/partners?limit=1000');
+                const result = await response.json();
+                
+                if (!result.data || result.data.length === 0) {
+                    alert('✅ Keine Partner gefunden.');
+                    return;
+                }
+                
+                // Geschützte E-Mails
+                const protected = ['admin@system.de', 'admin@deincheck.de'];
+                
+                // Zu löschende Partner
+                const toDelete = result.data.filter(p => !protected.includes(p.email.toLowerCase()));
+                
+                if (toDelete.length === 0) {
+                    alert('✅ Keine Test-Partner gefunden (nur geschützte Accounts vorhanden).');
+                    return;
+                }
+                
+                const confirmFinal = confirm(`Gefunden: ${toDelete.length} Test-Partner\n\nWirklich ALLE löschen?`);
+                if (!confirmFinal) return;
+                
+                // Löschen
+                let deleted = 0;
+                for (const partner of toDelete) {
+                    try {
+                        await fetch(`tables/partners/${partner.id}`, {
+                            method: 'DELETE'
+                        });
+                        deleted++;
+                        console.log('🗑️ Gelöscht:', partner.email);
+                    } catch (error) {
+                        console.error('Fehler beim Löschen:', partner.email, error);
+                    }
+                }
+                
+                alert(`✅ ${deleted} Test-Partner wurden gelöscht!\n\nSie können jetzt frische Partner erstellen.`);
+                
+            } catch (error) {
+                console.error('Fehler:', error);
+                alert('❌ Fehler beim Löschen: ' + error.message);
+            }
+        }
+
+        // Auto-fill Demo-Daten
+        window.addEventListener('keydown', function(e) {
+            if (e.key === 'D' && e.shiftKey && e.ctrlKey) {
+                const timestamp = Date.now();
+                document.getElementById('email').value = `test${timestamp}@partner.de`;
+                document.getElementById('vorname').value = 'Test';
+                document.getElementById('nachname').value = 'Partner';
+                document.getElementById('firma').value = 'Test GmbH';
+                document.getElementById('phone').value = '+49 123 456789';
+                console.log('🔓 Demo-Daten eingefügt');
+            }
+        });
+    </script>
+</body>
+</html>

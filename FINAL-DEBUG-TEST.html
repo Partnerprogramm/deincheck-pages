@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔬 FINAL DEBUG TEST - Partner Dashboard</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'Courier New', monospace;
+            background: #0a0a0a;
+            color: #00ff00;
+            padding: 2rem;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: #1a1a1a;
+            padding: 2rem;
+            border-radius: 10px;
+            border: 2px solid #00ff00;
+        }
+        
+        h1 {
+            color: #00ffff;
+            margin-bottom: 2rem;
+            text-align: center;
+            font-size: 2rem;
+        }
+        
+        .section {
+            background: #0f0f0f;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            border-radius: 8px;
+            border-left: 4px solid #00ff00;
+        }
+        
+        .section h2 {
+            color: #ffff00;
+            margin-bottom: 1rem;
+            font-size: 1.3rem;
+        }
+        
+        .test-btn {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            margin: 0.5rem;
+            transition: all 0.3s;
+        }
+        
+        .test-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        .output {
+            background: #000;
+            padding: 1rem;
+            border-radius: 5px;
+            margin-top: 1rem;
+            min-height: 100px;
+            max-height: 400px;
+            overflow-y: auto;
+            font-size: 0.9rem;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+        
+        .success { color: #00ff00; }
+        .error { color: #ff4444; }
+        .warning { color: #ffaa00; }
+        .info { color: #00aaff; }
+        
+        .stats-display {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+        
+        .stat-box {
+            background: #1a1a1a;
+            padding: 1rem;
+            border-radius: 8px;
+            border: 1px solid #333;
+        }
+        
+        .stat-label {
+            color: #888;
+            font-size: 0.8rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .stat-value {
+            color: #00ffff;
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔬 FINAL DEBUG TEST - Partner Dashboard</h1>
+        
+        <div class="section">
+            <h2>🎯 Test 1: Login-Status prüfen</h2>
+            <button class="test-btn" onclick="testLoginStatus()">▶ Test starten</button>
+            <div id="output-login" class="output"></div>
+        </div>
+        
+        <div class="section">
+            <h2>📦 Test 2: Verträge aus DB laden</h2>
+            <button class="test-btn" onclick="testLoadVertraege()">▶ Test starten</button>
+            <div id="output-vertraege" class="output"></div>
+        </div>
+        
+        <div class="section">
+            <h2>📊 Test 3: Statistiken berechnen</h2>
+            <button class="test-btn" onclick="testCalculateStats()">▶ Test starten</button>
+            <div id="stats-display" class="stats-display"></div>
+            <div id="output-stats" class="output"></div>
+        </div>
+        
+        <div class="section">
+            <h2>🏗️ Test 4: HTML-Elemente prüfen</h2>
+            <button class="test-btn" onclick="testHTMLElements()">▶ Test starten</button>
+            <div id="output-html" class="output"></div>
+        </div>
+        
+        <div class="section">
+            <h2>🚀 Test 5: Kompletter Dashboard-Ladeprozess simulieren</h2>
+            <button class="test-btn" onclick="testFullDashboardLoad()">▶ Test starten</button>
+            <div id="output-full" class="output"></div>
+        </div>
+        
+        <div class="section">
+            <h2>🔗 Weiter zum Partner Dashboard</h2>
+            <button class="test-btn" onclick="window.location.href='partner-dashboard.html'">🚀 Partner Dashboard öffnen</button>
+        </div>
+    </div>
+
+    <script>
+        let globalVertraege = [];
+        
+        function log(outputId, message, type = 'info') {
+            const output = document.getElementById(outputId);
+            const timestamp = new Date().toLocaleTimeString();
+            const className = type;
+            output.innerHTML += `<span class="${className}">[${timestamp}] ${message}</span>\n`;
+            console.log(message);
+        }
+        
+        function clear(outputId) {
+            document.getElementById(outputId).innerHTML = '';
+        }
+        
+        // Test 1: Login-Status
+        async function testLoginStatus() {
+            clear('output-login');
+            log('output-login', '🔍 Prüfe Login-Status...', 'info');
+            
+            const partnerEmail = localStorage.getItem('partnerEmail');
+            
+            if (partnerEmail) {
+                log('output-login', `✅ Partner eingeloggt: ${partnerEmail}`, 'success');
+                
+                // Prüfe ob Demo-Modus aktiv ist
+                const urlParams = new URLSearchParams(window.location.search);
+                const isDemoMode = urlParams.get('demo') === '1';
+                
+                if (isDemoMode) {
+                    log('output-login', '⚠️ WARNUNG: Demo-Modus ist AKTIV!', 'warning');
+                    log('output-login', '⚠️ Entferne ?demo=1 aus der URL', 'warning');
+                } else {
+                    log('output-login', '✅ Demo-Modus ist NICHT aktiv', 'success');
+                }
+                
+                return partnerEmail;
+            } else {
+                log('output-login', '❌ FEHLER: Kein Partner eingeloggt!', 'error');
+                log('output-login', '❌ Bitte erst in partner-login.html einloggen', 'error');
+                return null;
+            }
+        }
+        
+        // Test 2: Verträge laden
+        async function testLoadVertraege() {
+            clear('output-vertraege');
+            log('output-vertraege', '📦 Lade Verträge aus Datenbank...', 'info');
+            
+            const partnerEmail = localStorage.getItem('partnerEmail');
+            if (!partnerEmail) {
+                log('output-vertraege', '❌ FEHLER: Kein Login gefunden!', 'error');
+                return;
+            }
+            
+            try {
+                const res = await fetch('tables/vertragsabschluesse?limit=100');
+                const data = await res.json();
+                
+                log('output-vertraege', `✅ Erfolgreich geladen: ${data.data.length} Verträge gesamt`, 'success');
+                
+                // Filter nach Partner-Email
+                const meineVertraege = data.data.filter(v => {
+                    const vEmail = v.partner_email || v.email || v.partnerEmail || v.partner;
+                    return vEmail === partnerEmail;
+                });
+                
+                globalVertraege = meineVertraege;
+                
+                log('output-vertraege', `✅ Gefiltert: ${meineVertraege.length} Verträge für ${partnerEmail}`, 'success');
+                
+                if (meineVertraege.length > 0) {
+                    log('output-vertraege', '\n📄 Beispiel-Vertrag:', 'info');
+                    log('output-vertraege', JSON.stringify(meineVertraege[0], null, 2), 'info');
+                } else {
+                    log('output-vertraege', '⚠️ WARNUNG: Keine Verträge gefunden!', 'warning');
+                    log('output-vertraege', '⚠️ Prüfe ob die Email korrekt ist', 'warning');
+                }
+                
+            } catch (error) {
+                log('output-vertraege', `❌ FEHLER beim Laden: ${error.message}`, 'error');
+                console.error(error);
+            }
+        }
+        
+        // Test 3: Statistiken berechnen
+        async function testCalculateStats() {
+            clear('output-stats');
+            log('output-stats', '📊 Berechne Statistiken...', 'info');
+            
+            if (globalVertraege.length === 0) {
+                log('output-stats', '⚠️ Keine Verträge geladen. Bitte erst Test 2 ausführen!', 'warning');
+                return;
+            }
+            
+            // Helper functions
+            const getProvision = (v) => {
+                return parseFloat(v.provision_betrag) || 
+                       parseFloat(v.gesamt_provision) || 
+                       parseFloat(v.provision) || 
+                       0;
+            };
+            
+            const parseDate = (v) => {
+                let dateStr = v.erstellt_am || v.created_at || v.datum;
+                if (!dateStr) return new Date(0);
+                if (dateStr instanceof Date) return dateStr;
+                if (typeof dateStr === 'number') return new Date(dateStr);
+                dateStr = String(dateStr);
+                if (dateStr.match(/^\d{4}-\d{2}-\d{2}/)) return new Date(dateStr);
+                if (dateStr.match(/^\d{1,2}\.\d{1,2}\.\d{4}/)) {
+                    const [day, month, year] = dateStr.split('.');
+                    return new Date(year, month - 1, day);
+                }
+                return new Date(dateStr);
+            };
+            
+            const now = new Date();
+            const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+            const todayEnd = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
+            
+            // HEUTE
+            const todayVertraege = globalVertraege.filter(v => {
+                const vDate = parseDate(v);
+                return vDate >= today && vDate < todayEnd;
+            });
+            const todayProv = todayVertraege.reduce((sum, v) => sum + getProvision(v), 0);
+            
+            // GESTERN
+            const yesterday = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1);
+            const yesterdayVertraege = globalVertraege.filter(v => {
+                const vDate = parseDate(v);
+                return vDate >= yesterday && vDate < today;
+            });
+            const yesterdayProv = yesterdayVertraege.reduce((sum, v) => sum + getProvision(v), 0);
+            
+            // MONAT
+            const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+            const monthVertraege = globalVertraege.filter(v => parseDate(v) >= monthStart);
+            const monthProv = monthVertraege.reduce((sum, v) => sum + getProvision(v), 0);
+            
+            // TOTAL
+            const totalProv = globalVertraege.reduce((sum, v) => sum + getProvision(v), 0);
+            
+            // PENDING
+            const pending = globalVertraege.filter(v => {
+                const provStatus = (v.provision_status || '').toLowerCase();
+                return provStatus === 'ausstehend' || provStatus === '' || provStatus === 'neu';
+            });
+            const pendingProv = pending.reduce((sum, v) => sum + getProvision(v), 0);
+            
+            // Display Stats
+            const statsHTML = `
+                <div class="stat-box">
+                    <div class="stat-label">💰 Heute</div>
+                    <div class="stat-value">${todayProv.toFixed(2)}€</div>
+                    <div class="stat-label">${todayVertraege.length} Verträge</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-label">📅 Gestern</div>
+                    <div class="stat-value">${yesterdayProv.toFixed(2)}€</div>
+                    <div class="stat-label">${yesterdayVertraege.length} Verträge</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-label">📆 Dieser Monat</div>
+                    <div class="stat-value">${monthProv.toFixed(2)}€</div>
+                    <div class="stat-label">${monthVertraege.length} Verträge</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-label">💼 Gesamt</div>
+                    <div class="stat-value">${totalProv.toFixed(2)}€</div>
+                    <div class="stat-label">${globalVertraege.length} Verträge</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-label">⏳ Ausstehend</div>
+                    <div class="stat-value">${pendingProv.toFixed(2)}€</div>
+                    <div class="stat-label">${pending.length} Verträge</div>
+                </div>
+            `;
+            
+            document.getElementById('stats-display').innerHTML = statsHTML;
+            
+            log('output-stats', '✅ Statistiken erfolgreich berechnet!', 'success');
+            log('output-stats', `📊 Heute: ${todayProv.toFixed(2)}€ (${todayVertraege.length} Verträge)`, 'success');
+            log('output-stats', `📊 Gestern: ${yesterdayProv.toFixed(2)}€ (${yesterdayVertraege.length} Verträge)`, 'info');
+            log('output-stats', `📊 Monat: ${monthProv.toFixed(2)}€ (${monthVertraege.length} Verträge)`, 'info');
+            log('output-stats', `📊 Gesamt: ${totalProv.toFixed(2)}€ (${globalVertraege.length} Verträge)`, 'info');
+        }
+        
+        // Test 4: HTML-Elemente prüfen
+        function testHTMLElements() {
+            clear('output-html');
+            log('output-html', '🏗️ Prüfe HTML-Elemente...', 'info');
+            
+            const elements = [
+                'todayProvisionen',
+                'todayVertraege',
+                'yesterdayProvisionen',
+                'yesterdayVertraege',
+                'monthProvisionen',
+                'totalProvisionen',
+                'totalVertraege',
+                'pendingProvisionen'
+            ];
+            
+            let allFound = true;
+            
+            elements.forEach(id => {
+                const elem = document.getElementById(id);
+                if (elem) {
+                    log('output-html', `✅ Element gefunden: #${id}`, 'success');
+                } else {
+                    log('output-html', `❌ Element NICHT gefunden: #${id}`, 'error');
+                    allFound = false;
+                }
+            });
+            
+            if (allFound) {
+                log('output-html', '\n✅ ALLE Elemente gefunden!', 'success');
+            } else {
+                log('output-html', '\n❌ FEHLER: Einige Elemente fehlen!', 'error');
+                log('output-html', '❌ Dies ist eine Test-Seite ohne Dashboard-HTML', 'warning');
+                log('output-html', '⚠️ Teste dies direkt auf partner-dashboard.html!', 'warning');
+            }
+        }
+        
+        // Test 5: Kompletter Dashboard-Load
+        async function testFullDashboardLoad() {
+            clear('output-full');
+            log('output-full', '🚀 Starte vollständigen Dashboard-Test...', 'info');
+            
+            log('output-full', '\n=== SCHRITT 1: Login-Check ===', 'info');
+            const email = await testLoginStatus();
+            if (!email) {
+                log('output-full', '\n❌ TEST ABGEBROCHEN: Kein Login!', 'error');
+                return;
+            }
+            
+            log('output-full', '\n=== SCHRITT 2: Verträge laden ===', 'info');
+            await testLoadVertraege();
+            
+            if (globalVertraege.length === 0) {
+                log('output-full', '\n⚠️ WARNUNG: Keine Verträge gefunden!', 'warning');
+            }
+            
+            log('output-full', '\n=== SCHRITT 3: Statistiken berechnen ===', 'info');
+            await testCalculateStats();
+            
+            log('output-full', '\n=== SCHRITT 4: HTML-Elemente prüfen ===', 'info');
+            testHTMLElements();
+            
+            log('output-full', '\n✅ KOMPLETTER TEST ABGESCHLOSSEN!', 'success');
+            log('output-full', '🚀 Jetzt Partner Dashboard öffnen und Browser-Console (F12) prüfen!', 'info');
+        }
+    </script>
+</body>
+</html>

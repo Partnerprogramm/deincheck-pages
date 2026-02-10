@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Partner Import Tool</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 2rem;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 16px;
+            padding: 2rem;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        h1 { color: #667eea; margin-bottom: 1rem; }
+        .section {
+            background: #f7fafc;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+        button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        button:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+        }
+        button:disabled {
+            background: #cbd5e0;
+            cursor: not-allowed;
+            transform: none;
+        }
+        .log {
+            background: #1a202c;
+            color: #a0aec0;
+            border-radius: 8px;
+            padding: 1rem;
+            font-family: 'Courier New', monospace;
+            font-size: 0.875rem;
+            max-height: 500px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+        }
+        .log-success { color: #48bb78; }
+        .log-error { color: #f56565; }
+        .log-info { color: #4299e1; }
+        .progress {
+            width: 100%;
+            height: 30px;
+            background: #e2e8f0;
+            border-radius: 8px;
+            overflow: hidden;
+            margin-bottom: 1rem;
+        }
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            transition: width 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚀 Partner Import Tool</h1>
+        <p style="color: #718096; margin-bottom: 2rem;">
+            Importiere 310 Partner aus der CSV-Datei in die Datenbank
+        </p>
+
+        <div class="section">
+            <h2 style="margin-bottom: 1rem;">1️⃣ CSV-Datei laden</h2>
+            <input type="file" id="csvFile" accept=".csv" style="margin-bottom: 1rem;">
+            <button onclick="loadCSV()">CSV laden</button>
+            <div id="csvStatus" style="margin-top: 1rem;"></div>
+        </div>
+
+        <div class="section">
+            <h2 style="margin-bottom: 1rem;">2️⃣ Partner importieren</h2>
+            <div class="progress">
+                <div class="progress-bar" id="progressBar" style="width: 0%;">0%</div>
+            </div>
+            <button onclick="importPartners()" id="importBtn" disabled>Partner importieren</button>
+            <div id="importStatus" style="margin-top: 1rem;"></div>
+        </div>
+
+        <div class="section">
+            <h2 style="margin-bottom: 1rem;">📋 Import Log</h2>
+            <div class="log" id="log"></div>
+        </div>
+    </div>
+
+    <script>
+        let partnersData = [];
+
+        function log(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const logEntry = `[${timestamp}] ${message}`;
+            
+            const logEl = document.getElementById('log');
+            const span = document.createElement('div');
+            span.className = `log-${type}`;
+            span.textContent = logEntry;
+            logEl.appendChild(span);
+            logEl.scrollTop = logEl.scrollHeight;
+            
+            console.log(message);
+        }
+
+        function loadCSV() {
+            const fileInput = document.getElementById('csvFile');
+            const file = fileInput.files[0];
+            
+            if (!file) {
+                alert('Bitte wähle eine CSV-Datei aus!');
+                return;
+            }
+
+            log(`📂 Lade CSV-Datei: ${file.name}`, 'info');
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const text = e.target.result;
+                parseCSV(text);
+            };
+            reader.readAsText(file);
+        }
+
+        function parseCSV(text) {
+            const lines = text.split('\n');
+            const headers = lines[0].split(',').map(h => h.trim().replace(/"/g, ''));
+            
+            log(`📊 CSV Header: ${headers.join(', ')}`, 'info');
+            log(`📊 Total Zeilen: ${lines.length - 1}`, 'info');
+
+            partnersData = [];
+
+            for (let i = 1; i < lines.length; i++) {
+                if (!lines[i].trim()) continue;
+
+                // Parse CSV line (handle commas in quotes)
+                const values = [];
+                let current = '';
+                let inQuotes = false;
+                
+                for (let char of lines[i]) {
+                    if (char === '"') {
+                        inQuotes = !inQuotes;
+                    } else if (char === ',' && !inQuotes) {
+                        values.push(current.trim());
+                        current = '';
+                    } else {
+                        current += char;
+                    }
+                }
+                values.push(current.trim());
+
+                const partner = {
+                    email: values[0]?.replace(/"/g, '') || '',
+                    vorname: values[1]?.replace(/"/g, '') || '',
+                    nachname: values[2]?.replace(/"/g, '') || '',
+                    adresse: values[3]?.replace(/"/g, '') || '',
+                    firma: values[4]?.replace(/"/g, '') || '',
+                    land: values[5]?.replace(/"/g, '') || 'DE',
+                    telefon: values[6]?.replace(/"/g, '') || '',
+                    stadt: values[8]?.replace(/"/g, '') || '',
+                    plz: values[9]?.replace(/"/g, '') || '',
+                    bundesland: values[10]?.replace(/"/g, '') || '',
+                    website: values[11]?.replace(/"/g, '') || '',
+                    facebook: values[12]?.replace(/"/g, '') || '',
+                    youtube: values[13]?.replace(/"/g, '') || '',
+                    instagram: values[14]?.replace(/"/g, '') || '',
+                    tiktok: values[15]?.replace(/"/g, '') || '',
+                    referral_code: values[21]?.replace(/"/g, '') || '',
+                    status: values[25]?.replace(/"/g, '') || 'aktiv',
+                    erstellt_am: values[26]?.replace(/"/g, '') || new Date().toISOString(),
+                    // Zusätzliche Felder für Datenbank
+                    modell: 'Affiliate Marketing',
+                    tarif: 'basic',
+                    passwort: 'Partner2024!',
+                    onboarding_termin: false,
+                    onboarding_dokumente: false,
+                    onboarding_ausweis: false,
+                    onboarding_bank: false,
+                    onboarding_akademie: false,
+                    onboarding_abschluss: false,
+                    verifiziert: false
+                };
+
+                if (partner.email) {
+                    partnersData.push(partner);
+                }
+            }
+
+            log(`✅ CSV erfolgreich geparst!`, 'success');
+            log(`📊 ${partnersData.length} Partner gefunden`, 'success');
+
+            document.getElementById('csvStatus').innerHTML = `
+                <div style="background: #c6f6d5; color: #22543d; padding: 1rem; border-radius: 8px; font-weight: 600;">
+                    ✅ ${partnersData.length} Partner aus CSV geladen!
+                </div>
+            `;
+
+            document.getElementById('importBtn').disabled = false;
+        }
+
+        async function importPartners() {
+            if (partnersData.length === 0) {
+                alert('Bitte zuerst CSV-Datei laden!');
+                return;
+            }
+
+            const importBtn = document.getElementById('importBtn');
+            importBtn.disabled = true;
+            importBtn.textContent = 'Import läuft...';
+
+            log(`🚀 Starte Import von ${partnersData.length} Partnern`, 'info');
+
+            let imported = 0;
+            let errors = 0;
+
+            for (let i = 0; i < partnersData.length; i++) {
+                const partner = partnersData[i];
+                const progress = Math.round(((i + 1) / partnersData.length) * 100);
+
+                // Update Progress Bar
+                document.getElementById('progressBar').style.width = `${progress}%`;
+                document.getElementById('progressBar').textContent = `${progress}%`;
+
+                try {
+                    const response = await fetch('tables/partners', {
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify(partner)
+                    });
+
+                    if (response.ok) {
+                        imported++;
+                        if (i % 10 === 0) { // Log alle 10 Partner
+                            log(`✅ ${imported}/${partnersData.length} Partner importiert...`, 'success');
+                        }
+                    } else {
+                        errors++;
+                        log(`❌ Fehler bei ${partner.email}: HTTP ${response.status}`, 'error');
+                    }
+                } catch (error) {
+                    errors++;
+                    log(`❌ Fehler bei ${partner.email}: ${error.message}`, 'error');
+                }
+
+                // Kleine Pause um Server nicht zu überlasten
+                if (i % 50 === 0 && i > 0) {
+                    await new Promise(resolve => setTimeout(resolve, 1000));
+                }
+            }
+
+            log(`🎉 Import abgeschlossen!`, 'success');
+            log(`✅ Erfolgreich: ${imported}`, 'success');
+            log(`❌ Fehler: ${errors}`, errors > 0 ? 'error' : 'info');
+
+            document.getElementById('importStatus').innerHTML = `
+                <div style="background: ${errors > 0 ? '#feebc8' : '#c6f6d5'}; color: ${errors > 0 ? '#7c2d12' : '#22543d'}; padding: 1rem; border-radius: 8px; font-weight: 600;">
+                    🎉 Import abgeschlossen!<br>
+                    ✅ Erfolgreich: ${imported}<br>
+                    ${errors > 0 ? `❌ Fehler: ${errors}` : ''}
+                </div>
+            `;
+
+            importBtn.textContent = 'Import abgeschlossen!';
+        }
+    </script>
+</body>
+</html>

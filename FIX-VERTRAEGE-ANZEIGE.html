@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔧 FIX: Verträge-Anzeige Test</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: white;
+        }
+        .container { max-width: 1400px; margin: 0 auto; }
+        h1 { text-align: center; margin-bottom: 20px; }
+        .card {
+            background: rgba(255,255,255,0.05);
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        .btn {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 14px 28px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            margin: 8px;
+            transition: all 0.3s;
+        }
+        .btn:hover { transform: scale(1.05); }
+        .btn-green { background: linear-gradient(135deg, #00b894, #00cec9); }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 16px;
+            margin: 20px 0;
+        }
+        .stat-card {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+        }
+        .stat-value { font-size: 32px; font-weight: 800; }
+        .stat-label { font-size: 13px; opacity: 0.9; margin-top: 4px; }
+        .partner-card {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            margin-bottom: 12px;
+        }
+        .partner-header {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 16px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+        }
+        .partner-header:hover { filter: brightness(1.1); }
+        .partner-content {
+            padding: 16px;
+            display: none;
+            background: #f8f9fa;
+            color: #333;
+        }
+        .partner-content.show { display: block; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { padding: 10px; text-align: left; border-bottom: 1px solid #e0e0e0; }
+        th { background: #f0f0f0; font-weight: 600; }
+        .badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+            color: white;
+        }
+        .badge-neu { background: #e84393; }
+        .badge-aktiviert { background: #00b894; }
+        .badge-pruefung { background: #0984e3; }
+        .badge-abgelehnt { background: #d63031; }
+        .provision { color: #00b894; font-weight: 700; }
+        #log {
+            background: #0f0f1a;
+            padding: 16px;
+            border-radius: 8px;
+            font-family: monospace;
+            font-size: 12px;
+            max-height: 300px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+        }
+        .log-success { color: #00ff88; }
+        .log-error { color: #ff4757; }
+        .log-info { color: #74b9ff; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔧 FIX: Verträge-Anzeige Test</h1>
+        
+        <div class="card">
+            <div style="text-align: center;">
+                <button class="btn" onclick="loadAndDisplay()">🔄 Verträge laden & anzeigen</button>
+                <button class="btn btn-green" onclick="window.location.href='admin-dashboard.html'">➡️ Admin-Dashboard öffnen</button>
+            </div>
+        </div>
+        
+        <div id="stats" class="stats-grid"></div>
+        
+        <div class="card">
+            <h2 style="margin-bottom: 16px;"><i class="fas fa-file-contract"></i> Partner-Verträge (wie im Admin-Dashboard)</h2>
+            <div id="partner-vertraege"></div>
+        </div>
+        
+        <div class="card">
+            <h2 style="margin-bottom: 16px;"><i class="fas fa-terminal"></i> Debug-Log</h2>
+            <div id="log"></div>
+        </div>
+    </div>
+
+    <script>
+        const log = (msg, type = 'info') => {
+            const el = document.getElementById('log');
+            const cls = type === 'success' ? 'log-success' : type === 'error' ? 'log-error' : 'log-info';
+            el.innerHTML += `<span class="${cls}">${new Date().toLocaleTimeString()}: ${msg}</span>\n`;
+            el.scrollTop = el.scrollHeight;
+            console.log(msg);
+        };
+        
+        async function loadAndDisplay() {
+            document.getElementById('log').innerHTML = '';
+            document.getElementById('partner-vertraege').innerHTML = '<p>⏳ Lade Verträge...</p>';
+            
+            log('=== STARTE VERTRÄGE-LADEN ===', 'info');
+            
+            try {
+                // 1. Verträge laden
+                log('📥 Rufe API auf: tables/vertragsabschluesse?limit=1000', 'info');
+                const response = await fetch('tables/vertragsabschluesse?limit=1000');
+                log(`📡 HTTP Status: ${response.status} ${response.statusText}`, response.ok ? 'success' : 'error');
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const result = await response.json();
+                const vertraege = result.data || [];
+                
+                log(`✅ ${vertraege.length} Verträge geladen!`, 'success');
+                log(`   Total in DB: ${result.total || 'N/A'}`, 'info');
+                
+                if (vertraege.length === 0) {
+                    log('⚠️ KEINE VERTRÄGE IN DER DATENBANK!', 'error');
+                    document.getElementById('partner-vertraege').innerHTML = '<p style="color: #ff4757;">❌ Keine Verträge gefunden!</p>';
+                    return;
+                }
+                
+                // 2. Nach Partner gruppieren (genau wie im Admin-Dashboard)
+                log('🔄 Gruppiere Verträge nach Partner...', 'info');
+                
+                const partnerMap = {};
+                vertraege.forEach(v => {
+                    const email = v.partner_email || 'Unbekannt';
+                    if (!partnerMap[email]) {
+                        partnerMap[email] = {
+                            email: email,
+                            name: v.partner_name || email,
+                            vertraege: [],
+                            anzahl: 0,
+                            gesamtProvision: 0
+                        };
+                    }
+                    partnerMap[email].vertraege.push(v);
+                    partnerMap[email].anzahl++;
+                    partnerMap[email].gesamtProvision += parseFloat(v.gesamt_provision || v.provision || v.provision_betrag || 0);
+                });
+                
+                const partnerGroups = Object.values(partnerMap).sort((a, b) => b.anzahl - a.anzahl);
+                
+                log(`✅ ${partnerGroups.length} Partner-Gruppen erstellt!`, 'success');
+                
+                partnerGroups.forEach((p, i) => {
+                    log(`   ${i+1}. ${p.name} (${p.email}): ${p.anzahl} Verträge, ${p.gesamtProvision.toFixed(2)}€`, 'info');
+                });
+                
+                // 3. Stats anzeigen
+                const gesamtProvision = vertraege.reduce((sum, v) => sum + parseFloat(v.gesamt_provision || v.provision || 0), 0);
+                const aktiviert = vertraege.filter(v => v.vertrag_status === 'aktiviert').length;
+                const neu = vertraege.filter(v => v.vertrag_status === 'neu_eingegangen' || v.vertrag_status === 'neu').length;
+                
+                document.getElementById('stats').innerHTML = `
+                    <div class="stat-card">
+                        <div class="stat-value">${vertraege.length}</div>
+                        <div class="stat-label">📄 Verträge gesamt</div>
+                    </div>
+                    <div class="stat-card" style="background: linear-gradient(135deg, #00b894, #00cec9);">
+                        <div class="stat-value">${partnerGroups.length}</div>
+                        <div class="stat-label">👥 Partner</div>
+                    </div>
+                    <div class="stat-card" style="background: linear-gradient(135deg, #e84393, #fd79a8);">
+                        <div class="stat-value">${neu}</div>
+                        <div class="stat-label">🔥 Neu eingegangen</div>
+                    </div>
+                    <div class="stat-card" style="background: linear-gradient(135deg, #00b894, #55efc4);">
+                        <div class="stat-value">${aktiviert}</div>
+                        <div class="stat-label">✅ Aktiviert</div>
+                    </div>
+                    <div class="stat-card" style="background: linear-gradient(135deg, #fdcb6e, #f39c12);">
+                        <div class="stat-value">${gesamtProvision.toFixed(0)}€</div>
+                        <div class="stat-label">💰 Provision</div>
+                    </div>
+                `;
+                
+                // 4. Partner-Karten rendern (wie im Admin-Dashboard)
+                log('🎨 Rendere Partner-Karten...', 'info');
+                
+                let html = '';
+                partnerGroups.forEach((partner, index) => {
+                    html += `
+                        <div class="partner-card">
+                            <div class="partner-header" onclick="togglePartner(${index})">
+                                <div style="display: flex; align-items: center; gap: 12px;">
+                                    <div style="width: 44px; height: 44px; background: rgba(255,255,255,0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: 700;">
+                                        ${partner.name.charAt(0).toUpperCase()}
+                                    </div>
+                                    <div>
+                                        <div style="font-size: 16px; font-weight: 700;">${partner.name}</div>
+                                        <div style="font-size: 12px; opacity: 0.9;">${partner.email}</div>
+                                    </div>
+                                </div>
+                                <div style="display: flex; gap: 20px; align-items: center;">
+                                    <div style="text-align: center;">
+                                        <div style="font-size: 24px; font-weight: 700;">${partner.anzahl}</div>
+                                        <div style="font-size: 11px;">Verträge</div>
+                                    </div>
+                                    <div style="text-align: center;">
+                                        <div style="font-size: 24px; font-weight: 700;">${partner.gesamtProvision.toFixed(2)}€</div>
+                                        <div style="font-size: 11px;">Provision</div>
+                                    </div>
+                                    <i class="fas fa-chevron-down" id="icon-${index}"></i>
+                                </div>
+                            </div>
+                            <div class="partner-content" id="content-${index}">
+                                <table>
+                                    <thead>
+                                        <tr>
+                                            <th>Vertragsnr.</th>
+                                            <th>Datum</th>
+                                            <th>Kunde</th>
+                                            <th>Kategorie</th>
+                                            <th>Provision</th>
+                                            <th>Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        ${partner.vertraege.map(v => {
+                                            const datum = v.erstellt_am ? new Date(v.erstellt_am).toLocaleDateString('de-DE') : 'N/A';
+                                            const kunde = v.kunde_name || ((v.kunde_vorname || '') + ' ' + (v.kunde_nachname || '')).trim() || 'N/A';
+                                            const provision = parseFloat(v.gesamt_provision || v.provision || 0);
+                                            
+                                            let badge = '<span class="badge badge-neu">NEU</span>';
+                                            if (v.vertrag_status === 'aktiviert') badge = '<span class="badge badge-aktiviert">AKTIVIERT</span>';
+                                            else if (v.vertrag_status === 'in_pruefung') badge = '<span class="badge badge-pruefung">IN PRÜFUNG</span>';
+                                            else if (v.vertrag_status === 'abgelehnt') badge = '<span class="badge badge-abgelehnt">ABGELEHNT</span>';
+                                            
+                                            return `<tr>
+                                                <td><strong>${v.vertragsnummer || 'N/A'}</strong></td>
+                                                <td>${datum}</td>
+                                                <td>${kunde}</td>
+                                                <td>${v.kategorie || 'N/A'}</td>
+                                                <td class="provision">${provision.toFixed(2)}€</td>
+                                                <td>${badge}</td>
+                                            </tr>`;
+                                        }).join('')}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    `;
+                });
+                
+                document.getElementById('partner-vertraege').innerHTML = html;
+                log('✅ FERTIG! Alle Verträge werden angezeigt.', 'success');
+                log('=== WENN DU DAS SIEHST, FUNKTIONIERT DIE LOGIK ===', 'success');
+                
+            } catch (error) {
+                log(`❌ FEHLER: ${error.message}`, 'error');
+                document.getElementById('partner-vertraege').innerHTML = `<p style="color: #ff4757;">❌ Fehler: ${error.message}</p>`;
+            }
+        }
+        
+        function togglePartner(index) {
+            const content = document.getElementById(`content-${index}`);
+            const icon = document.getElementById(`icon-${index}`);
+            content.classList.toggle('show');
+            icon.style.transform = content.classList.contains('show') ? 'rotate(180deg)' : '';
+        }
+        
+        // Auto-load
+        document.addEventListener('DOMContentLoaded', loadAndDisplay);
+    </script>
+</body>
+</html>

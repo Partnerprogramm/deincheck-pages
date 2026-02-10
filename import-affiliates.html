@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Affiliate Partner Import - DeinCheck</title>
+    <link rel="icon" type="image/png" href="images/favicon-admin.png">
+    <link rel="apple-touch-icon" href="images/favicon-admin.png">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 2rem;
+        }
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.3);
+        }
+        h1 {
+            color: #4c1d95;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .info-box {
+            background: #ede9fe;
+            border: 2px solid #8b5cf6;
+            border-radius: 10px;
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        .info-box h3 { color: #5b21b6; margin-bottom: 0.5rem; }
+        .info-box ul { margin-left: 1.5rem; color: #4c1d95; }
+        .upload-area {
+            border: 3px dashed #8b5cf6;
+            border-radius: 15px;
+            padding: 2rem;
+            text-align: center;
+            background: #faf5ff;
+            margin-bottom: 1.5rem;
+            transition: all 0.3s;
+        }
+        .upload-area:hover { background: #ede9fe; border-color: #7c3aed; }
+        .upload-area.dragover { background: #ddd6fe; border-color: #6d28d9; }
+        .upload-area input[type="file"] { display: none; }
+        .upload-btn {
+            display: inline-block;
+            background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+            color: white;
+            padding: 1rem 2rem;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 1.1rem;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        .upload-btn:hover { transform: translateY(-2px); box-shadow: 0 10px 20px rgba(124,58,237,0.4); }
+        .preview-area {
+            display: none;
+            background: #f8fafc;
+            border-radius: 10px;
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .preview-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.85rem;
+        }
+        .preview-table th, .preview-table td {
+            padding: 0.5rem;
+            border: 1px solid #e2e8f0;
+            text-align: left;
+        }
+        .preview-table th { background: #8b5cf6; color: white; position: sticky; top: 0; }
+        .preview-table tr:nth-child(even) { background: #f1f5f9; }
+        .start-btn {
+            width: 100%;
+            padding: 1.2rem;
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.2rem;
+            font-weight: 700;
+            cursor: pointer;
+            display: none;
+            transition: all 0.3s;
+        }
+        .start-btn:hover { transform: translateY(-2px); box-shadow: 0 10px 20px rgba(16,185,129,0.4); }
+        .start-btn:disabled { background: #9ca3af; cursor: not-allowed; transform: none; box-shadow: none; }
+        .progress-area {
+            display: none;
+            background: #f8fafc;
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin-top: 1.5rem;
+        }
+        .progress-bar-container {
+            background: #e2e8f0;
+            border-radius: 10px;
+            height: 30px;
+            overflow: hidden;
+            margin-bottom: 1rem;
+        }
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #8b5cf6, #7c3aed);
+            width: 0%;
+            transition: width 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+        }
+        .status-log {
+            background: #1f2937;
+            color: #10b981;
+            border-radius: 8px;
+            padding: 1rem;
+            font-family: monospace;
+            font-size: 0.85rem;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        .status-log .error { color: #ef4444; }
+        .status-log .info { color: #60a5fa; }
+        .status-log .success { color: #10b981; }
+        .results-area {
+            display: none;
+            margin-top: 1.5rem;
+        }
+        .result-card {
+            display: inline-block;
+            padding: 1rem 1.5rem;
+            border-radius: 10px;
+            margin: 0.5rem;
+            font-weight: 600;
+            text-align: center;
+        }
+        .result-imported { background: #d1fae5; color: #065f46; }
+        .result-updated { background: #dbeafe; color: #1e40af; }
+        .result-skipped { background: #fef3c7; color: #92400e; }
+        .result-errors { background: #fee2e2; color: #991b1b; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1><i class="fas fa-users-cog"></i> Affiliate Partner Import</h1>
+        
+        <div class="info-box">
+            <h3><i class="fas fa-info-circle"></i> CSV-Format Anforderungen</h3>
+            <ul>
+                <li><strong>Email</strong> (Pflicht) - E-Mail Adresse</li>
+                <li><strong>First Name / Vorname</strong> - Vorname</li>
+                <li><strong>Last Name / Nachname</strong> - Nachname</li>
+                <li><strong>Phone / Telefon</strong> - Telefonnummer</li>
+                <li><strong>Address / Adresse</strong> - Straße</li>
+                <li><strong>City / Stadt</strong> - Stadt</li>
+                <li><strong>Zipcode / PLZ</strong> - Postleitzahl</li>
+                <li><strong>Country / Land</strong> - Land</li>
+                <li><strong>Referral code</strong> - Affiliate-Code</li>
+                <li><strong>Standard link</strong> - Affiliate-Link</li>
+            </ul>
+            <p style="margin-top: 0.5rem; color: #7c3aed;"><strong>Standardpasswort:</strong> Partner2026! (muss beim ersten Login geändert werden)</p>
+        </div>
+        
+        <div class="upload-area" id="uploadArea">
+            <input type="file" id="csvFile" accept=".csv">
+            <label for="csvFile" class="upload-btn">
+                <i class="fas fa-cloud-upload-alt"></i> CSV-Datei auswählen
+            </label>
+            <p style="margin-top: 1rem; color: #6b7280;">oder Datei hierher ziehen</p>
+        </div>
+        
+        <div class="preview-area" id="previewArea">
+            <h3 style="margin-bottom: 1rem; color: #4c1d95;"><i class="fas fa-eye"></i> Vorschau (erste 5 Einträge)</h3>
+            <table class="preview-table" id="previewTable"></table>
+        </div>
+        
+        <button class="start-btn" id="startBtn" onclick="startImport()">
+            <i class="fas fa-rocket"></i> Import starten
+        </button>
+        
+        <div class="progress-area" id="progressArea">
+            <h3 style="margin-bottom: 1rem; color: #4c1d95;"><i class="fas fa-cog fa-spin"></i> Import läuft...</h3>
+            <div class="progress-bar-container">
+                <div class="progress-bar" id="progressBar">0%</div>
+            </div>
+            <div class="status-log" id="statusLog"></div>
+        </div>
+        
+        <div class="results-area" id="resultsArea">
+            <h3 style="margin-bottom: 1rem; color: #4c1d95;"><i class="fas fa-chart-bar"></i> Import-Ergebnis</h3>
+            <div id="resultCards"></div>
+        </div>
+    </div>
+
+    <script>
+        let parsedData = [];
+        let headers = [];
+        
+        // Drag & Drop
+        const uploadArea = document.getElementById('uploadArea');
+        const csvFile = document.getElementById('csvFile');
+        
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        });
+        
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('dragover');
+        });
+        
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            const file = e.dataTransfer.files[0];
+            if (file && file.name.endsWith('.csv')) {
+                processFile(file);
+            } else {
+                alert('Bitte nur CSV-Dateien hochladen!');
+            }
+        });
+        
+        csvFile.addEventListener('change', (e) => {
+            if (e.target.files[0]) {
+                processFile(e.target.files[0]);
+            }
+        });
+        
+        // CSV Parser - RFC 4180 kompatibel
+        function parseCSVLine(line) {
+            const result = [];
+            let current = '';
+            let inQuotes = false;
+            
+            for (let i = 0; i < line.length; i++) {
+                const char = line[i];
+                const nextChar = line[i + 1];
+                
+                if (inQuotes) {
+                    if (char === '"' && nextChar === '"') {
+                        current += '"';
+                        i++;
+                    } else if (char === '"') {
+                        inQuotes = false;
+                    } else {
+                        current += char;
+                    }
+                } else {
+                    if (char === '"') {
+                        inQuotes = true;
+                    } else if (char === ',') {
+                        result.push(current.trim());
+                        current = '';
+                    } else {
+                        current += char;
+                    }
+                }
+            }
+            result.push(current.trim());
+            return result;
+        }
+        
+        function processFile(file) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const content = e.target.result;
+                const lines = content.split(/\r?\n/).filter(line => line.trim());
+                
+                if (lines.length < 2) {
+                    alert('CSV muss mindestens eine Kopfzeile und eine Datenzeile haben!');
+                    return;
+                }
+                
+                // Header parsen
+                headers = parseCSVLine(lines[0]).map(h => h.toLowerCase().replace(/"/g, '').trim());
+                console.log('📋 Erkannte Header:', headers);
+                
+                // Daten parsen
+                parsedData = [];
+                for (let i = 1; i < lines.length; i++) {
+                    const values = parseCSVLine(lines[i]);
+                    const row = {};
+                    headers.forEach((header, idx) => {
+                        row[header] = values[idx] || '';
+                    });
+                    
+                    // Nur Zeilen mit E-Mail behalten
+                    const email = getFieldValue(row, ['email', 'e-mail', 'email address']);
+                    if (email && email.includes('@')) {
+                        parsedData.push(row);
+                    }
+                }
+                
+                console.log('✅ Geparste Partner:', parsedData.length);
+                
+                // Vorschau anzeigen
+                showPreview();
+                document.getElementById('startBtn').style.display = 'block';
+            };
+            reader.readAsText(file, 'UTF-8');
+        }
+        
+        function getFieldValue(row, possibleKeys) {
+            for (const key of possibleKeys) {
+                // Exakte Übereinstimmung
+                if (row[key] && row[key].trim()) return row[key].trim();
+                
+                // Partial match
+                for (const rowKey in row) {
+                    if (rowKey.includes(key) && row[rowKey] && row[rowKey].trim()) {
+                        return row[rowKey].trim();
+                    }
+                }
+            }
+            return '';
+        }
+        
+        function showPreview() {
+            const previewArea = document.getElementById('previewArea');
+            const previewTable = document.getElementById('previewTable');
+            
+            // Wichtige Felder für Vorschau
+            const importantFields = ['Email', 'Vorname', 'Nachname', 'Telefon', 'Stadt', 'Referral Code'];
+            
+            let html = '<thead><tr>';
+            importantFields.forEach(f => html += `<th>${f}</th>`);
+            html += '</tr></thead><tbody>';
+            
+            // Erste 5 Einträge
+            const preview = parsedData.slice(0, 5);
+            preview.forEach(row => {
+                html += '<tr>';
+                html += `<td>${getFieldValue(row, ['email', 'e-mail'])}</td>`;
+                html += `<td>${getFieldValue(row, ['first name', 'firstname', 'vorname'])}</td>`;
+                html += `<td>${getFieldValue(row, ['last name', 'lastname', 'nachname'])}</td>`;
+                html += `<td>${getFieldValue(row, ['phone', 'telefon', 'tel'])}</td>`;
+                html += `<td>${getFieldValue(row, ['city', 'stadt', 'ort'])}</td>`;
+                html += `<td>${getFieldValue(row, ['referral code', 'referral_code'])}</td>`;
+                html += '</tr>';
+            });
+            
+            html += '</tbody>';
+            previewTable.innerHTML = html;
+            previewArea.style.display = 'block';
+            
+            // Info anzeigen
+            alert(`✅ ${parsedData.length} Partner gefunden!\n\nKlicke auf "Import starten" um fortzufahren.`);
+        }
+        
+        async function startImport() {
+            const startBtn = document.getElementById('startBtn');
+            const progressArea = document.getElementById('progressArea');
+            const progressBar = document.getElementById('progressBar');
+            const statusLog = document.getElementById('statusLog');
+            const resultsArea = document.getElementById('resultsArea');
+            
+            startBtn.disabled = true;
+            progressArea.style.display = 'block';
+            statusLog.innerHTML = '';
+            
+            let imported = 0, updated = 0, skipped = 0, errors = 0;
+            
+            log('🚀 Import gestartet mit ' + parsedData.length + ' Partnern...', 'info');
+            
+            // Existierende Partner laden
+            log('📥 Lade existierende Partner...', 'info');
+            let existingEmails = new Set();
+            let existingPartners = {};
+            
+            try {
+                const response = await fetch('tables/partners?limit=5000&_t=' + Date.now());
+                const data = await response.json();
+                if (data.data) {
+                    data.data.forEach(p => {
+                        const email = (p.email || '').toLowerCase();
+                        existingEmails.add(email);
+                        existingPartners[email] = p;
+                    });
+                }
+                log(`✅ ${existingEmails.size} existierende Partner gefunden`, 'success');
+            } catch (e) {
+                log('⚠️ Konnte existierende Partner nicht laden: ' + e.message, 'error');
+            }
+            
+            // Import durchführen
+            for (let i = 0; i < parsedData.length; i++) {
+                const row = parsedData[i];
+                const progress = Math.round(((i + 1) / parsedData.length) * 100);
+                progressBar.style.width = progress + '%';
+                progressBar.textContent = progress + '%';
+                
+                const email = getFieldValue(row, ['email', 'e-mail', 'email address']).toLowerCase();
+                
+                if (!email) {
+                    errors++;
+                    log(`❌ Zeile ${i + 1}: Keine E-Mail gefunden`, 'error');
+                    continue;
+                }
+                
+                // Partner-Daten zusammenstellen
+                const partnerData = {
+                    email: email,
+                    passwort: 'Partner2026!',
+                    passwort_muss_geaendert_werden: true,
+                    vorname: getFieldValue(row, ['first name', 'firstname', 'vorname']),
+                    nachname: getFieldValue(row, ['last name', 'lastname', 'nachname']),
+                    phone: getFieldValue(row, ['phone', 'telefon', 'tel', 'mobile', 'telefonnummer']),
+                    adresse: getFieldValue(row, ['address', 'adresse', 'strasse', 'street']),
+                    plz: getFieldValue(row, ['zipcode', 'zip', 'plz', 'postleitzahl']),
+                    stadt: getFieldValue(row, ['city', 'stadt', 'ort']),
+                    land: getFieldValue(row, ['country', 'land']) || 'DE',
+                    bundesland: getFieldValue(row, ['state', 'bundesland']),
+                    firma: getFieldValue(row, ['company', 'firma']),
+                    website: getFieldValue(row, ['website', 'webseite', 'url']),
+                    facebook: getFieldValue(row, ['facebook']),
+                    instagram: getFieldValue(row, ['instagram']),
+                    youtube: getFieldValue(row, ['youtube']),
+                    tiktok: getFieldValue(row, ['tiktok']),
+                    referral_code: getFieldValue(row, ['referral code', 'referral_code', 'ref_code']),
+                    standard_link: getFieldValue(row, ['standard link', 'standard_link', 'affiliate_link']),
+                    shortlink: getFieldValue(row, ['shortlink', 'short_link']),
+                    netzwerk_link: getFieldValue(row, ['network link', 'network_link', 'register link']),
+                    parent_name: getFieldValue(row, ['parent name', 'parent_name']),
+                    parent_email: getFieldValue(row, ['parent email', 'parent_email']),
+                    zahlungsmethode: getFieldValue(row, ['payment method', 'payment_method', 'zahlungsmethode']),
+                    zahlungsinfo: getFieldValue(row, ['payment info', 'payment_info', 'zahlungsinfo']),
+                    coupons: getFieldValue(row, ['coupons']),
+                    zusatz_infos: getFieldValue(row, ['additional infos', 'additional_infos', 'personal detail']),
+                    status: getFieldValue(row, ['status']) || 'Approved',
+                    ist_affiliate: true,
+                    aktiv: true,
+                    tarif: 'affiliate',
+                    geschaeftsmodell: 'affiliate',
+                    registriert_am: Date.now(),
+                    onboarding_abgeschlossen: false,
+                    erster_vertrag_abgeschlossen: false
+                };
+                
+                try {
+                    if (existingEmails.has(email)) {
+                        // Partner existiert - UPDATE
+                        const existingPartner = existingPartners[email];
+                        const updateResponse = await fetch(`tables/partners/${existingPartner.id}`, {
+                            method: 'PATCH',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(partnerData)
+                        });
+                        
+                        if (updateResponse.ok) {
+                            updated++;
+                            log(`🔄 ${email} aktualisiert`, 'info');
+                        } else {
+                            throw new Error('Update fehlgeschlagen');
+                        }
+                    } else {
+                        // Neuer Partner - CREATE
+                        const createResponse = await fetch('tables/partners', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(partnerData)
+                        });
+                        
+                        if (createResponse.ok || createResponse.status === 201) {
+                            imported++;
+                            existingEmails.add(email);
+                            log(`✅ ${email} importiert`, 'success');
+                        } else {
+                            throw new Error('Create fehlgeschlagen: ' + createResponse.status);
+                        }
+                    }
+                } catch (e) {
+                    errors++;
+                    log(`❌ ${email}: ${e.message}`, 'error');
+                }
+                
+                // Kleine Pause
+                await new Promise(r => setTimeout(r, 50));
+            }
+            
+            // Ergebnis anzeigen
+            log('🎉 Import abgeschlossen!', 'success');
+            progressBar.style.width = '100%';
+            progressBar.textContent = '100%';
+            progressBar.style.background = 'linear-gradient(90deg, #10b981, #059669)';
+            
+            resultsArea.style.display = 'block';
+            document.getElementById('resultCards').innerHTML = `
+                <div class="result-card result-imported">
+                    <i class="fas fa-plus-circle"></i><br>
+                    <span style="font-size: 2rem;">${imported}</span><br>
+                    Neu importiert
+                </div>
+                <div class="result-card result-updated">
+                    <i class="fas fa-sync-alt"></i><br>
+                    <span style="font-size: 2rem;">${updated}</span><br>
+                    Aktualisiert
+                </div>
+                <div class="result-card result-skipped">
+                    <i class="fas fa-forward"></i><br>
+                    <span style="font-size: 2rem;">${skipped}</span><br>
+                    Übersprungen
+                </div>
+                <div class="result-card result-errors">
+                    <i class="fas fa-exclamation-triangle"></i><br>
+                    <span style="font-size: 2rem;">${errors}</span><br>
+                    Fehler
+                </div>
+            `;
+            
+            startBtn.disabled = false;
+            startBtn.innerHTML = '<i class="fas fa-redo"></i> Erneut importieren';
+        }
+        
+        function log(message, type = '') {
+            const statusLog = document.getElementById('statusLog');
+            const time = new Date().toLocaleTimeString();
+            statusLog.innerHTML += `<div class="${type}">[${time}] ${message}</div>`;
+            statusLog.scrollTop = statusLog.scrollHeight;
+        }
+    </script>
+</body>
+</html>

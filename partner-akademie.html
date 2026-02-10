@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Partner Akademie - DeinCheck</title>
+    <link rel="icon" type="image/png" href="images/favicon-partner.png">
+    <link rel="apple-touch-icon" href="images/favicon-partner.png">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #f7fafc;
+            color: #2d3748;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #3b82f6, #60a5fa);
+            color: white;
+            padding: 40px;
+            border-radius: 16px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+
+        .back-btn {
+            background: white;
+            color: #3b82f6;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            margin-bottom: 20px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .back-btn:hover {
+            background: #f7fafc;
+        }
+
+        .modules-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+
+        .module-card {
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+            transition: all 0.3s;
+            cursor: pointer;
+            border: 2px solid transparent;
+        }
+
+        .module-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 24px rgba(102, 126, 234, 0.3);
+            border-color: #3b82f6;
+        }
+
+        .module-icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+        }
+
+        .module-card h3 {
+            font-size: 20px;
+            margin-bottom: 12px;
+            color: #2d3748;
+        }
+
+        .module-meta {
+            display: flex;
+            gap: 16px;
+            font-size: 14px;
+            color: #718096;
+            margin-top: 12px;
+        }
+
+        .btn-primary {
+            background: #3b82f6;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            margin-top: 12px;
+            width: 100%;
+        }
+
+        .btn-primary:hover {
+            background: #5568d3;
+        }
+
+        .lektionen-container,
+        .lektion-detail {
+            display: none;
+            background: white;
+            border-radius: 16px;
+            padding: 32px;
+            margin-bottom: 20px;
+        }
+
+        .lektionen-container.active,
+        .lektion-detail.active {
+            display: block;
+        }
+
+        .lektion-item {
+            background: #f7fafc;
+            padding: 16px;
+            border-radius: 10px;
+            margin-bottom: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .lektion-item:hover {
+            background: #edf2f7;
+            transform: translateX(4px);
+        }
+
+        .lektion-content {
+            line-height: 1.8;
+        }
+
+        .lektion-content h2 {
+            color: #3b82f6;
+            margin: 24px 0 12px 0;
+        }
+
+        .lektion-content p {
+            margin-bottom: 16px;
+        }
+
+        .lektion-content ul {
+            margin-left: 24px;
+            margin-bottom: 16px;
+        }
+
+        .lektion-content li {
+            margin-bottom: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <button class="back-btn" onclick="window.location.href='partner-dashboard.html'">
+            <i class="fas fa-arrow-left"></i> Zurück zum Dashboard
+        </button>
+
+        <div class="header">
+            <h1>🎓 Partner Akademie</h1>
+            <p>Werde zum Experten! Absolviere Module und sammle Zertifikate.</p>
+        </div>
+
+        <!-- MODULE GRID -->
+        <div id="modules-view">
+            <h2 style="margin-bottom: 20px; font-size: 24px;">📚 Verfügbare Module</h2>
+            <div class="modules-grid" id="modulesGrid">
+                <!-- Module werden hier eingefügt -->
+            </div>
+        </div>
+
+        <!-- LEKTIONEN LISTE -->
+        <div class="lektionen-container" id="lektionenContainer">
+            <button class="back-btn" onclick="backToModules()">
+                <i class="fas fa-arrow-left"></i> Zurück zu Modulen
+            </button>
+            <h2 id="modulTitle" style="margin-bottom: 20px;">Lektionen</h2>
+            <div id="lektionenList"></div>
+        </div>
+
+        <!-- LEKTION DETAIL -->
+        <div class="lektion-detail" id="lektionDetail">
+            <button class="back-btn" onclick="backToLektionen()">
+                <i class="fas fa-arrow-left"></i> Zurück zu Lektionen
+            </button>
+            <div id="lektionContent"></div>
+        </div>
+    </div>
+
+    <script>
+        console.log('🎓 Akademie Script startet...');
+
+        // EINFACHE MODULE DATEN
+        const modules = [
+            {
+                id: 'mobilfunk',
+                icon: '📱',
+                name: 'Mobilfunk-Experte',
+                beschreibung: 'Lerne alles über Mobilfunk-Tarife',
+                lektionen: 5,
+                dauer: '2 Std',
+                lektionenList: [
+                    {
+                        id: 1,
+                        titel: 'Grundlagen Mobilfunk',
+                        inhalt: '<h2>📱 Grundlagen Mobilfunk</h2><p>Ein Mobilfunk-Tarif ist ein Vertrag zwischen Kunde und Anbieter. Die drei Haupt-Tarifarten sind:</p><ul><li><strong>Prepaid:</strong> Vorauszahlung, keine Vertragsbindung</li><li><strong>Postpaid:</strong> Monatliche Abrechnung, meist 24 Monate</li><li><strong>Flex-Tarife:</strong> Monatlich kündbar</li></ul><p>Als Berater musst du diese Unterschiede kennen!</p>'
+                    },
+                    {
+                        id: 2,
+                        titel: 'Provider-Vergleich',
+                        inhalt: '<h2>📊 Provider-Vergleich</h2><p>Die großen deutschen Provider im Vergleich:</p><ul><li><strong>Telekom:</strong> Bestes Netz, höchster Preis</li><li><strong>Vodafone:</strong> Gutes Netz, mittlerer Preis</li><li><strong>O2:</strong> Günstigster Preis, schwächeres Netz</li></ul><p>Empfehle je nach Kundenbedarf!</p>'
+                    },
+                    {
+                        id: 3,
+                        titel: 'Datenvolumen beraten',
+                        inhalt: '<h2>💾 Datenvolumen beraten</h2><p>Richtwerte für Datenvolumen:</p><ul><li><strong>Wenignutzer:</strong> 3-5 GB/Monat</li><li><strong>Normalnutzer:</strong> 10-20 GB/Monat</li><li><strong>Vielnutzer:</strong> 30+ GB/Monat</li><li><strong>Streaming-Fans:</strong> Unlimited empfehlen</li></ul><p>Frage immer nach der Nutzung!</p>'
+                    }
+                ]
+            },
+            {
+                id: 'dsl',
+                icon: '🌐',
+                name: 'DSL & Internet',
+                beschreibung: 'Werde zum Internet-Berater',
+                lektionen: 4,
+                dauer: '1.5 Std',
+                lektionenList: [
+                    {
+                        id: 1,
+                        titel: 'DSL-Basics',
+                        inhalt: '<h2>🌐 DSL Grundlagen</h2><p>DSL steht für "Digital Subscriber Line" und nutzt Telefonleitungen.</p><p><strong>Geschwindigkeiten:</strong></p><ul><li>16 Mbit/s: Basis-Surfen</li><li>50 Mbit/s: Standard für Familien</li><li>100-250 Mbit/s: Streaming & Gaming</li><li>1000 Mbit/s: Glasfaser für Profis</li></ul>'
+                    },
+                    {
+                        id: 2,
+                        titel: 'Kabel vs DSL',
+                        inhalt: '<h2>⚡ Kabel vs DSL</h2><p><strong>Kabel:</strong> Schneller, aber geteilte Leitung mit Nachbarn</p><p><strong>DSL:</strong> Langsamer, aber stabile Leitung</p><p><strong>Glasfaser:</strong> Schnellste und stabilste Lösung</p>'
+                    }
+                ]
+            },
+            {
+                id: 'strom',
+                icon: '⚡',
+                name: 'Strom & Gas',
+                beschreibung: 'Energie-Beratung leicht gemacht',
+                lektionen: 3,
+                dauer: '1 Std',
+                lektionenList: [
+                    {
+                        id: 1,
+                        titel: 'Strom-Tarife verstehen',
+                        inhalt: '<h2>⚡ Strom-Tarife</h2><p>Grundpreis + Arbeitspreis = Gesamtkosten</p><ul><li><strong>Grundpreis:</strong> Monatliche Fixkosten</li><li><strong>Arbeitspreis:</strong> Cent pro kWh</li><li><strong>Ökostrom:</strong> Meist nur 1-2€ teurer</li></ul><p>Tipp: Immer Ökostrom empfehlen!</p>'
+                    }
+                ]
+            },
+            {
+                id: 'verkauf',
+                icon: '💼',
+                name: 'Verkaufsprofi',
+                beschreibung: 'Verkaufstechniken & Abschluss',
+                lektionen: 5,
+                dauer: '2 Std',
+                lektionenList: [
+                    {
+                        id: 1,
+                        titel: 'Erstes Kundengespräch',
+                        inhalt: '<h2>💼 Erstes Kundengespräch</h2><p>Die ersten 30 Sekunden entscheiden!</p><ul><li>Freundlich begrüßen</li><li>Offene Fragen stellen</li><li>Aktiv zuhören</li><li>Bedarf ermitteln</li></ul><p><strong>Golden Rule:</strong> Mehr fragen, weniger reden!</p>'
+                    },
+                    {
+                        id: 2,
+                        titel: 'Einwände behandeln',
+                        inhalt: '<h2>🛡️ Einwände behandeln</h2><p>Typische Einwände:</p><ul><li>"Zu teuer" → Wert zeigen</li><li>"Muss überlegen" → Konkreten Termin vereinbaren</li><li>"Kein Interesse" → Bedarfsanalyse vertiefen</li></ul>'
+                    }
+                ]
+            }
+        ];
+
+        let currentModule = null;
+        let currentLektion = null;
+
+        // MODULE ANZEIGEN
+        function showModules() {
+            console.log('📦 Zeige Module...');
+            const grid = document.getElementById('modulesGrid');
+            grid.innerHTML = '';
+
+            modules.forEach(modul => {
+                const card = document.createElement('div');
+                card.className = 'module-card';
+                card.innerHTML = `
+                    <div class="module-icon">${modul.icon}</div>
+                    <h3>${modul.name}</h3>
+                    <p style="color: #718096; font-size: 14px;">${modul.beschreibung}</p>
+                    <div class="module-meta">
+                        <span><i class="fas fa-book"></i> ${modul.lektionen} Lektionen</span>
+                        <span><i class="fas fa-clock"></i> ${modul.dauer}</span>
+                    </div>
+                    <button class="btn-primary">Jetzt starten</button>
+                `;
+                card.onclick = () => openModule(modul);
+                grid.appendChild(card);
+            });
+
+            console.log('✅ Module angezeigt:', modules.length);
+        }
+
+        // MODUL ÖFFNEN
+        function openModule(modul) {
+            console.log('📖 Öffne Modul:', modul.name);
+            currentModule = modul;
+
+            document.getElementById('modules-view').style.display = 'none';
+            document.getElementById('lektionenContainer').classList.add('active');
+            document.getElementById('modulTitle').textContent = modul.name;
+
+            const list = document.getElementById('lektionenList');
+            list.innerHTML = '';
+
+            modul.lektionenList.forEach((lek, index) => {
+                const item = document.createElement('div');
+                item.className = 'lektion-item';
+                item.innerHTML = `
+                    <div>
+                        <strong>${index + 1}. ${lek.titel}</strong>
+                    </div>
+                    <i class="fas fa-arrow-right" style="color: #3b82f6;"></i>
+                `;
+                item.onclick = () => openLektion(lek);
+                list.appendChild(item);
+            });
+        }
+
+        // LEKTION ÖFFNEN
+        function openLektion(lektion) {
+            console.log('📄 Öffne Lektion:', lektion.titel);
+            currentLektion = lektion;
+
+            document.getElementById('lektionenContainer').classList.remove('active');
+            document.getElementById('lektionDetail').classList.add('active');
+
+            document.getElementById('lektionContent').innerHTML = `
+                <div style="background: linear-gradient(135deg, #3b82f6, #60a5fa); color: white; padding: 40px; border-radius: 16px; margin-bottom: 30px; text-align: center;">
+                    <h1 style="margin: 0;">${lektion.titel}</h1>
+                </div>
+                <div class="lektion-content">
+                    ${lektion.inhalt}
+                </div>
+                <button class="btn-primary" onclick="completeLektion()">
+                    <i class="fas fa-check"></i> Lektion abschließen
+                </button>
+            `;
+        }
+
+        // ZURÜCK ZU MODULEN
+        function backToModules() {
+            document.getElementById('lektionenContainer').classList.remove('active');
+            document.getElementById('modules-view').style.display = 'block';
+            currentModule = null;
+        }
+
+        // ZURÜCK ZU LEKTIONEN
+        function backToLektionen() {
+            document.getElementById('lektionDetail').classList.remove('active');
+            document.getElementById('lektionenContainer').classList.add('active');
+            currentLektion = null;
+        }
+
+        // LEKTION ABSCHLIESSEN
+        function completeLektion() {
+            alert('✅ Lektion abgeschlossen!\n\nGut gemacht! Mach weiter mit der nächsten Lektion.');
+            backToLektionen();
+        }
+
+        // BEIM START MODULE ANZEIGEN
+        console.log('🚀 Starte Akademie...');
+        showModules();
+    </script>
+</body>
+</html>

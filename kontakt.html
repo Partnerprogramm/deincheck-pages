@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kontakt - DeinCheck Partnerprogramm</title>
+    <link rel="icon" type="image/png" href="images/favicon-main.png">
+    <link rel="apple-touch-icon" href="images/favicon-main.png">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #3b82f6;
+            --dark: #0f172a;
+            --text: #1e293b;
+            --text-muted: #64748b;
+            --border: #e2e8f0;
+            --bg-light: #f8fafc;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'SF Pro Display', sans-serif;
+            background: #ffffff;
+            color: var(--text);
+            line-height: 1.8;
+        }
+
+        nav {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            background: white;
+            border-bottom: 1px solid var(--border);
+            z-index: 1000;
+            padding: 1rem 0;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--text);
+            text-decoration: none;
+        }
+
+        .logo-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, var(--primary), #8b5cf6);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.25rem;
+        }
+
+        .back-link {
+            color: var(--primary);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .back-link:hover {
+            opacity: 0.8;
+        }
+
+        .content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 8rem 2rem 4rem;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            text-align: center;
+            color: var(--dark);
+        }
+
+        .subtitle {
+            color: var(--text-muted);
+            font-size: 1.1rem;
+            margin-bottom: 4rem;
+            text-align: center;
+        }
+
+        .contact-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-bottom: 4rem;
+        }
+
+        .contact-card {
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 15px;
+            padding: 2rem;
+            text-align: center;
+            transition: all 0.3s;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        .contact-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(59, 130, 246, 0.15);
+            border-color: var(--primary);
+        }
+
+        .contact-icon {
+            width: 70px;
+            height: 70px;
+            margin: 0 auto 1.5rem;
+            background: linear-gradient(135deg, var(--primary), #8b5cf6);
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            color: white;
+        }
+
+        .contact-card h3 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            color: var(--dark);
+        }
+
+        .contact-card p {
+            color: var(--text-muted);
+            margin-bottom: 0.5rem;
+        }
+
+        .contact-card a {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .contact-card a:hover {
+            opacity: 0.8;
+        }
+
+        .headquarters-section {
+            background: var(--bg-light);
+            border-radius: 20px;
+            padding: 3rem;
+            margin-bottom: 4rem;
+            border: 1px solid var(--border);
+        }
+
+        .headquarters-section h2 {
+            font-size: 2rem;
+            margin-bottom: 2rem;
+            text-align: center;
+            color: var(--dark);
+        }
+
+        .headquarters-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            align-items: start;
+        }
+
+        .headquarters-info {
+            padding-right: 2rem;
+        }
+
+        .headquarters-info h3 {
+            font-size: 1.3rem;
+            margin-bottom: 1rem;
+            color: var(--dark);
+        }
+
+        .info-item {
+            display: flex;
+            align-items: start;
+            gap: 1rem;
+            margin-bottom: 1rem;
+            padding: 0.8rem;
+            background: white;
+            border-radius: 10px;
+            border: 1px solid var(--border);
+        }
+
+        .info-item i {
+            color: var(--primary);
+            font-size: 1.2rem;
+            width: 24px;
+            flex-shrink: 0;
+            margin-top: 0.2rem;
+        }
+
+        .info-item-content {
+            flex: 1;
+        }
+
+        .info-item-content strong {
+            display: block;
+            color: var(--dark);
+            margin-bottom: 0.3rem;
+        }
+
+        .info-item-content span {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+        }
+
+        .map-placeholder {
+            background: white;
+            border-radius: 15px;
+            padding: 2rem;
+            text-align: center;
+            border: 1px solid var(--border);
+            min-height: 350px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .map-placeholder i {
+            font-size: 4rem;
+            color: var(--primary);
+            margin-bottom: 1rem;
+        }
+
+        .map-placeholder h4 {
+            font-size: 1.3rem;
+            color: var(--dark);
+            margin-bottom: 0.5rem;
+        }
+
+        .map-placeholder p {
+            color: var(--text-muted);
+        }
+
+        .hours-box {
+            background: linear-gradient(135deg, var(--primary), #8b5cf6);
+            color: white;
+            padding: 1.5rem;
+            border-radius: 15px;
+            margin-top: 1.5rem;
+        }
+
+        .hours-box h4 {
+            margin-bottom: 1rem;
+            font-size: 1.1rem;
+        }
+
+        .hours-box p {
+            margin-bottom: 0.3rem;
+            font-size: 0.95rem;
+        }
+
+        @media (max-width: 968px) {
+            .headquarters-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .headquarters-info {
+                padding-right: 0;
+            }
+
+            .content {
+                padding: 6rem 1.5rem 3rem;
+            }
+
+            h1 {
+                font-size: 2rem;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .contact-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <div class="nav-container">
+            <a href="index.html" class="logo">
+                <div class="logo-icon">
+                    <i class="fas fa-handshake"></i>
+                </div>
+                <span>DeinCheck Partnerprogramm</span>
+            </a>
+            <a href="index.html" class="back-link">
+                <i class="fas fa-arrow-left"></i>
+                Zurück zur Startseite
+            </a>
+        </div>
+    </nav>
+
+    <div class="content">
+        <h1>Kontaktiere uns</h1>
+        <p class="subtitle">Wir sind für dich da - per Telefon, E-Mail, WhatsApp oder persönlich vor Ort in Hamburg</p>
+
+        <!-- Contact Cards -->
+        <div class="contact-grid">
+            <div class="contact-card">
+                <div class="contact-icon">
+                    <i class="fas fa-phone"></i>
+                </div>
+                <h3>Telefon</h3>
+                <p>Montag - Samstag</p>
+                <p>10:00 - 20:00 Uhr</p>
+                <p><a href="tel:+4915562558936">+49 15562 558936</a></p>
+            </div>
+
+            <div class="contact-card">
+                <div class="contact-icon">
+                    <i class="fas fa-envelope"></i>
+                </div>
+                <h3>E-Mail</h3>
+                <p style="margin-bottom: 1rem;">Wir antworten innerhalb von 24h</p>
+                <p><strong>Partnerprogramm:</strong><br>
+                <a href="mailto:partnerprogramm@deincheck.de">partnerprogramm@deincheck.de</a></p>
+                <p><strong>Support:</strong><br>
+                <a href="mailto:support@deincheck.de">support@deincheck.de</a></p>
+                <p><strong>Allgemein:</strong><br>
+                <a href="mailto:info@deincheck.de">info@deincheck.de</a></p>
+            </div>
+
+            <div class="contact-card">
+                <div class="contact-icon">
+                    <i class="fab fa-whatsapp"></i>
+                </div>
+                <h3>WhatsApp</h3>
+                <p>Schnelle Antworten per Chat</p>
+                <p style="margin-top: 1rem;"><a href="https://wa.me/4915562558936">+49 15562 558936</a></p>
+            </div>
+        </div>
+
+        <!-- Headquarters Section -->
+        <div class="headquarters-section">
+            <h2>Unsere Zentrale in Hamburg</h2>
+            
+            <div class="headquarters-grid">
+                <div class="headquarters-info">
+                    <h3>Deincheck Mobile GmbH</h3>
+                    
+                    <div class="info-item">
+                        <i class="fas fa-map-marker-alt"></i>
+                        <div class="info-item-content">
+                            <strong>Adresse</strong>
+                            <span>Alte Elbgaustraße 1<br>22523 Hamburg<br>Deutschland</span>
+                        </div>
+                    </div>
+
+                    <div class="info-item">
+                        <i class="fas fa-user-tie"></i>
+                        <div class="info-item-content">
+                            <strong>Geschäftsführer</strong>
+                            <span>Kevin Daron</span>
+                        </div>
+                    </div>
+
+                    <div class="info-item">
+                        <i class="fas fa-building"></i>
+                        <div class="info-item-content">
+                            <strong>Handelsregister</strong>
+                            <span>HRB 16354<br>Amtsgericht Hamburg</span>
+                        </div>
+                    </div>
+
+                    <div class="info-item">
+                        <i class="fas fa-file-invoice"></i>
+                        <div class="info-item-content">
+                            <strong>Umsatzsteuer-ID</strong>
+                            <span>DE350321610</span>
+                        </div>
+                    </div>
+
+                    <div class="hours-box">
+                        <h4><i class="fas fa-clock"></i> Geschäftszeiten</h4>
+                        <p><strong>Montag - Freitag:</strong> 10:00 - 20:00 Uhr</p>
+                        <p><strong>Samstag:</strong> 10:00 - 18:00 Uhr</p>
+                        <p><strong>Sonntag:</strong> Geschlossen</p>
+                    </div>
+                </div>
+
+                <div class="map-placeholder">
+                    <i class="fas fa-map-marked-alt"></i>
+                    <h4>Standort Hamburg</h4>
+                    <p>Alte Elbgaustraße 1<br>22523 Hamburg</p>
+                    <p style="margin-top: 1rem; color: var(--primary); font-weight: 600;">
+                        <a href="https://maps.google.com/?q=Alte+Elbgaustraße+1,+22523+Hamburg" target="_blank" style="color: var(--primary);">
+                            <i class="fas fa-external-link-alt"></i> In Google Maps öffnen
+                        </a>
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Info Box -->
+        <div style="background: var(--bg-light); border-radius: 15px; padding: 2rem; border: 1px solid var(--border); text-align: center;">
+            <h3 style="color: var(--dark); margin-bottom: 1rem;">💬 Wie können wir dir helfen?</h3>
+            <p style="color: var(--text-muted); margin-bottom: 1.5rem;">
+                Egal ob du Fragen zum Partnerprogramm hast, Unterstützung bei einem bestehenden Vertrag benötigst 
+                oder einfach mehr über unsere Modelle erfahren möchtest - wir sind für dich da!
+            </p>
+            <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+                <a href="tel:+4915562558936" style="background: linear-gradient(135deg, var(--primary), #8b5cf6); color: white; padding: 0.8rem 1.5rem; border-radius: 50px; text-decoration: none; font-weight: 600; display: inline-flex; align-items: center; gap: 0.5rem;">
+                    <i class="fas fa-phone"></i> Jetzt anrufen
+                </a>
+                <a href="https://wa.me/4915562558936" style="background: #25D366; color: white; padding: 0.8rem 1.5rem; border-radius: 50px; text-decoration: none; font-weight: 600; display: inline-flex; align-items: center; gap: 0.5rem;">
+                    <i class="fab fa-whatsapp"></i> WhatsApp Chat
+                </a>
+                <a href="mailto:partnerprogramm@deincheck.de" style="background: white; color: var(--primary); padding: 0.8rem 1.5rem; border-radius: 50px; text-decoration: none; font-weight: 600; border: 2px solid var(--primary); display: inline-flex; align-items: center; gap: 0.5rem;">
+                    <i class="fas fa-envelope"></i> E-Mail senden
+                </a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
