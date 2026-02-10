@@ -1,0 +1,728 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Datenbank Sicherung - DeinCheck</title>
+    <link rel="icon" type="image/png" href="images/favicon-admin.png">
+    <link rel="apple-touch-icon" href="images/favicon-admin.png">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 40px;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.95;
+        }
+
+        .cards-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 25px 80px rgba(0,0,0,0.4);
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .card-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+            color: white;
+        }
+
+        .backup-icon {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .restore-icon {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+
+        .card-title {
+            font-size: 1.5rem;
+            color: #2d3748;
+        }
+
+        .card-description {
+            color: #718096;
+            margin-bottom: 25px;
+            line-height: 1.6;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            color: white;
+        }
+
+        .btn-backup {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .btn-backup:hover {
+            transform: scale(1.05);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-restore {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+
+        .btn-restore:hover {
+            transform: scale(1.05);
+            box-shadow: 0 10px 30px rgba(240, 147, 251, 0.4);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+
+        .file-input-label {
+            width: 100%;
+            padding: 15px 30px;
+            border: 3px dashed #cbd5e0;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            color: #4a5568;
+            background: #f7fafc;
+            margin-bottom: 15px;
+        }
+
+        .file-input-label:hover {
+            border-color: #667eea;
+            color: #667eea;
+            background: #edf2f7;
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        .status {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 12px;
+            font-size: 0.95rem;
+            display: none;
+        }
+
+        .status.success {
+            background: #c6f6d5;
+            color: #22543d;
+            border: 2px solid #68d391;
+        }
+
+        .status.error {
+            background: #fed7d7;
+            color: #742a2a;
+            border: 2px solid #fc8181;
+        }
+
+        .status.info {
+            background: #bee3f8;
+            color: #2c5282;
+            border: 2px solid #63b3ed;
+        }
+
+        .status.show {
+            display: block;
+        }
+
+        .progress-container {
+            margin-top: 20px;
+            display: none;
+        }
+
+        .progress-container.show {
+            display: block;
+        }
+
+        .progress-bar-bg {
+            width: 100%;
+            height: 10px;
+            background: #e2e8f0;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .progress-text {
+            margin-top: 10px;
+            text-align: center;
+            color: #4a5568;
+            font-weight: 600;
+        }
+
+        .stats-card {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .stat-item {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            border-radius: 15px;
+            color: white;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        .selected-file {
+            margin-top: 10px;
+            padding: 10px;
+            background: #edf2f7;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            color: #4a5568;
+            display: none;
+        }
+
+        .selected-file.show {
+            display: block;
+        }
+
+        .loading-spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .backup-history {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f7fafc;
+            border-radius: 12px;
+        }
+
+        .backup-history h4 {
+            color: #2d3748;
+            margin-bottom: 10px;
+        }
+
+        .backup-item {
+            padding: 10px;
+            background: white;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .backup-item:last-child {
+            margin-bottom: 0;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 1.8rem;
+            }
+
+            .cards-container {
+                grid-template-columns: 1fr;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>
+                <i class="fas fa-database"></i>
+                Datenbank Sicherung
+            </h1>
+            <p>Sichern und wiederherstellen Sie Ihre wertvollen Daten mit einem Klick</p>
+        </div>
+
+        <!-- Statistics Card -->
+        <div class="stats-card">
+            <h3 style="color: #2d3748; margin-bottom: 10px;">
+                <i class="fas fa-chart-line"></i> Datenbank Statistiken
+            </h3>
+            <div class="stats-grid" id="statsGrid">
+                <div class="stat-item">
+                    <div class="stat-value">35</div>
+                    <div class="stat-label">Tabellen</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="totalRecords">0</div>
+                    <div class="stat-label">Datensätze</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="lastBackup">Nie</div>
+                    <div class="stat-label">Letztes Backup</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Action Cards -->
+        <div class="cards-container">
+            <!-- Backup Card -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-icon backup-icon">
+                        <i class="fas fa-download"></i>
+                    </div>
+                    <div class="card-title">Backup erstellen</div>
+                </div>
+                <p class="card-description">
+                    Laden Sie alle Ihre Datenbanktabellen als JSON-Datei herunter. Diese Datei enthält alle Ihre Daten und kann jederzeit wiederhergestellt werden.
+                </p>
+                <button class="btn btn-backup" id="backupBtn" onclick="createBackup()">
+                    <i class="fas fa-download"></i>
+                    <span>Jetzt Backup erstellen</span>
+                </button>
+                <div class="progress-container" id="backupProgress">
+                    <div class="progress-bar-bg">
+                        <div class="progress-bar" id="backupProgressBar"></div>
+                    </div>
+                    <div class="progress-text" id="backupProgressText">0%</div>
+                </div>
+                <div class="status" id="backupStatus"></div>
+            </div>
+
+            <!-- Restore Card -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-icon restore-icon">
+                        <i class="fas fa-upload"></i>
+                    </div>
+                    <div class="card-title">Backup wiederherstellen</div>
+                </div>
+                <p class="card-description">
+                    Stellen Sie Ihre Daten aus einer zuvor gespeicherten Backup-Datei wieder her. Alle aktuellen Daten werden ersetzt.
+                </p>
+                <label for="fileInput" class="file-input-label">
+                    <i class="fas fa-file-upload"></i>
+                    <span>Backup-Datei auswählen</span>
+                </label>
+                <input type="file" id="fileInput" class="file-input" accept=".json" onchange="handleFileSelect(event)">
+                <div class="selected-file" id="selectedFile"></div>
+                <button class="btn btn-restore" id="restoreBtn" onclick="restoreBackup()" disabled>
+                    <i class="fas fa-upload"></i>
+                    <span>Backup wiederherstellen</span>
+                </button>
+                <div class="progress-container" id="restoreProgress">
+                    <div class="progress-bar-bg">
+                        <div class="progress-bar" id="restoreProgressBar"></div>
+                    </div>
+                    <div class="progress-text" id="restoreProgressText">0%</div>
+                </div>
+                <div class="status" id="restoreStatus"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const TABLES = [
+            'projekte', 'provisionen', 'akademie_fortschritt', 'zertifikate', 'interessenten',
+            'task_projekte', 'tasks', 'umsaetze', 'email_verlauf', 'news',
+            'provision_staffeln', 'bonus_ziele', 'partner_bonus_fortschritt', 'chat_nachrichten',
+            'tickets', 'ticket_antworten', 'admin_verfuegbarkeit', 'empfehlungen',
+            'empfehlungs_provisionen', 'notizen', 'dokumente', 'vertraege', 'produkte',
+            'verkaufs_leads', 'vertragsabschluesse', 'benachrichtigungen', 'quiz_ergebnisse',
+            'partner_benachrichtigungen', 'partners', 'akademie_progress', 'akademie_lektionen_completed',
+            'partner_news', 'admin_aktivitaeten', 'task_kommentare', 'termine'
+        ];
+
+        let selectedFile = null;
+
+        // Load statistics on page load
+        window.addEventListener('DOMContentLoaded', loadStatistics);
+
+        async function loadStatistics() {
+            try {
+                let totalRecords = 0;
+                for (const table of TABLES) {
+                    try {
+                        const response = await fetch(`tables/${table}?limit=1`);
+                        if (response.ok) {
+                            const data = await response.json();
+                            totalRecords += data.total || 0;
+                        }
+                    } catch (error) {
+                        console.log(`Fehler beim Laden von ${table}:`, error);
+                    }
+                }
+                document.getElementById('totalRecords').textContent = totalRecords.toLocaleString('de-DE');
+
+                // Load last backup date from localStorage
+                const lastBackup = localStorage.getItem('lastBackupDate');
+                if (lastBackup) {
+                    const date = new Date(lastBackup);
+                    document.getElementById('lastBackup').textContent = date.toLocaleDateString('de-DE');
+                }
+            } catch (error) {
+                console.error('Fehler beim Laden der Statistiken:', error);
+            }
+        }
+
+        async function createBackup() {
+            const backupBtn = document.getElementById('backupBtn');
+            const backupStatus = document.getElementById('backupStatus');
+            const backupProgress = document.getElementById('backupProgress');
+            const backupProgressBar = document.getElementById('backupProgressBar');
+            const backupProgressText = document.getElementById('backupProgressText');
+
+            backupBtn.disabled = true;
+            backupBtn.innerHTML = '<span class="loading-spinner"></span> <span>Erstelle Backup...</span>';
+            backupStatus.className = 'status';
+            backupProgress.classList.add('show');
+
+            const backup = {
+                version: '1.0',
+                created_at: new Date().toISOString(),
+                tables: {}
+            };
+
+            let totalTables = TABLES.length;
+            let processedTables = 0;
+
+            try {
+                for (const table of TABLES) {
+                    try {
+                        let allRecords = [];
+                        let page = 1;
+                        let hasMore = true;
+
+                        // Fetch all pages for this table
+                        while (hasMore) {
+                            const response = await fetch(`tables/${table}?page=${page}&limit=100`);
+                            if (response.ok) {
+                                const data = await response.json();
+                                allRecords = allRecords.concat(data.data || []);
+                                hasMore = data.data && data.data.length === 100;
+                                page++;
+                            } else {
+                                hasMore = false;
+                            }
+                        }
+
+                        backup.tables[table] = allRecords;
+                        console.log(`✓ ${table}: ${allRecords.length} Datensätze gesichert`);
+                    } catch (error) {
+                        console.error(`Fehler bei ${table}:`, error);
+                        backup.tables[table] = [];
+                    }
+
+                    processedTables++;
+                    const progress = Math.round((processedTables / totalTables) * 100);
+                    backupProgressBar.style.width = progress + '%';
+                    backupProgressText.textContent = `${progress}% (${processedTables}/${totalTables} Tabellen)`;
+                }
+
+                // Calculate total records
+                const totalRecords = Object.values(backup.tables).reduce((sum, records) => sum + records.length, 0);
+
+                // Create download
+                const blob = new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, -5);
+                a.download = `database-backup-${timestamp}.json`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+
+                // Save last backup date
+                localStorage.setItem('lastBackupDate', new Date().toISOString());
+                document.getElementById('lastBackup').textContent = new Date().toLocaleDateString('de-DE');
+
+                backupStatus.className = 'status success show';
+                backupStatus.innerHTML = `
+                    <i class="fas fa-check-circle"></i>
+                    <strong>Backup erfolgreich erstellt!</strong><br>
+                    ${totalRecords.toLocaleString('de-DE')} Datensätze aus ${TABLES.length} Tabellen wurden gesichert.
+                `;
+            } catch (error) {
+                console.error('Backup-Fehler:', error);
+                backupStatus.className = 'status error show';
+                backupStatus.innerHTML = `
+                    <i class="fas fa-exclamation-circle"></i>
+                    <strong>Fehler beim Erstellen des Backups:</strong><br>
+                    ${error.message}
+                `;
+            } finally {
+                backupBtn.disabled = false;
+                backupBtn.innerHTML = '<i class="fas fa-download"></i> <span>Jetzt Backup erstellen</span>';
+                setTimeout(() => {
+                    backupProgress.classList.remove('show');
+                    backupProgressBar.style.width = '0%';
+                }, 2000);
+            }
+        }
+
+        function handleFileSelect(event) {
+            const file = event.target.files[0];
+            const selectedFileDiv = document.getElementById('selectedFile');
+            const restoreBtn = document.getElementById('restoreBtn');
+
+            if (file) {
+                selectedFile = file;
+                selectedFileDiv.textContent = `📁 ${file.name} (${(file.size / 1024).toFixed(2)} KB)`;
+                selectedFileDiv.classList.add('show');
+                restoreBtn.disabled = false;
+            } else {
+                selectedFile = null;
+                selectedFileDiv.classList.remove('show');
+                restoreBtn.disabled = true;
+            }
+        }
+
+        async function restoreBackup() {
+            if (!selectedFile) {
+                alert('Bitte wählen Sie zuerst eine Backup-Datei aus.');
+                return;
+            }
+
+            const confirmed = confirm(
+                '⚠️ ACHTUNG: Diese Aktion wird alle aktuellen Daten löschen und durch die Backup-Daten ersetzen!\n\n' +
+                'Möchten Sie wirklich fortfahren?'
+            );
+
+            if (!confirmed) return;
+
+            const restoreBtn = document.getElementById('restoreBtn');
+            const restoreStatus = document.getElementById('restoreStatus');
+            const restoreProgress = document.getElementById('restoreProgress');
+            const restoreProgressBar = document.getElementById('restoreProgressBar');
+            const restoreProgressText = document.getElementById('restoreProgressText');
+
+            restoreBtn.disabled = true;
+            restoreBtn.innerHTML = '<span class="loading-spinner"></span> <span>Stelle wieder her...</span>';
+            restoreStatus.className = 'status';
+            restoreProgress.classList.add('show');
+
+            try {
+                // Read file
+                const fileContent = await selectedFile.text();
+                const backup = JSON.parse(fileContent);
+
+                if (!backup.tables || typeof backup.tables !== 'object') {
+                    throw new Error('Ungültiges Backup-Format');
+                }
+
+                const tables = Object.keys(backup.tables);
+                let totalTables = tables.length;
+                let processedTables = 0;
+                let totalRestored = 0;
+                let errors = [];
+
+                for (const table of tables) {
+                    try {
+                        const records = backup.tables[table];
+                        
+                        if (!Array.isArray(records)) {
+                            console.warn(`${table}: Keine gültigen Daten`);
+                            continue;
+                        }
+
+                        // Delete all existing records (by fetching and deleting one by one)
+                        try {
+                            let page = 1;
+                            let hasMore = true;
+                            while (hasMore) {
+                                const response = await fetch(`tables/${table}?page=${page}&limit=100`);
+                                if (response.ok) {
+                                    const data = await response.json();
+                                    const existingRecords = data.data || [];
+                                    
+                                    for (const record of existingRecords) {
+                                        try {
+                                            await fetch(`tables/${table}/${record.id}`, { method: 'DELETE' });
+                                        } catch (delError) {
+                                            console.log(`Konnte Datensatz ${record.id} nicht löschen:`, delError);
+                                        }
+                                    }
+                                    
+                                    hasMore = existingRecords.length === 100;
+                                    page++;
+                                } else {
+                                    hasMore = false;
+                                }
+                            }
+                        } catch (deleteError) {
+                            console.log(`Fehler beim Löschen von ${table}:`, deleteError);
+                        }
+
+                        // Insert backup records
+                        for (const record of records) {
+                            try {
+                                // Remove system fields that should not be manually set
+                                const cleanRecord = { ...record };
+                                delete cleanRecord.created_at;
+                                delete cleanRecord.updated_at;
+
+                                await fetch(`tables/${table}`, {
+                                    method: 'POST',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify(cleanRecord)
+                                });
+                                totalRestored++;
+                            } catch (recordError) {
+                                console.log(`Fehler beim Einfügen in ${table}:`, recordError);
+                            }
+                        }
+
+                        console.log(`✓ ${table}: ${records.length} Datensätze wiederhergestellt`);
+                    } catch (tableError) {
+                        console.error(`Fehler bei ${table}:`, tableError);
+                        errors.push(`${table}: ${tableError.message}`);
+                    }
+
+                    processedTables++;
+                    const progress = Math.round((processedTables / totalTables) * 100);
+                    restoreProgressBar.style.width = progress + '%';
+                    restoreProgressText.textContent = `${progress}% (${processedTables}/${totalTables} Tabellen)`;
+                }
+
+                if (errors.length === 0) {
+                    restoreStatus.className = 'status success show';
+                    restoreStatus.innerHTML = `
+                        <i class="fas fa-check-circle"></i>
+                        <strong>Backup erfolgreich wiederhergestellt!</strong><br>
+                        ${totalRestored.toLocaleString('de-DE')} Datensätze aus ${tables.length} Tabellen wurden wiederhergestellt.
+                    `;
+                } else {
+                    restoreStatus.className = 'status info show';
+                    restoreStatus.innerHTML = `
+                        <i class="fas fa-info-circle"></i>
+                        <strong>Wiederherstellung mit Warnungen abgeschlossen</strong><br>
+                        ${totalRestored.toLocaleString('de-DE')} Datensätze wiederhergestellt. ${errors.length} Fehler bei einzelnen Tabellen.
+                    `;
+                }
+
+                // Reload statistics
+                await loadStatistics();
+            } catch (error) {
+                console.error('Restore-Fehler:', error);
+                restoreStatus.className = 'status error show';
+                restoreStatus.innerHTML = `
+                    <i class="fas fa-exclamation-circle"></i>
+                    <strong>Fehler beim Wiederherstellen:</strong><br>
+                    ${error.message}
+                `;
+            } finally {
+                restoreBtn.disabled = false;
+                restoreBtn.innerHTML = '<i class="fas fa-upload"></i> <span>Backup wiederherstellen</span>';
+                setTimeout(() => {
+                    restoreProgress.classList.remove('show');
+                    restoreProgressBar.style.width = '0%';
+                }, 2000);
+            }
+        }
+    </script>
+</body>
+</html>

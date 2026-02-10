@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CSV → Data Backup Konverter | Deincheck</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .gradient-bg { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen">
+    <div class="gradient-bg text-white py-8">
+        <div class="max-w-4xl mx-auto px-4">
+            <h1 class="text-3xl font-bold">📦 CSV → Data Backup Konverter</h1>
+            <p class="mt-2 opacity-90">Konvertiert deine Affiliate-CSV in das Data Backup JSON-Format</p>
+        </div>
+    </div>
+
+    <div class="max-w-4xl mx-auto px-4 py-8">
+        <!-- Upload Section -->
+        <div class="bg-white rounded-xl shadow-lg p-6 mb-6">
+            <h2 class="text-xl font-bold mb-4">1. CSV hochladen</h2>
+            <div id="dropzone" class="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-purple-500 transition cursor-pointer">
+                <input type="file" id="fileInput" accept=".csv" class="hidden">
+                <div class="text-4xl mb-2">📄</div>
+                <p class="text-gray-600">CSV-Datei hier ablegen oder klicken zum Hochladen</p>
+            </div>
+        </div>
+
+        <!-- Preview Section -->
+        <div id="previewSection" class="bg-white rounded-xl shadow-lg p-6 mb-6 hidden">
+            <h2 class="text-xl font-bold mb-4">2. Vorschau (<span id="partnerCount">0</span> Partner)</h2>
+            <div class="overflow-x-auto max-h-64 overflow-y-auto">
+                <table class="min-w-full text-sm">
+                    <thead class="bg-gray-50 sticky top-0">
+                        <tr>
+                            <th class="px-3 py-2 text-left">#</th>
+                            <th class="px-3 py-2 text-left">Email</th>
+                            <th class="px-3 py-2 text-left">Name</th>
+                            <th class="px-3 py-2 text-left">Referral Code</th>
+                        </tr>
+                    </thead>
+                    <tbody id="previewTable"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Download Section -->
+        <div id="downloadSection" class="bg-white rounded-xl shadow-lg p-6 hidden">
+            <h2 class="text-xl font-bold mb-4">3. Backup-Datei herunterladen</h2>
+            <p class="text-gray-600 mb-4">Die JSON-Datei kannst du direkt unter <strong>Settings → Data Backup → Import</strong> einspielen.</p>
+            
+            <div class="flex gap-4">
+                <button id="downloadBtn" class="bg-purple-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-purple-700 transition">
+                    📥 JSON herunterladen
+                </button>
+                <button id="copyBtn" class="bg-gray-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-gray-700 transition">
+                    📋 In Zwischenablage kopieren
+                </button>
+            </div>
+
+            <div class="mt-6 p-4 bg-yellow-50 rounded-lg border border-yellow-200">
+                <h3 class="font-bold text-yellow-800 mb-2">⚠️ Wichtig beim Import:</h3>
+                <ul class="text-yellow-700 text-sm space-y-1">
+                    <li>• Gehe zu <strong>Settings → Data Backup</strong></li>
+                    <li>• Klicke auf <strong>Import</strong></li>
+                    <li>• Wähle die heruntergeladene JSON-Datei</li>
+                    <li>• Die Partner werden mit Passwort <code class="bg-yellow-100 px-1 rounded">Partner2026!</code> angelegt</li>
+                    <li>• Beim ersten Login müssen sie das Passwort ändern</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- JSON Preview -->
+        <div id="jsonPreview" class="bg-white rounded-xl shadow-lg p-6 mt-6 hidden">
+            <h2 class="text-xl font-bold mb-4">JSON-Vorschau (erste 3 Einträge)</h2>
+            <pre id="jsonContent" class="bg-gray-900 text-green-400 p-4 rounded-lg overflow-x-auto text-xs max-h-96 overflow-y-auto"></pre>
+        </div>
+    </div>
+
+    <script>
+        let partnersData = [];
+        let jsonBackup = null;
+
+        // Dropzone handling
+        const dropzone = document.getElementById('dropzone');
+        const fileInput = document.getElementById('fileInput');
+
+        dropzone.addEventListener('click', () => fileInput.click());
+        dropzone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropzone.classList.add('border-purple-500', 'bg-purple-50');
+        });
+        dropzone.addEventListener('dragleave', () => {
+            dropzone.classList.remove('border-purple-500', 'bg-purple-50');
+        });
+        dropzone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropzone.classList.remove('border-purple-500', 'bg-purple-50');
+            const file = e.dataTransfer.files[0];
+            if (file) processFile(file);
+        });
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files[0]) processFile(e.target.files[0]);
+        });
+
+        function processFile(file) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const csvContent = e.target.result;
+                parseCSV(csvContent);
+            };
+            reader.readAsText(file);
+        }
+
+        function parseCSV(csv) {
+            const lines = csv.split('\n');
+            const headers = parseCSVLine(lines[0]);
+            
+            // Map CSV headers to our schema fields
+            const fieldMap = {
+                'email': 'email',
+                'first name': 'vorname',
+                'last name': 'nachname',
+                'phone': 'telefon',
+                'company': 'firma',
+                'address': 'adresse',
+                'city': 'stadt',
+                'zipcode': 'plz',
+                'country': 'land',
+                'referral code': 'referral_code',
+                'network link': 'netzwerk_link',
+                'standard link': 'standard_link',
+                'shortlink': 'shortlink',
+                'payment method': 'zahlungsmethode',
+                'payment info': 'zahlungsinfo',
+                'status': 'status',
+                'website': 'website',
+                'facebook': 'facebook',
+                'youtube': 'youtube',
+                'instagram': 'instagram',
+                'tiktok': 'tiktok'
+            };
+
+            // Create header index map
+            const headerIndex = {};
+            headers.forEach((h, i) => {
+                const normalized = h.toLowerCase().trim();
+                if (fieldMap[normalized]) {
+                    headerIndex[fieldMap[normalized]] = i;
+                }
+            });
+
+            partnersData = [];
+            for (let i = 1; i < lines.length; i++) {
+                if (!lines[i].trim()) continue;
+                
+                const values = parseCSVLine(lines[i]);
+                const getValue = (field) => {
+                    const idx = headerIndex[field];
+                    return idx !== undefined ? (values[idx] || '').trim() : '';
+                };
+
+                const email = getValue('email');
+                if (!email || !email.includes('@')) continue;
+
+                const partner = {
+                    id: `aff-${String(partnersData.length + 1).padStart(3, '0')}`,
+                    email: email.toLowerCase(),
+                    vorname: getValue('vorname'),
+                    nachname: getValue('nachname'),
+                    telefon: getValue('telefon'),
+                    firma: getValue('firma'),
+                    adresse: getValue('adresse'),
+                    plz: getValue('plz'),
+                    stadt: getValue('stadt'),
+                    land: getValue('land') || 'DE',
+                    referral_code: getValue('referral_code'),
+                    standard_link: getValue('standard_link'),
+                    shortlink: getValue('shortlink'),
+                    netzwerk_link: getValue('netzwerk_link'),
+                    zahlungsmethode: getValue('zahlungsmethode'),
+                    zahlungsinfo: getValue('zahlungsinfo'),
+                    website: getValue('website'),
+                    facebook: getValue('facebook'),
+                    youtube: getValue('youtube'),
+                    instagram: getValue('instagram'),
+                    tiktok: getValue('tiktok'),
+                    status: getValue('status') || 'Approved',
+                    ist_affiliate: true,
+                    aktiv: true,
+                    tarif: 'Silber',
+                    passwort_hash: 'Partner2026!',
+                    passwort_muss_geaendert_werden: true,
+                    onboarding_abgeschlossen: false,
+                    onboarding_fortschritt: 20
+                };
+
+                // Remove empty fields
+                Object.keys(partner).forEach(key => {
+                    if (partner[key] === '' && !['ist_affiliate', 'aktiv', 'passwort_muss_geaendert_werden', 'onboarding_abgeschlossen', 'onboarding_fortschritt'].includes(key)) {
+                        delete partner[key];
+                    }
+                });
+
+                partnersData.push(partner);
+            }
+
+            updateUI();
+        }
+
+        function parseCSVLine(line) {
+            const result = [];
+            let current = '';
+            let inQuotes = false;
+            
+            for (let i = 0; i < line.length; i++) {
+                const char = line[i];
+                
+                if (char === '"') {
+                    inQuotes = !inQuotes;
+                } else if (char === ',' && !inQuotes) {
+                    result.push(current.trim());
+                    current = '';
+                } else {
+                    current += char;
+                }
+            }
+            result.push(current.trim());
+            return result;
+        }
+
+        function updateUI() {
+            // Show preview section
+            document.getElementById('previewSection').classList.remove('hidden');
+            document.getElementById('downloadSection').classList.remove('hidden');
+            document.getElementById('jsonPreview').classList.remove('hidden');
+            
+            // Update count
+            document.getElementById('partnerCount').textContent = partnersData.length;
+            
+            // Fill preview table
+            const tbody = document.getElementById('previewTable');
+            tbody.innerHTML = partnersData.slice(0, 20).map((p, i) => `
+                <tr class="border-b hover:bg-gray-50">
+                    <td class="px-3 py-2">${i + 1}</td>
+                    <td class="px-3 py-2 font-mono text-xs">${p.email}</td>
+                    <td class="px-3 py-2">${p.vorname} ${p.nachname}</td>
+                    <td class="px-3 py-2 font-mono text-xs">${p.referral_code || '-'}</td>
+                </tr>
+            `).join('') + (partnersData.length > 20 ? `
+                <tr class="bg-gray-100">
+                    <td colspan="4" class="px-3 py-2 text-center text-gray-500">
+                        ... und ${partnersData.length - 20} weitere Partner
+                    </td>
+                </tr>
+            ` : '');
+
+            // Create JSON backup
+            jsonBackup = {
+                partners: partnersData
+            };
+
+            // Show JSON preview (first 3)
+            const previewData = { partners: partnersData.slice(0, 3) };
+            document.getElementById('jsonContent').textContent = JSON.stringify(previewData, null, 2);
+        }
+
+        // Download button
+        document.getElementById('downloadBtn').addEventListener('click', () => {
+            if (!jsonBackup) return;
+            
+            const blob = new Blob([JSON.stringify(jsonBackup, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `partners-backup-${new Date().toISOString().split('T')[0]}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+        });
+
+        // Copy button
+        document.getElementById('copyBtn').addEventListener('click', () => {
+            if (!jsonBackup) return;
+            
+            navigator.clipboard.writeText(JSON.stringify(jsonBackup, null, 2)).then(() => {
+                const btn = document.getElementById('copyBtn');
+                btn.textContent = '✅ Kopiert!';
+                setTimeout(() => btn.textContent = '📋 In Zwischenablage kopieren', 2000);
+            });
+        });
+    </script>
+</body>
+</html>

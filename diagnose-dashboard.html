@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔧 Diagnose: Dashboard Problem</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; padding: 20px; background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); min-height: 100vh; color: #eee; }
+        .container { max-width: 800px; margin: 0 auto; }
+        h1 { text-align: center; margin-bottom: 30px; color: #48bb78; font-size: 28px; }
+        
+        .card { background: rgba(255,255,255,0.05); border-radius: 16px; padding: 25px; margin-bottom: 20px; border: 1px solid rgba(255,255,255,0.1); }
+        .card h2 { color: #4299e1; margin-bottom: 15px; font-size: 20px; }
+        
+        .status { display: flex; align-items: center; gap: 10px; padding: 12px 16px; border-radius: 10px; margin: 10px 0; }
+        .status.ok { background: rgba(72, 187, 120, 0.2); border-left: 4px solid #48bb78; }
+        .status.error { background: rgba(229, 62, 62, 0.2); border-left: 4px solid #e53e3e; }
+        .status.warning { background: rgba(237, 137, 54, 0.2); border-left: 4px solid #ed8936; }
+        .status.info { background: rgba(66, 153, 225, 0.2); border-left: 4px solid #4299e1; }
+        
+        .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 15px; margin-top: 20px; }
+        .stat-box { background: rgba(255,255,255,0.08); padding: 20px; border-radius: 12px; text-align: center; }
+        .stat-value { font-size: 28px; font-weight: 700; color: #48bb78; }
+        .stat-label { font-size: 14px; color: #a0aec0; margin-top: 8px; }
+        
+        .btn { background: linear-gradient(135deg, #48bb78 0%, #38a169 100%); color: white; border: none; padding: 14px 28px; border-radius: 10px; cursor: pointer; font-size: 16px; font-weight: 600; margin: 5px; transition: transform 0.2s; }
+        .btn:hover { transform: translateY(-2px); }
+        .btn-secondary { background: linear-gradient(135deg, #4299e1 0%, #3182ce 100%); }
+        .btn-danger { background: linear-gradient(135deg, #e53e3e 0%, #c53030 100%); }
+        
+        .email-input { width: 100%; padding: 14px 18px; border-radius: 10px; border: 2px solid rgba(255,255,255,0.2); background: rgba(255,255,255,0.05); color: #fff; font-size: 16px; margin: 10px 0; }
+        .email-input:focus { outline: none; border-color: #48bb78; }
+        
+        .action-buttons { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 20px; }
+        
+        pre { background: #0d1117; padding: 15px; border-radius: 10px; overflow-x: auto; font-size: 12px; margin-top: 15px; max-height: 300px; overflow-y: auto; }
+        code { color: #7ee787; }
+        
+        .loading { text-align: center; padding: 20px; color: #718096; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔧 Dashboard Diagnose-Tool</h1>
+        
+        <!-- Login Status -->
+        <div class="card">
+            <h2>1️⃣ Login-Status prüfen</h2>
+            <div id="login-status">
+                <div class="loading">⏳ Prüfe...</div>
+            </div>
+            <input type="email" id="email-input" class="email-input" placeholder="Partner-Email eingeben...">
+            <div class="action-buttons">
+                <button class="btn" onclick="setEmail()">✅ Email setzen</button>
+                <button class="btn btn-danger" onclick="clearEmail()">🗑️ Email löschen</button>
+            </div>
+        </div>
+        
+        <!-- Verträge in DB -->
+        <div class="card">
+            <h2>2️⃣ Verträge in Datenbank</h2>
+            <button class="btn btn-secondary" onclick="loadContracts()">📥 Verträge laden</button>
+            <div id="contracts-status">
+                <div class="status info">Klicke auf "Verträge laden" um zu starten</div>
+            </div>
+        </div>
+        
+        <!-- Statistiken -->
+        <div class="card">
+            <h2>3️⃣ Berechnete Statistiken</h2>
+            <div class="stat-grid">
+                <div class="stat-box">
+                    <div class="stat-value" id="stat-today">-</div>
+                    <div class="stat-label">💰 Heute</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-value" id="stat-yesterday">-</div>
+                    <div class="stat-label">📅 Gestern</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-value" id="stat-month">-</div>
+                    <div class="stat-label">📆 Monat</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-value" id="stat-pending">-</div>
+                    <div class="stat-label">⏳ Ausstehend</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-value" id="stat-total">-</div>
+                    <div class="stat-label">📊 Gesamt</div>
+                </div>
+            </div>
+            <div id="stats-status"></div>
+        </div>
+        
+        <!-- Actions -->
+        <div class="card">
+            <h2>4️⃣ Aktionen</h2>
+            <div class="action-buttons">
+                <a href="partner-dashboard.html" class="btn">🚀 Dashboard öffnen</a>
+                <button class="btn btn-secondary" onclick="runFullDiagnosis()">🔄 Komplette Diagnose</button>
+            </div>
+        </div>
+        
+        <!-- Debug Log -->
+        <div class="card">
+            <h2>📋 Debug-Log</h2>
+            <pre id="debug-log"><code>Bereit...</code></pre>
+        </div>
+    </div>
+    
+    <script>
+        let logContent = [];
+        
+        function log(msg) {
+            const time = new Date().toLocaleTimeString('de-DE');
+            logContent.push(`[${time}] ${msg}`);
+            document.getElementById('debug-log').innerHTML = '<code>' + logContent.join('\n') + '</code>';
+            document.getElementById('debug-log').scrollTop = document.getElementById('debug-log').scrollHeight;
+            console.log(msg);
+        }
+        
+        function checkLoginStatus() {
+            const email = localStorage.getItem('partnerEmail');
+            const statusDiv = document.getElementById('login-status');
+            const emailInput = document.getElementById('email-input');
+            
+            if (email) {
+                statusDiv.innerHTML = `
+                    <div class="status ok">✅ Eingeloggt als: <strong>${email}</strong></div>
+                `;
+                emailInput.value = email;
+                log('✅ Login gefunden: ' + email);
+            } else {
+                statusDiv.innerHTML = `
+                    <div class="status error">❌ NICHT eingeloggt - keine Email in localStorage!</div>
+                    <div class="status warning">⚠️ Das Dashboard zeigt deshalb Demo-Daten an.</div>
+                `;
+                log('❌ Kein Login gefunden');
+            }
+        }
+        
+        function setEmail() {
+            const email = document.getElementById('email-input').value.trim();
+            if (!email || !email.includes('@')) {
+                alert('Bitte gültige Email eingeben!');
+                return;
+            }
+            localStorage.setItem('partnerEmail', email);
+            log('📧 Email gesetzt: ' + email);
+            checkLoginStatus();
+            loadContracts();
+        }
+        
+        function clearEmail() {
+            localStorage.removeItem('partnerEmail');
+            log('🗑️ Email gelöscht');
+            checkLoginStatus();
+        }
+        
+        async function loadContracts() {
+            const email = localStorage.getItem('partnerEmail');
+            const statusDiv = document.getElementById('contracts-status');
+            
+            if (!email) {
+                statusDiv.innerHTML = '<div class="status error">❌ Bitte zuerst Email setzen!</div>';
+                return;
+            }
+            
+            statusDiv.innerHTML = '<div class="loading">⏳ Lade Verträge...</div>';
+            log('📥 Lade Verträge für: ' + email);
+            
+            try {
+                const response = await fetch('tables/vertragsabschluesse?limit=1000');
+                const result = await response.json();
+                const alle = result.data || [];
+                
+                log('📦 Gesamt in DB: ' + alle.length + ' Verträge');
+                
+                // Filter
+                const emailLower = email.toLowerCase();
+                const meine = alle.filter(v => v.partner_email && v.partner_email.toLowerCase() === emailLower);
+                
+                log('📧 Für ' + email + ': ' + meine.length + ' Verträge');
+                
+                if (meine.length > 0) {
+                    statusDiv.innerHTML = `
+                        <div class="status ok">✅ <strong>${meine.length}</strong> Verträge für ${email} gefunden!</div>
+                    `;
+                    calculateStats(meine);
+                } else {
+                    statusDiv.innerHTML = `
+                        <div class="status error">❌ Keine Verträge für ${email} gefunden!</div>
+                        <div class="status info">📋 Alle Emails in DB: ${[...new Set(alle.map(v => v.partner_email))].join(', ')}</div>
+                    `;
+                    log('❌ Keine Verträge gefunden');
+                }
+                
+            } catch (error) {
+                statusDiv.innerHTML = `<div class="status error">❌ Fehler: ${error.message}</div>`;
+                log('❌ API Fehler: ' + error.message);
+            }
+        }
+        
+        function calculateStats(vertraege) {
+            const getProvision = (v) => parseFloat(v.gesamt_provision) || parseFloat(v.provision_betrag) || 0;
+            
+            const now = new Date();
+            const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+            const yesterdayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1);
+            const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+            
+            let today = 0, yesterday = 0, month = 0, pending = 0, total = 0;
+            let todayCount = 0, yesterdayCount = 0;
+            
+            vertraege.forEach(v => {
+                const prov = getProvision(v);
+                total += prov;
+                
+                const d = v.erstellt_am ? new Date(v.erstellt_am) : null;
+                if (d) {
+                    if (d >= todayStart) { today += prov; todayCount++; }
+                    else if (d >= yesterdayStart && d < todayStart) { yesterday += prov; yesterdayCount++; }
+                    if (d >= monthStart) month += prov;
+                }
+                
+                const status = (v.vertrag_status || '').toLowerCase();
+                if (status.includes('neu') || status === '' || status.includes('ausste')) {
+                    pending += prov;
+                }
+            });
+            
+            document.getElementById('stat-today').textContent = today.toFixed(2) + '€';
+            document.getElementById('stat-yesterday').textContent = yesterday.toFixed(2) + '€';
+            document.getElementById('stat-month').textContent = month.toFixed(2) + '€';
+            document.getElementById('stat-pending').textContent = pending.toFixed(2) + '€';
+            document.getElementById('stat-total').textContent = vertraege.length + ' Verträge';
+            
+            document.getElementById('stats-status').innerHTML = `
+                <div class="status ok">
+                    ✅ Statistiken berechnet!<br>
+                    Heute: ${todayCount} Verträge (${today.toFixed(2)}€)<br>
+                    Gestern: ${yesterdayCount} Verträge (${yesterday.toFixed(2)}€)
+                </div>
+            `;
+            
+            log('📊 Stats: Heute=' + today.toFixed(2) + '€, Monat=' + month.toFixed(2) + '€');
+        }
+        
+        async function runFullDiagnosis() {
+            log('🔄 Starte vollständige Diagnose...');
+            checkLoginStatus();
+            await loadContracts();
+            log('✅ Diagnose abgeschlossen');
+        }
+        
+        // Auto-Start
+        window.onload = () => {
+            log('🚀 Diagnose-Tool gestartet');
+            checkLoginStatus();
+        };
+    </script>
+</body>
+</html>

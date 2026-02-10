@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bonus-Staffel Widget - Partner Dashboard</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --primary: #667eea;
+            --success: #48bb78;
+            --info: #4299e1;
+            --warning: #ed8936;
+            --text: #1a202c;
+            --text-light: #718096;
+            --bg: #f7fafc;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+            padding: 40px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        .data-card {
+            margin-bottom: 2rem;
+        }
+        .data-card-header {
+            margin-bottom: 1.5rem;
+        }
+        .data-card-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Bonus-Ziele Widget -->
+        <div class="data-card">
+            <div class="data-card-header">
+                <div class="data-card-title">
+                    <i class="fas fa-trophy"></i>
+                    <span>🎯 Bonus-Staffeln</span>
+                </div>
+            </div>
+            
+            <div style="padding: 1.5rem; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 12px; color: white; margin-bottom: 1.5rem;">
+                <h3 style="margin: 0 0 0.5rem 0; font-size: 1.3rem;">💰 Verdiene Extra-Bonus!</h3>
+                <p style="margin: 0; opacity: 0.95;">Erreiche diese Ziele und kassiere attraktive Bonus-Zahlungen on top!</p>
+            </div>
+            
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; padding: 0 1.5rem 1.5rem;">
+                <!-- Staffel 1 -->
+                <div style="background: linear-gradient(135deg, #48bb78 0%, #38a169 100%); border-radius: 12px; padding: 1.5rem; color: white; box-shadow: 0 4px 20px rgba(72, 187, 120, 0.3);">
+                    <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 1rem;">
+                        <div>
+                            <div style="font-size: 0.875rem; opacity: 0.9; margin-bottom: 0.25rem;">Staffel 1</div>
+                            <h3 style="margin: 0; font-size: 2rem; font-weight: 800;">250€</h3>
+                            <div style="font-size: 0.875rem; opacity: 0.9; margin-top: 0.25rem;">Bonus-Zahlung</div>
+                        </div>
+                        <div style="width: 60px; height: 60px; background: rgba(255,255,255,0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.8rem;">
+                            🥉
+                        </div>
+                    </div>
+                    <div style="background: rgba(255,255,255,0.15); height: 2px; margin: 1rem 0;"></div>
+                    <div style="font-size: 0.95rem; line-height: 1.6;">
+                        <strong>Ziel:</strong><br>
+                        ✅ 10 Verträge abschließen<br>
+                        ✅ Beliebige Kategorien
+                    </div>
+                </div>
+                
+                <!-- Staffel 2 -->
+                <div style="background: linear-gradient(135deg, #4299e1 0%, #3182ce 100%); border-radius: 12px; padding: 1.5rem; color: white; box-shadow: 0 4px 20px rgba(66, 153, 225, 0.3);">
+                    <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 1rem;">
+                        <div>
+                            <div style="font-size: 0.875rem; opacity: 0.9; margin-bottom: 0.25rem;">Staffel 2</div>
+                            <h3 style="margin: 0; font-size: 2rem; font-weight: 800;">850€</h3>
+                            <div style="font-size: 0.875rem; opacity: 0.9; margin-top: 0.25rem;">Bonus-Zahlung</div>
+                        </div>
+                        <div style="width: 60px; height: 60px; background: rgba(255,255,255,0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.8rem;">
+                            🥈
+                        </div>
+                    </div>
+                    <div style="background: rgba(255,255,255,0.15); height: 2px; margin: 1rem 0;"></div>
+                    <div style="font-size: 0.95rem; line-height: 1.6;">
+                        <strong>Ziel:</strong><br>
+                        ✅ 30 Verträge gesamt<br>
+                        ✅ Davon 10 DSL-Verträge<br>
+                        ✅ Davon 5 Strom-Verträge
+                    </div>
+                </div>
+                
+                <!-- Staffel 3 -->
+                <div style="background: linear-gradient(135deg, #ed8936 0%, #dd6b20 100%); border-radius: 12px; padding: 1.5rem; color: white; box-shadow: 0 4px 20px rgba(237, 137, 54, 0.3);">
+                    <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 1rem;">
+                        <div>
+                            <div style="font-size: 0.875rem; opacity: 0.9; margin-bottom: 0.25rem;">Staffel 3</div>
+                            <h3 style="margin: 0; font-size: 2rem; font-weight: 800;">???€</h3>
+                            <div style="font-size: 0.875rem; opacity: 0.9; margin-top: 0.25rem;">Individueller Bonus</div>
+                        </div>
+                        <div style="width: 60px; height: 60px; background: rgba(255,255,255,0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.8rem;">
+                            🥇
+                        </div>
+                    </div>
+                    <div style="background: rgba(255,255,255,0.15); height: 2px; margin: 1rem 0;"></div>
+                    <div style="font-size: 0.95rem; line-height: 1.6;">
+                        <strong>Individuelles Ziel:</strong><br>
+                        💬 Kontaktiere uns für dein<br>
+                        persönliches Bonus-Ziel!
+                    </div>
+                    <button onclick="alert('📞 Kontakt:\\n\\nSchreibe uns eine E-Mail oder rufe an, um dein individuelles Bonus-Ziel zu besprechen!')" style="width: 100%; margin-top: 1rem; padding: 0.75rem; background: rgba(255,255,255,0.2); border: 2px solid rgba(255,255,255,0.4); border-radius: 8px; color: white; font-weight: 700; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.3)'" onmouseout="this.style.background='rgba(255,255,255,0.2)'">
+                        <i class="fas fa-envelope"></i> Jetzt kontaktieren
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Aktueller Fortschritt -->
+            <div style="padding: 0 1.5rem 1.5rem;">
+                <div style="background: var(--bg); border-radius: 10px; padding: 1.5rem;">
+                    <h4 style="margin: 0 0 1rem 0; color: var(--text);"><i class="fas fa-chart-line"></i> Dein Fortschritt</h4>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem;">
+                        <div style="text-align: center; padding: 1rem; background: white; border-radius: 8px;">
+                            <div style="font-size: 2rem; font-weight: 800; color: var(--primary);" id="bonus-vertraege-gesamt">7</div>
+                            <div style="font-size: 0.875rem; color: var(--text-light); margin-top: 0.25rem;">Verträge gesamt</div>
+                        </div>
+                        <div style="text-align: center; padding: 1rem; background: white; border-radius: 8px;">
+                            <div style="font-size: 2rem; font-weight: 800; color: var(--info);" id="bonus-vertraege-dsl">3</div>
+                            <div style="font-size: 0.875rem; color: var(--text-light); margin-top: 0.25rem;">DSL-Verträge</div>
+                        </div>
+                        <div style="text-align: center; padding: 1rem; background: white; border-radius: 8px;">
+                            <div style="font-size: 2rem; font-weight: 800; color: var(--warning);" id="bonus-vertraege-strom">2</div>
+                            <div style="font-size: 0.875rem; color: var(--text-light); margin-top: 0.25rem;">Strom-Verträge</div>
+                        </div>
+                    </div>
+                    <div style="margin-top: 1rem; padding: 1rem; background: white; border-radius: 8px; border-left: 4px solid #ed8936;">
+                        <div style="font-size: 0.875rem; color: var(--text-light); margin-bottom: 0.5rem;">Bis zur nächsten Bonus-Staffel:</div>
+                        <div style="display: flex; gap: 1.5rem; flex-wrap: wrap;">
+                            <div>
+                                <strong style="color: var(--success);">Staffel 1 (250€):</strong>
+                                <span id="fortschritt-staffel-1">Noch 3 Verträge</span>
+                            </div>
+                            <div>
+                                <strong style="color: var(--info);">Staffel 2 (850€):</strong>
+                                <span id="fortschritt-staffel-2">Noch 23 Verträge + 7 DSL + 3 Strom</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        console.log('✅ Bonus-Staffel Widget geladen!');
+        console.log('📊 Demo-Fortschritt: 7 Verträge gesamt, 3 DSL, 2 Strom');
+    </script>
+</body>
+</html>

@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🚀 Partner Auto-Import (Affiliates)</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 700px;
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        h1 {
+            font-size: 28px;
+            font-weight: 700;
+            color: #1a202c;
+            margin-bottom: 12px;
+        }
+        .subtitle {
+            color: #718096;
+            font-size: 15px;
+            margin-bottom: 24px;
+        }
+        .info-box {
+            background: #ebf8ff;
+            border: 1px solid #bee3f8;
+            border-radius: 10px;
+            padding: 16px;
+            margin-bottom: 24px;
+        }
+        .info-box h3 {
+            color: #2c5282;
+            font-size: 14px;
+            margin-bottom: 8px;
+        }
+        .info-box ul {
+            list-style: none;
+            padding: 0;
+        }
+        .info-box li {
+            font-size: 13px;
+            color: #4a5568;
+            padding: 4px 0;
+        }
+        .info-box li::before {
+            content: "✓ ";
+            color: #48bb78;
+            font-weight: bold;
+        }
+        .status {
+            background: #f7fafc;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 24px;
+        }
+        .status-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        .status-item:last-child { border-bottom: none; }
+        .label {
+            font-weight: 600;
+            color: #2d3748;
+        }
+        .value {
+            color: #667eea;
+            font-weight: 700;
+        }
+        .value.error { color: #f56565; }
+        .value.success { color: #48bb78; }
+        .button {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102,126,234,0.4);
+        }
+        .button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+        .button.secondary {
+            background: #edf2f7;
+            color: #4a5568;
+            margin-top: 12px;
+        }
+        .button.secondary:hover {
+            background: #e2e8f0;
+            box-shadow: none;
+        }
+        #log {
+            background: #1a202c;
+            color: #48bb78;
+            border-radius: 12px;
+            padding: 20px;
+            max-height: 350px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            line-height: 1.5;
+            margin-top: 24px;
+            display: none;
+        }
+        .log-line { margin-bottom: 3px; }
+        .success { color: #48bb78; }
+        .error { color: #f56565; }
+        .info { color: #4299e1; }
+        .warn { color: #ecc94b; }
+        .spinner {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin-right: 8px;
+            vertical-align: middle;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #e2e8f0;
+            border-radius: 4px;
+            margin-top: 20px;
+            overflow: hidden;
+        }
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            width: 0%;
+            transition: width 0.3s;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚀 Affiliate Partner Import</h1>
+        <p class="subtitle">Importiere ~313 bestehende Partner aus dem alten Affiliate-System</p>
+        
+        <div class="info-box">
+            <h3>📋 Import-Einstellungen:</h3>
+            <ul>
+                <li>Standard-Passwort: <strong>Partner2026!</strong></li>
+                <li>Passwortänderung beim ersten Login erforderlich</li>
+                <li>Kein Onboarding erforderlich (ist_affiliate = true)</li>
+                <li>Alle Original-Daten werden im Feld "alte_partner_daten" gespeichert</li>
+                <li>Referral-Codes und Links werden übernommen</li>
+            </ul>
+        </div>
+        
+        <div class="status">
+            <div class="status-item">
+                <span class="label">CSV-Datei:</span>
+                <span class="value" id="csv-status">Lädt...</span>
+            </div>
+            <div class="status-item">
+                <span class="label">Partner gefunden:</span>
+                <span class="value" id="partner-count">0</span>
+            </div>
+            <div class="status-item">
+                <span class="label">Importiert:</span>
+                <span class="value" id="imported-count">0 / 0</span>
+            </div>
+            <div class="status-item">
+                <span class="label">Übersprungen (Duplikate):</span>
+                <span class="value" id="skipped-count">0</span>
+            </div>
+            <div class="status-item">
+                <span class="label">Fehler:</span>
+                <span class="value error" id="error-count">0</span>
+            </div>
+            <div class="status-item">
+                <span class="label">Status:</span>
+                <span class="value" id="import-status">Bereit</span>
+            </div>
+        </div>
+
+        <div class="progress-bar">
+            <div class="progress-fill" id="progress-fill"></div>
+        </div>
+
+        <button id="import-btn" class="button" onclick="startImport()">
+            🚀 Jetzt importieren
+        </button>
+        
+        <button class="button secondary" onclick="window.location.href='partner-dashboard.html'">
+            📊 Zum Partner-Dashboard
+        </button>
+
+        <div id="log"></div>
+    </div>
+
+    <script>
+        // ============================================
+        // KONFIGURATION
+        // ============================================
+        const CONFIG = {
+            csvFile: 'data/affiliates-import.csv',
+            defaultPassword: 'Partner2026!',
+            defaultTarif: 'Silber',
+            batchSize: 5,
+            batchDelay: 300
+        };
+
+        let partnersData = [];
+        let existingEmails = new Set();
+        let stats = { imported: 0, skipped: 0, errors: 0, total: 0 };
+
+        // ============================================
+        // CSV LADEN UND PARSEN
+        // ============================================
+        async function loadCSV() {
+            try {
+                log('📥 Lade CSV-Datei...', 'info');
+                
+                const response = await fetch(CONFIG.csvFile);
+                if (!response.ok) {
+                    throw new Error(`CSV nicht gefunden: ${response.status}`);
+                }
+                
+                const text = await response.text();
+                const lines = text.split('\n');
+                
+                log(`📄 ${lines.length} Zeilen gefunden`, 'info');
+                
+                // Header parsen
+                const headerLine = lines[0];
+                const headers = parseCSVLine(headerLine);
+                log(`📋 Header: ${headers.slice(0, 5).join(', ')}...`, 'info');
+                
+                // Partner extrahieren
+                for (let i = 1; i < lines.length; i++) {
+                    const line = lines[i].trim();
+                    if (!line) continue;
+                    
+                    const values = parseCSVLine(line);
+                    const email = cleanValue(values[0]);
+                    
+                    if (email && email.includes('@')) {
+                        const partnerObj = mapCSVToPartner(values);
+                        partnersData.push(partnerObj);
+                    }
+                }
+                
+                stats.total = partnersData.length;
+                
+                log(`✅ ${partnersData.length} Partner gefunden`, 'success');
+                document.getElementById('csv-status').textContent = 'Geladen ✅';
+                document.getElementById('partner-count').textContent = partnersData.length;
+                document.getElementById('imported-count').textContent = `0 / ${partnersData.length}`;
+                
+            } catch (error) {
+                log(`❌ Fehler beim Laden: ${error.message}`, 'error');
+                document.getElementById('csv-status').textContent = 'Fehler ❌';
+                document.getElementById('csv-status').classList.add('error');
+            }
+        }
+
+        // CSV-Wert bereinigen
+        function cleanValue(val) {
+            if (!val) return '';
+            return val.replace(/^"|"$/g, '').trim();
+        }
+
+        // CSV-Zeile parsen (mit Anführungszeichen)
+        function parseCSVLine(line) {
+            const result = [];
+            let current = '';
+            let inQuotes = false;
+            
+            for (let i = 0; i < line.length; i++) {
+                const char = line[i];
+                
+                if (char === '"') {
+                    inQuotes = !inQuotes;
+                } else if (char === ',' && !inQuotes) {
+                    result.push(current);
+                    current = '';
+                } else {
+                    current += char;
+                }
+            }
+            result.push(current);
+            return result;
+        }
+
+        // CSV zu Partner-Objekt mappen
+        // CSV Headers: Email, First Name, Last Name, Address, Company, Country, Phone, Personal Detail, 
+        //              City, Zipcode, State, Website, Facebook, Youtube, Instagram, Tiktok, Additional Infos,
+        //              Program, Standard link, Shortlink, Network link, Referral code, Payment Method, 
+        //              Payment Info, Coupons, Status, Date created, Parent name, Parent email, Last login
+        function mapCSVToPartner(values) {
+            const email = cleanValue(values[0]);
+            const vorname = cleanValue(values[1]);
+            const nachname = cleanValue(values[2]);
+            const adresse = cleanValue(values[3]);
+            const firma = cleanValue(values[4]);
+            const land = cleanValue(values[5]) || 'DE';
+            const telefon = cleanValue(values[6]);
+            const personalDetail = cleanValue(values[7]);
+            const stadt = cleanValue(values[8]);
+            const plz = cleanValue(values[9]);
+            const bundesland = cleanValue(values[10]);
+            const website = cleanValue(values[11]);
+            const facebook = cleanValue(values[12]);
+            const youtube = cleanValue(values[13]);
+            const instagram = cleanValue(values[14]);
+            const tiktok = cleanValue(values[15]);
+            const zusatzInfos = cleanValue(values[16]);
+            const programm = cleanValue(values[17]);
+            const standardLink = cleanValue(values[18]);
+            const shortlink = cleanValue(values[19]);
+            const netzwerkLink = cleanValue(values[20]);
+            const referralCode = cleanValue(values[21]);
+            const zahlungsmethode = cleanValue(values[22]);
+            const zahlungsinfo = cleanValue(values[23]);
+            const coupons = cleanValue(values[24]);
+            const status = cleanValue(values[25]);
+            const dateCreated = cleanValue(values[26]);
+            const parentName = cleanValue(values[27]);
+            const parentEmail = cleanValue(values[28]);
+            const lastLogin = cleanValue(values[29]);
+            
+            // Datum parsen
+            let registriertAm = new Date().toISOString();
+            if (dateCreated && dateCreated !== '1970-01-01 01:00:00') {
+                try {
+                    const d = new Date(dateCreated.replace(' ', 'T'));
+                    if (!isNaN(d.getTime())) registriertAm = d.toISOString();
+                } catch (e) {}
+            }
+            
+            let letzterLogin = null;
+            if (lastLogin && lastLogin !== '1970-01-01 01:00:00') {
+                try {
+                    const d = new Date(lastLogin.replace(' ', 'T'));
+                    if (!isNaN(d.getTime())) letzterLogin = d.toISOString();
+                } catch (e) {}
+            }
+            
+            // IBAN aus Zahlungsinfo extrahieren
+            let iban = '';
+            if (zahlungsinfo && zahlungsinfo.includes('Account number:')) {
+                const match = zahlungsinfo.match(/Account number:([^,]+)/i);
+                if (match) iban = match[1].trim();
+            }
+            
+            // Kontoinhaber aus Zahlungsinfo extrahieren
+            let kontoinhaber = '';
+            if (zahlungsinfo && zahlungsinfo.includes('Account name:')) {
+                const match = zahlungsinfo.match(/Account name:([^,]+)/i);
+                if (match) kontoinhaber = match[1].trim();
+            }
+            
+            // Original-Daten als JSON speichern
+            const originalData = {
+                email, vorname, nachname, adresse, firma, land, telefon,
+                personalDetail, stadt, plz, bundesland, website, facebook,
+                youtube, instagram, tiktok, zusatzInfos, programm,
+                standardLink, shortlink, netzwerkLink, referralCode,
+                zahlungsmethode, zahlungsinfo, coupons, status,
+                dateCreated, parentName, parentEmail, lastLogin
+            };
+            
+            return {
+                email: email.toLowerCase(),
+                vorname: vorname,
+                nachname: nachname,
+                telefon: telefon,
+                firma: firma,
+                adresse: adresse,
+                plz: plz,
+                stadt: stadt,
+                bundesland: bundesland,
+                land: land,
+                tarif: CONFIG.defaultTarif,
+                aktiv: status === 'Approved',
+                iban: iban,
+                kontoinhaber: kontoinhaber || `${vorname} ${nachname}`.trim(),
+                registriert_am: registriertAm,
+                letzter_login: letzterLogin,
+                
+                // Affiliate-spezifische Felder
+                ist_affiliate: true,
+                passwort_hash: CONFIG.defaultPassword, // Wird später gehashed
+                passwort_muss_geaendert_werden: true,
+                referral_code: referralCode,
+                standard_link: standardLink,
+                shortlink: shortlink,
+                netzwerk_link: netzwerkLink,
+                zahlungsmethode: zahlungsmethode,
+                zahlungsinfo: zahlungsinfo,
+                coupons: coupons,
+                status: status,
+                parent_name: parentName,
+                parent_email: parentEmail,
+                website: website,
+                facebook: facebook,
+                youtube: youtube,
+                instagram: instagram,
+                tiktok: tiktok,
+                zusatz_infos: zusatzInfos,
+                
+                // Onboarding überspringen
+                onboarding_abgeschlossen: true,
+                onboarding_fortschritt: 100,
+                
+                // Original-Daten als JSON
+                alte_partner_daten: JSON.stringify(originalData)
+            };
+        }
+
+        // ============================================
+        // EXISTIERENDE PARTNER LADEN
+        // ============================================
+        async function loadExistingPartners() {
+            try {
+                log('🔍 Lade existierende Partner...', 'info');
+                
+                const response = await fetch('tables/partners?limit=1000');
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.data && Array.isArray(data.data)) {
+                        data.data.forEach(p => {
+                            if (p.email) existingEmails.add(p.email.toLowerCase());
+                        });
+                        log(`📋 ${existingEmails.size} existierende Partner gefunden`, 'info');
+                    }
+                }
+            } catch (error) {
+                log(`⚠️ Konnte existierende Partner nicht laden: ${error.message}`, 'warn');
+            }
+        }
+
+        // ============================================
+        // IMPORT STARTEN
+        // ============================================
+        async function startImport() {
+            const btn = document.getElementById('import-btn');
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner"></span> Importiere...';
+            
+            document.getElementById('log').style.display = 'block';
+            document.getElementById('import-status').textContent = 'Läuft...';
+            
+            log('🚀 ═══════════════════════════════════════', 'info');
+            log('🚀 IMPORT GESTARTET', 'info');
+            log('🚀 ═══════════════════════════════════════', 'info');
+            log(`📦 ${partnersData.length} Partner zu importieren`, 'info');
+            log(`🔑 Standard-Passwort: ${CONFIG.defaultPassword}`, 'info');
+            log('', 'info');
+            
+            // Existierende Partner laden
+            await loadExistingPartners();
+            
+            // Batch-Import
+            for (let i = 0; i < partnersData.length; i += CONFIG.batchSize) {
+                const batch = partnersData.slice(i, i + CONFIG.batchSize);
+                
+                for (const partner of batch) {
+                    await importSinglePartner(partner);
+                    updateProgress();
+                }
+                
+                // Kurze Pause zwischen Batches
+                if (i + CONFIG.batchSize < partnersData.length) {
+                    await new Promise(resolve => setTimeout(resolve, CONFIG.batchDelay));
+                }
+            }
+            
+            // Abschluss
+            log('', 'info');
+            log('🎉 ═══════════════════════════════════════', 'success');
+            log('🎉 IMPORT ABGESCHLOSSEN!', 'success');
+            log('🎉 ═══════════════════════════════════════', 'success');
+            log(`✅ Erfolgreich importiert: ${stats.imported}`, 'success');
+            log(`⏭️ Übersprungen (Duplikate): ${stats.skipped}`, 'warn');
+            log(`❌ Fehler: ${stats.errors}`, 'error');
+            
+            document.getElementById('import-status').textContent = 'Fertig ✅';
+            document.getElementById('import-status').classList.add('success');
+            btn.innerHTML = '✅ Import abgeschlossen';
+        }
+
+        // Einzelnen Partner importieren
+        async function importSinglePartner(partner) {
+            try {
+                // Duplikat-Check
+                if (existingEmails.has(partner.email.toLowerCase())) {
+                    stats.skipped++;
+                    log(`⏭️ ${partner.email} - bereits vorhanden`, 'warn');
+                    return;
+                }
+                
+                const response = await fetch('tables/partners', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(partner)
+                });
+                
+                if (response.ok || response.status === 201) {
+                    stats.imported++;
+                    existingEmails.add(partner.email.toLowerCase());
+                    log(`✅ ${partner.email} (${partner.vorname} ${partner.nachname})`, 'success');
+                } else {
+                    stats.errors++;
+                    const errorText = await response.text();
+                    log(`❌ ${partner.email} - Fehler ${response.status}: ${errorText.substring(0, 50)}`, 'error');
+                }
+                
+            } catch (error) {
+                stats.errors++;
+                log(`❌ ${partner.email} - ${error.message}`, 'error');
+            }
+        }
+
+        // Progress aktualisieren
+        function updateProgress() {
+            const processed = stats.imported + stats.skipped + stats.errors;
+            const percent = Math.round((processed / stats.total) * 100);
+            
+            document.getElementById('imported-count').textContent = `${stats.imported} / ${stats.total}`;
+            document.getElementById('skipped-count').textContent = stats.skipped;
+            document.getElementById('error-count').textContent = stats.errors;
+            document.getElementById('progress-fill').style.width = `${percent}%`;
+        }
+
+        // Log-Funktion
+        function log(message, type = 'info') {
+            const logDiv = document.getElementById('log');
+            const line = document.createElement('div');
+            line.className = `log-line ${type}`;
+            line.textContent = message;
+            logDiv.appendChild(line);
+            logDiv.scrollTop = logDiv.scrollHeight;
+            console.log(`[${type.toUpperCase()}] ${message}`);
+        }
+
+        // ✅ Auto-Load beim Start
+        window.addEventListener('load', loadCSV);
+    </script>
+</body>
+</html>

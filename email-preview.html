@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>E-Mail Preview - Partner Launch</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .preview-header {
+            max-width: 700px;
+            margin: 0 auto 20px;
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            padding: 25px 30px;
+            color: white;
+        }
+        .preview-header h1 {
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+        .preview-header p {
+            color: rgba(255,255,255,0.7);
+            font-size: 14px;
+        }
+        .device-toggle {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        .device-toggle button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        .device-toggle button.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .device-toggle button:not(.active) {
+            background: rgba(255,255,255,0.1);
+            color: white;
+        }
+        .device-toggle button:hover:not(.active) {
+            background: rgba(255,255,255,0.2);
+        }
+        .preview-container {
+            max-width: 700px;
+            margin: 0 auto;
+            transition: all 0.3s;
+        }
+        .preview-container.mobile {
+            max-width: 375px;
+        }
+        .preview-frame {
+            background: white;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 25px 80px rgba(0,0,0,0.4);
+        }
+        .preview-frame iframe {
+            width: 100%;
+            height: 1400px;
+            border: none;
+        }
+        .copy-section {
+            max-width: 700px;
+            margin: 30px auto 0;
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            padding: 25px 30px;
+        }
+        .copy-section h3 {
+            color: white;
+            font-size: 16px;
+            margin-bottom: 15px;
+        }
+        .copy-section textarea {
+            width: 100%;
+            height: 150px;
+            background: rgba(0,0,0,0.3);
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 8px;
+            color: #aaa;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            padding: 15px;
+            resize: vertical;
+        }
+        .copy-section button {
+            margin-top: 15px;
+            padding: 12px 30px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        .copy-section button:hover {
+            transform: scale(1.02);
+        }
+        .info-box {
+            background: rgba(102, 126, 234, 0.2);
+            border: 1px solid rgba(102, 126, 234, 0.3);
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 20px;
+        }
+        .info-box h4 {
+            color: #667eea;
+            font-size: 14px;
+            margin-bottom: 8px;
+        }
+        .info-box ul {
+            color: rgba(255,255,255,0.8);
+            font-size: 13px;
+            padding-left: 20px;
+        }
+        .info-box li {
+            margin-bottom: 5px;
+        }
+    </style>
+</head>
+<body>
+    
+    <div class="preview-header">
+        <h1>📧 E-Mail Preview</h1>
+        <p>Partner-Launch E-Mail für BixGrow</p>
+        
+        <div class="device-toggle">
+            <button class="active" onclick="setView('desktop', this)">🖥️ Desktop</button>
+            <button onclick="setView('mobile', this)">📱 Mobile</button>
+        </div>
+    </div>
+    
+    <div class="preview-container" id="previewContainer">
+        <div class="preview-frame">
+            <iframe src="email-templates/partner-launch-email.html" id="emailFrame"></iframe>
+        </div>
+    </div>
+    
+    <div class="copy-section">
+        <h3>📋 HTML-Code für BixGrow kopieren:</h3>
+        <textarea id="htmlCode" readonly>Lade HTML-Code...</textarea>
+        <button onclick="copyCode()">📋 HTML-Code kopieren</button>
+        
+        <div class="info-box">
+            <h4>📌 BixGrow Variablen (werden automatisch ersetzt):</h4>
+            <ul>
+                <li><code>{{first_name}}</code> → Vorname des Partners</li>
+                <li><code>{{email}}</code> → E-Mail-Adresse des Partners</li>
+            </ul>
+        </div>
+    </div>
+    
+    <script>
+        function setView(view, btn) {
+            const container = document.getElementById('previewContainer');
+            const buttons = document.querySelectorAll('.device-toggle button');
+            
+            buttons.forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            
+            if (view === 'mobile') {
+                container.classList.add('mobile');
+            } else {
+                container.classList.remove('mobile');
+            }
+        }
+        
+        // Load HTML code
+        fetch('email-templates/partner-launch-email.html')
+            .then(res => res.text())
+            .then(html => {
+                document.getElementById('htmlCode').value = html;
+            });
+        
+        function copyCode() {
+            const textarea = document.getElementById('htmlCode');
+            textarea.select();
+            document.execCommand('copy');
+            
+            const btn = event.target;
+            const originalText = btn.textContent;
+            btn.textContent = '✅ Kopiert!';
+            btn.style.background = 'linear-gradient(135deg, #10b981 0%, #059669 100%)';
+            
+            setTimeout(() => {
+                btn.textContent = originalText;
+                btn.style.background = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
+            }, 2000);
+        }
+    </script>
+    
+</body>
+</html>

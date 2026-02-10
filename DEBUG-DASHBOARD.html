@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>🔧 DEBUG Dashboard</title>
+    <style>
+        body { font-family: monospace; padding: 20px; background: #000; color: #0f0; }
+        h1 { color: #0ff; }
+        pre { background: #111; padding: 10px; border: 1px solid #0f0; margin: 10px 0; }
+        .success { color: #0f0; }
+        .error { color: #f00; }
+        .warning { color: #ff0; }
+        button { padding: 10px 20px; font-size: 16px; margin: 10px 5px; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <h1>🔧 DEBUG PARTNER DASHBOARD</h1>
+    
+    <button onclick="testDashboard()">🧪 Test Dashboard Logik</button>
+    <button onclick="checkLogin()">🔑 Check Login</button>
+    
+    <div id="output"></div>
+
+    <script>
+        async function checkLogin() {
+            const output = document.getElementById('output');
+            output.innerHTML = '<h2>🔑 Login Check</h2>';
+            
+            const email = localStorage.getItem('partnerEmail');
+            output.innerHTML += `<pre>Partner Email: ${email || '❌ NICHT EINGELOGGT'}</pre>`;
+            
+            if (!email) {
+                output.innerHTML += '<p class="error">⚠️ Du bist nicht eingeloggt!</p>';
+            }
+        }
+        
+        async function testDashboard() {
+            const output = document.getElementById('output');
+            output.innerHTML = '<h2>🧪 Dashboard Test läuft...</h2>';
+            
+            try {
+                // Check Login
+                const partnerEmail = localStorage.getItem('partnerEmail');
+                if (!partnerEmail) {
+                    output.innerHTML += '<p class="error">❌ NICHT EINGELOGGT</p>';
+                    return;
+                }
+                
+                output.innerHTML += `<pre class="success">✅ Eingeloggt als: ${partnerEmail}</pre>`;
+                
+                // Load Verträge
+                output.innerHTML += '<p>📦 Lade Verträge...</p>';
+                const res = await fetch('tables/vertragsabschluesse?limit=100');
+                const data = await res.json();
+                
+                output.innerHTML += `<pre class="success">✅ ${data.data.length} Verträge geladen</pre>`;
+                
+                // Filter meine Verträge
+                const meineVertraege = data.data.filter(v => v.partner_email === partnerEmail);
+                output.innerHTML += `<pre class="success">✅ ${meineVertraege.length} MEINE Verträge</pre>`;
+                
+                if (meineVertraege.length === 0) {
+                    output.innerHTML += '<p class="error">❌ KEINE Verträge für diesen Partner!</p>';
+                    output.innerHTML += `<p class="warning">Deine Email: ${partnerEmail}</p>`;
+                    output.innerHTML += '<p class="warning">Verfügbare Partner in DB:</p>';
+                    const uniqueEmails = [...new Set(data.data.map(v => v.partner_email))];
+                    output.innerHTML += `<pre>${uniqueEmails.join('\n')}</pre>`;
+                    return;
+                }
+                
+                // Provision Helper
+                const getProvision = (v) => parseFloat(v.provision_betrag) || parseFloat(v.gesamt_provision) || 0;
+                
+                // Date Helper
+                const parseDate = (v) => {
+                    const dateStr = v.erstellt_am || v.created_at || v.datum;
+                    if (!dateStr) return new Date(0);
+                    if (typeof dateStr === 'number') return new Date(dateStr);
+                    return new Date(dateStr);
+                };
+                
+                // HEUTE
+                const now = new Date();
+                const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+                const todayEnd = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
+                
+                output.innerHTML += '<h3>📅 HEUTE Filter:</h3>';
+                output.innerHTML += `<pre>Start: ${today}\nEnde:  ${todayEnd}</pre>`;
+                
+                const todayVertraege = meineVertraege.filter(v => {
+                    const vDate = parseDate(v);
+                    const isToday = vDate >= today && vDate < todayEnd;
+                    output.innerHTML += `<pre>Vertrag ${v.vertragsnummer}: ${v.erstellt_am} → ${vDate} → ${isToday ? '✅ HEUTE' : '❌ nicht heute'}</pre>`;
+                    return isToday;
+                });
+                
+                const todayProv = todayVertraege.reduce((sum, v) => sum + getProvision(v), 0);
+                
+                output.innerHTML += `<h2 class="${todayVertraege.length > 0 ? 'success' : 'error'}">
+                    💰 HEUTE: ${todayProv.toFixed(2)}€ (${todayVertraege.length} Verträge)
+                </h2>`;
+                
+                // GESTERN
+                const yesterday = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1);
+                const yesterdayVertraege = meineVertraege.filter(v => {
+                    const vDate = parseDate(v);
+                    return vDate >= yesterday && vDate < today;
+                });
+                const yesterdayProv = yesterdayVertraege.reduce((sum, v) => sum + getProvision(v), 0);
+                
+                output.innerHTML += `<h2>📅 GESTERN: ${yesterdayProv.toFixed(2)}€ (${yesterdayVertraege.length} Verträge)</h2>`;
+                
+                // MONAT
+                const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+                const monthVertraege = meineVertraege.filter(v => parseDate(v) >= monthStart);
+                const monthProv = monthVertraege.reduce((sum, v) => sum + getProvision(v), 0);
+                
+                output.innerHTML += `<h2>📊 DIESER MONAT: ${monthProv.toFixed(2)}€ (${monthVertraege.length} Verträge)</h2>`;
+                
+                // AUSSTEHEND
+                const pending = meineVertraege.filter(v => {
+                    const provStatus = (v.provision_status || '').toLowerCase();
+                    return provStatus === 'ausstehend' || provStatus === '' || provStatus === 'neu';
+                });
+                const pendingProv = pending.reduce((sum, v) => sum + getProvision(v), 0);
+                
+                output.innerHTML += `<h2>⏳ AUSSTEHEND: ${pendingProv.toFixed(2)}€ (${pending.length} Verträge)</h2>`;
+                
+                // TOTAL
+                const totalProv = meineVertraege.reduce((sum, v) => sum + getProvision(v), 0);
+                output.innerHTML += `<h2>📋 GESAMT: ${totalProv.toFixed(2)}€ (${meineVertraege.length} Verträge)</h2>`;
+                
+                // Check HTML Elements
+                output.innerHTML += '<h3>🔍 HTML Element Check:</h3>';
+                const elements = [
+                    'todayProvisionen',
+                    'todayVertraege',
+                    'yesterdayProvisionen',
+                    'yesterdayVertraege',
+                    'monthProvisionen',
+                    'pendingProvisionen',
+                    'totalProvisionen',
+                    'totalVertraege'
+                ];
+                
+                elements.forEach(id => {
+                    const el = document.getElementById(id);
+                    if (el) {
+                        output.innerHTML += `<pre class="success">✅ ${id} existiert</pre>`;
+                    } else {
+                        output.innerHTML += `<pre class="error">❌ ${id} FEHLT!</pre>`;
+                    }
+                });
+                
+            } catch (error) {
+                output.innerHTML += `<h2 class="error">❌ FEHLER:</h2>`;
+                output.innerHTML += `<pre>${error.message}\n\n${error.stack}</pre>`;
+            }
+        }
+        
+        // Auto-run on load
+        checkLogin();
+    </script>
+</body>
+</html>

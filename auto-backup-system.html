@@ -1,0 +1,856 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Automatisches Backup-System - DeinCheck</title>
+    <link rel="icon" type="image/png" href="images/favicon-admin.png">
+    <link rel="apple-touch-icon" href="images/favicon-admin.png">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 40px;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.95;
+        }
+
+        .card {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            margin-bottom: 30px;
+        }
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+        }
+
+        .status-badge.active {
+            background: #c6f6d5;
+            color: #22543d;
+        }
+
+        .status-badge.inactive {
+            background: #fed7d7;
+            color: #742a2a;
+        }
+
+        .status-badge.pending {
+            background: #fef3c7;
+            color: #78350f;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        .info-item {
+            background: #f7fafc;
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+        }
+
+        .info-label {
+            font-size: 0.85rem;
+            color: #718096;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .info-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #2d3748;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            margin: 5px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #48bb78, #38a169);
+            color: white;
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #f56565, #e53e3e);
+            color: white;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .settings-group {
+            margin: 20px 0;
+            padding: 20px;
+            background: #f7fafc;
+            border-radius: 12px;
+        }
+
+        .settings-group h3 {
+            color: #2d3748;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .setting-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 15px 0;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .setting-item:last-child {
+            border-bottom: none;
+        }
+
+        .setting-label {
+            font-weight: 600;
+            color: #4a5568;
+        }
+
+        .setting-description {
+            font-size: 0.85rem;
+            color: #718096;
+            margin-top: 4px;
+        }
+
+        .toggle-switch {
+            position: relative;
+            width: 60px;
+            height: 30px;
+        }
+
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #cbd5e0;
+            transition: .4s;
+            border-radius: 30px;
+        }
+
+        .toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 22px;
+            width: 22px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .toggle-slider {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        input:checked + .toggle-slider:before {
+            transform: translateX(30px);
+        }
+
+        .log-container {
+            max-height: 300px;
+            overflow-y: auto;
+            background: #2d3748;
+            color: #e2e8f0;
+            padding: 15px;
+            border-radius: 10px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.85rem;
+            margin-top: 15px;
+        }
+
+        .log-entry {
+            padding: 5px 0;
+            border-bottom: 1px solid #4a5568;
+        }
+
+        .log-entry:last-child {
+            border-bottom: none;
+        }
+
+        .log-time {
+            color: #a0aec0;
+            margin-right: 10px;
+        }
+
+        .log-success {
+            color: #68d391;
+        }
+
+        .log-error {
+            color: #fc8181;
+        }
+
+        .log-info {
+            color: #63b3ed;
+        }
+
+        .countdown {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #667eea;
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .progress-ring {
+            width: 150px;
+            height: 150px;
+            margin: 0 auto;
+        }
+
+        .progress-ring-circle {
+            transition: stroke-dashoffset 0.35s;
+            transform: rotate(-90deg);
+            transform-origin: 50% 50%;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .loading-spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 20px;
+            border-radius: 10px;
+            color: white;
+            font-weight: 600;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            z-index: 1000;
+            display: none;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        .notification.show {
+            display: block;
+        }
+
+        .notification.success {
+            background: linear-gradient(135deg, #48bb78, #38a169);
+        }
+
+        .notification.error {
+            background: linear-gradient(135deg, #f56565, #e53e3e);
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 1.8rem;
+            }
+
+            .info-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>
+                <i class="fas fa-clock"></i>
+                Automatisches Backup-System
+            </h1>
+            <p>24-Stunden automatische Datensicherung</p>
+        </div>
+
+        <!-- Status Card -->
+        <div class="card">
+            <h2 style="color: #2d3748; margin-bottom: 20px;">
+                <i class="fas fa-heartbeat"></i> System-Status
+            </h2>
+            <div id="statusBadge" class="status-badge inactive">
+                <i class="fas fa-circle"></i>
+                <span>Inaktiv</span>
+            </div>
+
+            <div class="info-grid">
+                <div class="info-item">
+                    <div class="info-label">Nächstes Backup in</div>
+                    <div class="info-value" id="nextBackupTime">--:--:--</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Letztes Backup</div>
+                    <div class="info-value" id="lastBackupTime">Nie</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Erfolgreiche Backups</div>
+                    <div class="info-value" id="successCount">0</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Fehlgeschlagen</div>
+                    <div class="info-value" id="errorCount">0</div>
+                </div>
+            </div>
+
+            <div style="text-align: center; margin-top: 20px;">
+                <button class="btn btn-success" id="startBtn" onclick="startAutoBackup()">
+                    <i class="fas fa-play"></i>
+                    Auto-Backup starten
+                </button>
+                <button class="btn btn-danger" id="stopBtn" onclick="stopAutoBackup()" disabled>
+                    <i class="fas fa-stop"></i>
+                    Auto-Backup stoppen
+                </button>
+                <button class="btn btn-primary" onclick="triggerManualBackup()">
+                    <i class="fas fa-download"></i>
+                    Manuelles Backup jetzt
+                </button>
+            </div>
+        </div>
+
+        <!-- Settings Card -->
+        <div class="card">
+            <h2 style="color: #2d3748; margin-bottom: 20px;">
+                <i class="fas fa-cog"></i> Einstellungen
+            </h2>
+
+            <div class="settings-group">
+                <h3><i class="fas fa-clock"></i> Backup-Intervall</h3>
+                <div class="setting-item">
+                    <div>
+                        <div class="setting-label">Intervall (Stunden)</div>
+                        <div class="setting-description">Wie oft soll ein Backup erstellt werden?</div>
+                    </div>
+                    <select id="intervalSelect" onchange="updateInterval()" style="padding: 8px 12px; border-radius: 8px; border: 2px solid #e2e8f0; font-size: 1rem;">
+                        <option value="1">1 Stunde</option>
+                        <option value="6">6 Stunden</option>
+                        <option value="12">12 Stunden</option>
+                        <option value="24" selected>24 Stunden</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="settings-group">
+                <h3><i class="fas fa-bell"></i> Benachrichtigungen</h3>
+                <div class="setting-item">
+                    <div>
+                        <div class="setting-label">Browser-Benachrichtigungen</div>
+                        <div class="setting-description">Benachrichtigung bei erfolgreichem Backup</div>
+                    </div>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="notificationToggle" onchange="toggleNotifications()">
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+                <div class="setting-item">
+                    <div>
+                        <div class="setting-label">Sound aktivieren</div>
+                        <div class="setting-description">Ton bei Backup-Abschluss abspielen</div>
+                    </div>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="soundToggle">
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="settings-group">
+                <h3><i class="fas fa-save"></i> Speicher-Optionen</h3>
+                <div class="setting-item">
+                    <div>
+                        <div class="setting-label">Automatischer Download</div>
+                        <div class="setting-description">Backup-Datei automatisch herunterladen</div>
+                    </div>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="autoDownloadToggle" checked>
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+                <div class="setting-item">
+                    <div>
+                        <div class="setting-label">Alte Backups behalten</div>
+                        <div class="setting-description">Anzahl der gespeicherten Backups</div>
+                    </div>
+                    <select id="keepBackupsSelect" style="padding: 8px 12px; border-radius: 8px; border: 2px solid #e2e8f0; font-size: 1rem;">
+                        <option value="3">3 Backups</option>
+                        <option value="5" selected>5 Backups</option>
+                        <option value="10">10 Backups</option>
+                        <option value="999">Alle behalten</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- Log Card -->
+        <div class="card">
+            <h2 style="color: #2d3748; margin-bottom: 20px;">
+                <i class="fas fa-list"></i> Backup-Protokoll
+            </h2>
+            <div class="log-container" id="logContainer">
+                <div class="log-entry log-info">
+                    <span class="log-time">[System]</span>
+                    <span>Automatisches Backup-System bereit</span>
+                </div>
+            </div>
+            <div style="margin-top: 10px; text-align: right;">
+                <button class="btn btn-primary" onclick="clearLogs()" style="font-size: 0.9rem; padding: 8px 16px;">
+                    <i class="fas fa-trash"></i>
+                    Protokoll löschen
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification -->
+    <div id="notification" class="notification"></div>
+
+    <script>
+        const TABLES = [
+            'projekte', 'provisionen', 'akademie_fortschritt', 'zertifikate', 'interessenten',
+            'task_projekte', 'tasks', 'umsaetze', 'email_verlauf', 'news',
+            'provision_staffeln', 'bonus_ziele', 'partner_bonus_fortschritt', 'chat_nachrichten',
+            'tickets', 'ticket_antworten', 'admin_verfuegbarkeit', 'empfehlungen',
+            'empfehlungs_provisionen', 'notizen', 'dokumente', 'vertraege', 'produkte',
+            'verkaufs_leads', 'vertragsabschluesse', 'benachrichtigungen', 'quiz_ergebnisse',
+            'partner_benachrichtigungen', 'partners', 'akademie_progress', 'akademie_lektionen_completed',
+            'partner_news', 'admin_aktivitaeten', 'task_kommentare', 'termine'
+        ];
+
+        let autoBackupInterval = null;
+        let countdownInterval = null;
+        let nextBackupTimestamp = null;
+        let isRunning = false;
+
+        // Load settings from localStorage
+        function loadSettings() {
+            const settings = JSON.parse(localStorage.getItem('autoBackupSettings') || '{}');
+            
+            if (settings.interval) {
+                document.getElementById('intervalSelect').value = settings.interval;
+            }
+            if (settings.notifications !== undefined) {
+                document.getElementById('notificationToggle').checked = settings.notifications;
+            }
+            if (settings.sound !== undefined) {
+                document.getElementById('soundToggle').checked = settings.sound;
+            }
+            if (settings.autoDownload !== undefined) {
+                document.getElementById('autoDownloadToggle').checked = settings.autoDownload;
+            }
+            if (settings.keepBackups) {
+                document.getElementById('keepBackupsSelect').value = settings.keepBackups;
+            }
+
+            // Load statistics
+            const stats = JSON.parse(localStorage.getItem('backupStats') || '{"success": 0, "errors": 0}');
+            document.getElementById('successCount').textContent = stats.success;
+            document.getElementById('errorCount').textContent = stats.errors;
+
+            // Load last backup time
+            const lastBackup = localStorage.getItem('lastAutoBackup');
+            if (lastBackup) {
+                const date = new Date(lastBackup);
+                document.getElementById('lastBackupTime').textContent = date.toLocaleString('de-DE');
+            }
+
+            // Check if auto-backup was running
+            const wasRunning = localStorage.getItem('autoBackupRunning') === 'true';
+            if (wasRunning) {
+                startAutoBackup();
+            }
+        }
+
+        // Save settings
+        function saveSettings() {
+            const settings = {
+                interval: document.getElementById('intervalSelect').value,
+                notifications: document.getElementById('notificationToggle').checked,
+                sound: document.getElementById('soundToggle').checked,
+                autoDownload: document.getElementById('autoDownloadToggle').checked,
+                keepBackups: document.getElementById('keepBackupsSelect').value
+            };
+            localStorage.setItem('autoBackupSettings', JSON.stringify(settings));
+        }
+
+        // Update interval
+        function updateInterval() {
+            saveSettings();
+            if (isRunning) {
+                stopAutoBackup();
+                startAutoBackup();
+            }
+        }
+
+        // Toggle notifications
+        function toggleNotifications() {
+            saveSettings();
+            if (document.getElementById('notificationToggle').checked) {
+                requestNotificationPermission();
+            }
+        }
+
+        // Request notification permission
+        async function requestNotificationPermission() {
+            if ('Notification' in window && Notification.permission === 'default') {
+                const permission = await Notification.requestPermission();
+                if (permission === 'granted') {
+                    addLog('Browser-Benachrichtigungen aktiviert', 'success');
+                } else {
+                    addLog('Browser-Benachrichtigungen abgelehnt', 'error');
+                    document.getElementById('notificationToggle').checked = false;
+                    saveSettings();
+                }
+            }
+        }
+
+        // Show notification
+        function showNotification(message, type = 'success') {
+            // Browser notification
+            if (document.getElementById('notificationToggle').checked && 'Notification' in window && Notification.permission === 'granted') {
+                new Notification('Automatisches Backup', {
+                    body: message,
+                    icon: type === 'success' ? '✅' : '❌'
+                });
+            }
+
+            // In-app notification
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.className = `notification ${type} show`;
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 5000);
+
+            // Sound
+            if (document.getElementById('soundToggle').checked) {
+                playSound(type);
+            }
+        }
+
+        // Play sound
+        function playSound(type) {
+            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+
+            oscillator.frequency.value = type === 'success' ? 800 : 400;
+            oscillator.type = 'sine';
+
+            gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
+
+            oscillator.start(audioContext.currentTime);
+            oscillator.stop(audioContext.currentTime + 0.5);
+        }
+
+        // Add log entry
+        function addLog(message, type = 'info') {
+            const logContainer = document.getElementById('logContainer');
+            const time = new Date().toLocaleTimeString('de-DE');
+            const logEntry = document.createElement('div');
+            logEntry.className = `log-entry log-${type}`;
+            logEntry.innerHTML = `<span class="log-time">[${time}]</span><span>${message}</span>`;
+            logContainer.appendChild(logEntry);
+            logContainer.scrollTop = logContainer.scrollHeight;
+
+            // Keep only last 50 log entries
+            while (logContainer.children.length > 50) {
+                logContainer.removeChild(logContainer.firstChild);
+            }
+        }
+
+        // Clear logs
+        function clearLogs() {
+            const logContainer = document.getElementById('logContainer');
+            logContainer.innerHTML = '<div class="log-entry log-info"><span class="log-time">[System]</span><span>Protokoll gelöscht</span></div>';
+        }
+
+        // Update countdown
+        function updateCountdown() {
+            if (!nextBackupTimestamp) return;
+
+            const now = Date.now();
+            const remaining = nextBackupTimestamp - now;
+
+            if (remaining <= 0) {
+                document.getElementById('nextBackupTime').textContent = '00:00:00';
+                return;
+            }
+
+            const hours = Math.floor(remaining / 3600000);
+            const minutes = Math.floor((remaining % 3600000) / 60000);
+            const seconds = Math.floor((remaining % 60000) / 1000);
+
+            document.getElementById('nextBackupTime').textContent = 
+                `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+        }
+
+        // Create backup
+        async function createBackup() {
+            addLog('Starte automatisches Backup...', 'info');
+
+            const backup = {
+                version: '1.0',
+                created_at: new Date().toISOString(),
+                auto_backup: true,
+                tables: {}
+            };
+
+            try {
+                for (const table of TABLES) {
+                    try {
+                        let allRecords = [];
+                        let page = 1;
+                        let hasMore = true;
+
+                        while (hasMore) {
+                            const response = await fetch(`tables/${table}?page=${page}&limit=100`);
+                            if (response.ok) {
+                                const data = await response.json();
+                                allRecords = allRecords.concat(data.data || []);
+                                hasMore = data.data && data.data.length === 100;
+                                page++;
+                            } else {
+                                hasMore = false;
+                            }
+                        }
+
+                        backup.tables[table] = allRecords;
+                    } catch (error) {
+                        console.error(`Fehler bei ${table}:`, error);
+                        backup.tables[table] = [];
+                    }
+                }
+
+                const totalRecords = Object.values(backup.tables).reduce((sum, records) => sum + records.length, 0);
+
+                // Auto-download if enabled
+                if (document.getElementById('autoDownloadToggle').checked) {
+                    const blob = new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json' });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, -5);
+                    a.download = `auto-backup-${timestamp}.json`;
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(url);
+                }
+
+                // Update statistics
+                const stats = JSON.parse(localStorage.getItem('backupStats') || '{"success": 0, "errors": 0}');
+                stats.success++;
+                localStorage.setItem('backupStats', JSON.stringify(stats));
+                document.getElementById('successCount').textContent = stats.success;
+
+                // Update last backup time
+                const now = new Date().toISOString();
+                localStorage.setItem('lastAutoBackup', now);
+                document.getElementById('lastBackupTime').textContent = new Date(now).toLocaleString('de-DE');
+
+                addLog(`✓ Backup erfolgreich! ${totalRecords.toLocaleString('de-DE')} Datensätze gesichert`, 'success');
+                showNotification(`Backup erfolgreich erstellt! ${totalRecords.toLocaleString('de-DE')} Datensätze gesichert`, 'success');
+
+                return true;
+            } catch (error) {
+                console.error('Backup-Fehler:', error);
+                
+                // Update error statistics
+                const stats = JSON.parse(localStorage.getItem('backupStats') || '{"success": 0, "errors": 0}');
+                stats.errors++;
+                localStorage.setItem('backupStats', JSON.stringify(stats));
+                document.getElementById('errorCount').textContent = stats.errors;
+
+                addLog(`✗ Backup fehlgeschlagen: ${error.message}`, 'error');
+                showNotification(`Backup fehlgeschlagen: ${error.message}`, 'error');
+
+                return false;
+            }
+        }
+
+        // Start auto-backup
+        function startAutoBackup() {
+            if (isRunning) return;
+
+            const intervalHours = parseInt(document.getElementById('intervalSelect').value);
+            const intervalMs = intervalHours * 60 * 60 * 1000;
+
+            isRunning = true;
+            localStorage.setItem('autoBackupRunning', 'true');
+
+            // Update UI
+            document.getElementById('statusBadge').className = 'status-badge active';
+            document.getElementById('statusBadge').innerHTML = '<i class="fas fa-circle"></i><span>Aktiv</span>';
+            document.getElementById('startBtn').disabled = true;
+            document.getElementById('stopBtn').disabled = false;
+
+            // Set next backup time
+            nextBackupTimestamp = Date.now() + intervalMs;
+
+            // Start countdown
+            countdownInterval = setInterval(updateCountdown, 1000);
+            updateCountdown();
+
+            // Schedule backup
+            autoBackupInterval = setInterval(async () => {
+                await createBackup();
+                nextBackupTimestamp = Date.now() + intervalMs;
+            }, intervalMs);
+
+            addLog(`Auto-Backup gestartet (Intervall: ${intervalHours}h)`, 'success');
+            showNotification(`Auto-Backup aktiviert! Nächstes Backup in ${intervalHours} Stunden`, 'success');
+
+            // Create first backup immediately
+            setTimeout(() => createBackup(), 2000);
+        }
+
+        // Stop auto-backup
+        function stopAutoBackup() {
+            if (!isRunning) return;
+
+            isRunning = false;
+            localStorage.setItem('autoBackupRunning', 'false');
+
+            if (autoBackupInterval) {
+                clearInterval(autoBackupInterval);
+                autoBackupInterval = null;
+            }
+
+            if (countdownInterval) {
+                clearInterval(countdownInterval);
+                countdownInterval = null;
+            }
+
+            nextBackupTimestamp = null;
+
+            // Update UI
+            document.getElementById('statusBadge').className = 'status-badge inactive';
+            document.getElementById('statusBadge').innerHTML = '<i class="fas fa-circle"></i><span>Inaktiv</span>';
+            document.getElementById('startBtn').disabled = false;
+            document.getElementById('stopBtn').disabled = true;
+            document.getElementById('nextBackupTime').textContent = '--:--:--';
+
+            addLog('Auto-Backup gestoppt', 'info');
+            showNotification('Auto-Backup deaktiviert', 'success');
+        }
+
+        // Trigger manual backup
+        async function triggerManualBackup() {
+            addLog('Manuelles Backup gestartet...', 'info');
+            await createBackup();
+        }
+
+        // Initialize on page load
+        window.addEventListener('DOMContentLoaded', () => {
+            loadSettings();
+            addLog('System initialisiert und bereit', 'success');
+        });
+
+        // Save state before page unload
+        window.addEventListener('beforeunload', () => {
+            saveSettings();
+        });
+    </script>
+</body>
+</html>
