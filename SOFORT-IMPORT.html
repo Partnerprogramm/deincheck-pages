@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <title>SOFORT IMPORT - 313 Partner</title>
+    <style>
+        body { font-family: Arial; padding: 20px; background: #f5f5f5; }
+        .box { background: white; padding: 30px; border-radius: 10px; max-width: 800px; margin: 0 auto; }
+        h1 { color: #333; }
+        #log { background: #1a1a2e; color: #0f0; padding: 20px; height: 400px; overflow-y: auto; font-family: monospace; font-size: 12px; border-radius: 8px; }
+        button { background: #28a745; color: white; border: none; padding: 20px 40px; font-size: 18px; cursor: pointer; border-radius: 8px; margin: 10px 0; }
+        button:disabled { background: #999; }
+        .red { color: #f00; }
+        .yellow { color: #ff0; }
+        .stats { display: flex; gap: 20px; margin: 20px 0; }
+        .stat { background: #eee; padding: 15px 30px; border-radius: 8px; text-align: center; }
+        .stat-num { font-size: 36px; font-weight: bold; color: #28a745; }
+    </style>
+</head>
+<body>
+<div class="box">
+    <h1>🚀 Partner Import Tool</h1>
+    <p><strong>Aktuelle URL:</strong> <span id="url"></span></p>
+    
+    <div class="stats">
+        <div class="stat"><div class="stat-num" id="total">313</div>Gesamt</div>
+        <div class="stat"><div class="stat-num" id="done">0</div>Importiert</div>
+        <div class="stat"><div class="stat-num" id="skip">0</div>Übersprungen</div>
+        <div class="stat"><div class="stat-num" id="fail">0</div>Fehler</div>
+    </div>
+    
+    <button onclick="checkFirst()">1️⃣ ERST PRÜFEN - Wie viele Partner existieren?</button>
+    <button onclick="startImport()">2️⃣ ALLE 313 PARTNER IMPORTIEREN</button>
+    
+    <div id="log">Bereit. Klicke auf einen Button.</div>
+</div>
+
+<script>
+document.getElementById('url').textContent = window.location.href;
+
+const partners = [
+    {email:"Germanydripy56@gmail.com",vorname:"Connor",nachname:"Scheel",land:"DE",referral_code:"bvX9EBU2AL"},
+    {email:"mohammadalkhat123@gmail.com",vorname:"Mohammad",nachname:"Alkhayat",land:"DE",referral_code:"TEYi86skbP"},
+    {email:"umidmalakzada@gmail.com",vorname:"Omed",nachname:"Safai",land:"DE",referral_code:"sv6BLS8Jvo"},
+    {email:"suatdestani929@gmail.com",vorname:"Destani Berai",nachname:"Suat",land:"DE",referral_code:"SxwGAwlFDs"},
+    {email:"arnoheyne@loarno.de",vorname:"Arno",nachname:"Heyne",firma:"Loarno Werbung",land:"DE",referral_code:"R5LsVxQnYQ"},
+    {email:"fatih.oeztas@icloud.com",vorname:"Fatih",nachname:"Öztas",land:"DE",referral_code:"edml7Bm8Cq"},
+    {email:"Ouchaou@web.de",vorname:"Younes",nachname:"Ouchaou",land:"DE",telefon:"017661858557",referral_code:"NSp5VrxWjD"},
+    {email:"emkrt@outlook.de",vorname:"Erdem",nachname:"Kurt",land:"DE",referral_code:"byGtmiJ4mb"},
+    {email:"mad@lephone.de",vorname:"Marcel",nachname:"Dehne",firma:"LePhone Mobile",land:"DE",referral_code:"hVPEInYYTo"},
+    {email:"dogan.enes@live.de",vorname:"Enes",nachname:"Dogan",land:"DE",referral_code:"1xXD9M70Za"},
+    {email:"nermin.rajkovic@outlook.de",vorname:"Nermin",nachname:"Rajkovic",land:"DE",referral_code:"q8smP2EnhR"},
+    {email:"salim.aziza4@gmail.com",vorname:"Mohamad Salim",nachname:"Aziza",land:"DE",referral_code:"Tv0XxHA9g6"},
+    {email:"hussein.omeirate@web.de",vorname:"Hussein",nachname:"Omeirate",land:"DE",referral_code:"4xA60aqmnQ"},
+    {email:"tarifpro83@gmail.com",vorname:"nouri",nachname:"Allaf",firma:"Tarif pro",land:"DE",referral_code:"qtIaR8sR7N"},
+    {email:"marco.catgiu@telegy.de",vorname:"Marco",nachname:"Catgiu",firma:"TeleGy GmbH",land:"DE",referral_code:"cCwXO9s5N4"},
+    {email:"fahri_cakir99@icloud.com",vorname:"Fahri",nachname:"Cakir",land:"DE",referral_code:"02SrFpji5k"},
+    {email:"nawidzamani@gmail.com",vorname:"Daniel",nachname:"Zamani",land:"DE",referral_code:"LtX5Mh9vZP"},
+    {email:"Janaferro1995@gmail.com",vorname:"Jana",nachname:"Ferro",land:"DE",referral_code:"24ZiCudHR9"},
+    {email:"hammer@consultstth.de",vorname:"Tom",nachname:"Hammer",land:"DE",referral_code:"ukbVLFtdqc"},
+    {email:"mogernagar@gmail.com",vorname:"Moghir",nachname:"Alnajjar",land:"DE",referral_code:"G6OLRxKixL"},
+    {email:"Handyweltgronau@gmail.com",vorname:"Maryal",nachname:"Zouaiter",firma:"Handywelt Gronau",land:"DE",referral_code:"kopCDYTyUq"},
+    {email:"luciano.pendolino@hotmail.de",vorname:"Luciano",nachname:"Pendolino",land:"DE",referral_code:"QlGvaOInUo"},
+    {email:"dennis.ibo@mail.de",vorname:"Dennis Ibrahim",nachname:"Busch",land:"DE",referral_code:"JxwZ4Mwh3K"},
+    {email:"mobilfunk.din@gmail.com",vorname:"Hakan",nachname:"Akay",firma:"Mobilfunk Dinslaken",land:"DE",referral_code:"xLeTrvxbVZ"},
+    {email:"A.lawa@gmx.de",vorname:"Arnold",nachname:"Lawa",land:"DE",referral_code:"wiENaJJQOD"},
+    {email:"h_oezciftci@web.de",vorname:"Hakan",nachname:"Özciftci",land:"DE",referral_code:"aHm60mnQc0"},
+    {email:"a.dabko@checkyourtarif.com",vorname:"Ahmed",nachname:"Dabko",firma:"Check Your Tarif",land:"DE",referral_code:"kXfIvg2gzg"},
+    {email:"m.berisa@newreach.de",vorname:"Mustafa",nachname:"Berisa",firma:"NewReach",land:"DE",referral_code:"QM8cIxbs3m"},
+    {email:"franko.daloiso@web.de",vorname:"Franko",nachname:"Daloiso",land:"DE",referral_code:"Kw8QAjl8bH"},
+    {email:"jason.gellert@ymail.com",vorname:"Jason",nachname:"Gellert",land:"DE",referral_code:"OH1fcaHkPS"},
+    {email:"service@erano.de",vorname:"Karsten",nachname:"Günther",land:"DE",referral_code:"YkTpZqeesh"},
+    {email:"emisan-salesmarketing@outlook.com",vorname:"Emiliano",nachname:"Pavkovic",land:"DE",referral_code:"30h4wtr1pq"},
+    {email:"genexhd2@web.de",vorname:"Alfons",nachname:"Hetler",land:"DE",referral_code:"XImXJdgE4H"},
+    {email:"bekirruzgar@hotmail.com",vorname:"Bekir",nachname:"Rüzgar",land:"DE",referral_code:"6jxgl2090v"},
+    {email:"dejumax42@gmail.com",vorname:"Deniz",nachname:"Fener",land:"FR",referral_code:"ISKXalLt17"},
+    {email:"fabian.ernst1203@gmail.com",vorname:"Fabian",nachname:"Ernst",land:"DE",referral_code:"8KJqp0YcWr"},
+    {email:"nextmobile24.shop@gmail.com",vorname:"Tony",nachname:"Schumaier",land:"DE",referral_code:"bgYeSPTSae"},
+    {email:"suher23@web.de",vorname:"Suher",nachname:"Aziz",land:"DE",referral_code:"hFy901V6eI"},
+    {email:"g.ilhan@phoneconcept-lahr.de",vorname:"Gökhan",nachname:"Ilhan",firma:"Phone Concept",land:"DE",referral_code:"pUpQoRoMCV"},
+    {email:"ahmed.elhamad@outlook.de",vorname:"Ahmed",nachname:"El Hamad",land:"DE",referral_code:"3chWcg5lTM"},
+    {email:"steven.nowakowski@web.de",vorname:"Steven",nachname:"Nowakowski",land:"DE",referral_code:"UGffjBROo3"},
+    {email:"info@guelak-consulting.de",vorname:"Mustafa",nachname:"Gülak",firma:"Gülak Consulting",land:"DE",referral_code:"ftyeGoH42u"},
+    {email:"s.hotaki@web.de",vorname:"Safiullah",nachname:"Hotaki",land:"DE",referral_code:"7Yb013kMXd"},
+    {email:"klener03@hotmail.de",vorname:"Sebastian",nachname:"Erhard",land:"DE",referral_code:"bpuInIeLh1"},
+    {email:"aleksandar124@web.de",vorname:"Aleksandr",nachname:"Arnaut",land:"DE",referral_code:"gj8coAJfTx"},
+    {email:"info@deincheck.de",vorname:"Deincheck",nachname:"Team",firma:"Deincheck Team",land:"DE",referral_code:"UQ4tCH8Rrn"},
+    {email:"askardia@yahoo.com",vorname:"Issa",nachname:"Atish",land:"DE",referral_code:"VbkkgKVIwc"},
+    {email:"juergenhoeck@proton.me",vorname:"Jürgen",nachname:"Höck",land:"DE",referral_code:"rCdXvZfioY"},
+    {email:"fabian120503@gmx.de",vorname:"Fabian",nachname:"Fedler",land:"DE",referral_code:"KuwrMM7IhN"},
+    {email:"info@3k-solutions.de",vorname:"Twinkl",nachname:"Khakkar",firma:"3K Solutions GbR",land:"DE",referral_code:"QMCnuznCxx"},
+    {email:"ua@efemobile.de",vorname:"Ufuk",nachname:"Akgün",land:"DE",referral_code:"PonmcMjtT7"},
+    {email:"yelkenmarketing@t-online.de",vorname:"Melik",nachname:"Yelken",land:"DE",referral_code:"U77hacdB4G"},
+    {email:"ra.vermittlung@gmail.com",vorname:"Fatmir",nachname:"Redza",land:"DE",referral_code:"so8oynjtME"},
+    {email:"wedekind-peter@t-online.de",vorname:"Peter",nachname:"Wedekind",land:"DE",referral_code:"E3Wq8GaK7s"},
+    {email:"veselkrasniqi014@gmail.com",vorname:"Vesel",nachname:"Krasniqi",land:"DE",referral_code:"PGuTYAGB4m"},
+    {email:"luciano.pendolino@hotmail.dd",vorname:"Luciano",nachname:"Pendolino",land:"DE",referral_code:"WAqRvGlMua"},
+    {email:"b.berkem@web.de",vorname:"Dzoskun",nachname:"Aliov",land:"DE",referral_code:"Qd1Yhd8GvS"},
+    {email:"supermarktomid@gmail.com",vorname:"Omid",nachname:"Akbari",land:"DE",referral_code:"mnjKGBl1nj"},
+    {email:"johnluwali@gmail.con",vorname:"John",nachname:"Penndorf",land:"DE",referral_code:"5pvsB9NTeJ"},
+    {email:"meynsilvia@gmail.com",vorname:"Silvia",nachname:"Meyn",land:"DE",referral_code:"WU0kaPMe68"},
+    {email:"stabelmarcus@gmail.com",vorname:"Marcus",nachname:"Stabel",land:"DE",referral_code:"n6k4shRVFT"},
+    {email:"Yamemmoon7@gmail.com",vorname:"Mohamad yamen",nachname:"Amer",land:"DE",referral_code:"dix81cAkmq"},
+    {email:"jh28payments@proton.me",vorname:"Jannick",nachname:"Harms",land:"DE",referral_code:"G7iujATk88"},
+    {email:"dannyradke@d2dcoaching.de",vorname:"Danny",nachname:"Radke",land:"DE",referral_code:"e7Ppv4VyPm"},
+    {email:"mustafa.berisa@gmx.de",vorname:"Mustafa",nachname:"Berisa",firma:"New Reach",land:"DE",referral_code:"Yyo6pKtKdG"},
+    {email:"Harald.wilhelms@gmail.com",vorname:"Harald",nachname:"Wilhelms",land:"DE",referral_code:"Mxh76kPEyU"},
+    {email:"germanavakjan4@gmail.com",vorname:"German",nachname:"Avakjan",land:"DE",referral_code:"eclfGN21EK"},
+    {email:"hasmust20@gmail.com",vorname:"Mustafa",nachname:"Hasan",land:"DE",referral_code:"3I2YKZ09pU"},
+    {email:"mklein24211@yahoo.de",vorname:"Michael",nachname:"Klein",land:"DE",referral_code:"QuoCDRTnD6"},
+    {email:"s.schmitt1@vodafone.de",vorname:"Sebastian",nachname:"Schmitt",land:"DE",referral_code:"qj4qAB06ee"},
+    {email:"wanja.musik@gmx.de",vorname:"Johannes",nachname:"Schneider",land:"DE",referral_code:"vJPuxCtZk6"},
+    {email:"info@dfly-webservices.de",vorname:"Rene",nachname:"Lempp",land:"DE",referral_code:"1qnJ61H84W"},
+    {email:"mariam.el.baouti1996@gmail.com",vorname:"Mariam",nachname:"EL Baouti",land:"DE",referral_code:"MqGveZs3RO"},
+    {email:"muratdalman00@icloud.com",vorname:"Murat",nachname:"Dalman",land:"DE",referral_code:"jzscWIAk4r"},
+    {email:"isahmuc@gmail.com",vorname:"Sabina",nachname:"Topal",land:"DE",referral_code:"MCWBSJTvwA"},
+    {email:"ersin.yumusak@icloud.com",vorname:"Ersin",nachname:"Yumusak",land:"DE",referral_code:"EUoRV9YiV2"},
+    {email:"mkanat@gmx.de",vorname:"Muhammet",nachname:"Kanat",land:"DE",referral_code:"pXosY3c0BI"},
+    {email:"oezguer29g@hotmail.de",vorname:"Betül",nachname:"Günel",land:"DE",referral_code:"OLU08hJvgr"},
+    {email:"morteza@connect-cell.de",vorname:"Morteza",nachname:"Qasimzadeh",firma:"Connect Cell",land:"DE",referral_code:"lvR0GUaD9B"},
+    {email:"yukhno.anatoliy@gmail.com",vorname:"Anatoliy",nachname:"Yukhno",land:"DE",referral_code:"xFVUYyScql"},
+    {email:"buelent1979@yahoo.de",vorname:"Bülent",nachname:"Goker",land:"DE",referral_code:"iiYt109pVr"},
+    {email:"boehm@mata-door.de",vorname:"Michael",nachname:"Böhm",firma:"Matadoor",land:"DE",referral_code:"xjUHoGI34i"},
+    {email:"becktayfun@gmail.com",vorname:"tayfun",nachname:"Beck",land:"DE",referral_code:"tGfBlqz7O0"},
+    {email:"inanc.oezdemir@gmail.com",vorname:"Inanc",nachname:"Özdemir",land:"DE",referral_code:"q3JK0tz7Z9"},
+    {email:"wyrwol@experten-point-hildesheim.de",vorname:"Paul",nachname:"Wyrwol",land:"DE",referral_code:"9NupKdKMiE"},
+    {email:"andykhelifa@gmail.com",vorname:"Andy",nachname:"Khelifa",land:"DE",referral_code:"T5Y76Xxryi"},
+    {email:"West-team@web.de",vorname:"Werner",nachname:"Steinke",land:"DE",referral_code:"visMWUyOTY"},
+    {email:"crosseller232@gmail.com",vorname:"Karim",nachname:"Chikhaoui",land:"DE",referral_code:"QwYfabt7Sx"},
+    {email:"nickschmidt-vertrieb@outlook.de",vorname:"Nick",nachname:"Schmidt",land:"DE",referral_code:"HpNYFhWXKE"},
+    {email:"k.efetuerk@gmail.com",vorname:"Halit",nachname:"Kizmaz",land:"DE",referral_code:"4dDYBkbB2t"},
+    {email:"fabio.doelker@gmail.com",vorname:"Fabio-Christian",nachname:"Dölker",land:"DE",referral_code:"QDzlpeprvd"},
+    {email:"arifdogrufb66@gmail.com",vorname:"Arif",nachname:"Dogur",land:"DE",referral_code:"NM1m8pQRYl"},
+    {email:"loris.zahiri1@icloud.com",vorname:"Loris",nachname:"Zahiri",land:"DE",referral_code:"c2yLNNMh5A"},
+    {email:"kontakt@dominickrueger.de",vorname:"Dominic",nachname:"Krüger",land:"DE",referral_code:"9zV07kg7mh"},
+    {email:"ndricim.sal@outlook.de",vorname:"Ndricim",nachname:"Saliu",land:"DE",referral_code:"fTtly7jB5v"},
+    {email:"christianzell.19@icloud.com",vorname:"Christian",nachname:"Zell",land:"DE",referral_code:"HjKwcYFbDB"},
+    {email:"info@4more-energy.de",vorname:"Mohamad",nachname:"Zeino",land:"DE",referral_code:"wCGcHX0KOt"},
+    {email:"max.brug@yahoo.de",vorname:"Max",nachname:"Brug",land:"DE",referral_code:"RoyMC31Jlj"},
+    {email:"dolgoon_u@yahoo.de",vorname:"Bilguun",nachname:"Bold",land:"DE",referral_code:"H7O961PLO6"},
+    {email:"muratdivar_23@outlook.de",vorname:"Murat",nachname:"Divar",land:"DE",referral_code:"nvTlgLxJSM"},
+    {email:"realmaher123@gmail.com",vorname:"Maher",nachname:"Al Cheikh Dhaher",land:"DE",referral_code:"kxSqleGR7X"},
+    {email:"habilkos@icloud.com",vorname:"Habil",nachname:"Arslan",land:"DE",referral_code:"qWqRSKTm32"},
+    {email:"deniz21@live.de",vorname:"Deniz",nachname:"Sarigöz",land:"DE",referral_code:"6bUsHnQbsc"},
+    {email:"aramis.winter@icloud.com",vorname:"Aaron",nachname:"Werner",land:"DE",referral_code:"QUoqyR7dvp"},
+    {email:"oliveira5@web.de",vorname:"Frank",nachname:"Krausenecker de Oliveira",land:"DE",referral_code:"8mzWqDzZD5"},
+    {email:"arno.fr@yahoo.com",vorname:"Atiq",nachname:"San",land:"DE",referral_code:"lWsY8e4Zgy"},
+    {email:"keine@gmail.com",vorname:"Aslan",nachname:"Jem",land:"DE",referral_code:"CLYckBqbSc"},
+    {email:"flo.teuscher@gmail.com",vorname:"Florian",nachname:"Teuscher",land:"DE",referral_code:"UXLADltSHK"},
+    {email:"murat01520@hotmail.de",vorname:"Murat",nachname:"Sögünmez",land:"DE",referral_code:"FwjUvhoJkU"},
+    {email:"n.mahdi@outlook.de",vorname:"Nabil",nachname:"Mahdi",land:"DE",referral_code:"FQ8PS2DwAn"},
+    {email:"info@jetztvergleiche.de",vorname:"Ahmed",nachname:"Alkanjo",land:"DE",referral_code:"ggRrQff2AK"},
+    {email:"haitam.al@outlook.de",vorname:"Haitam",nachname:"AL Hassnaoui",land:"DE",referral_code:"KbtdOJbeXp"},
+    {email:"service1@erano.de",vorname:"Karsten",nachname:"Günther",land:"DE",referral_code:"7oTb8tGGEj"},
+    {email:"alalifayiz@gmail.com",vorname:"Fayiz",nachname:"Alali",land:"DE",referral_code:"kvtQk2B55a"},
+    {email:"muratyeni@gmx.de",vorname:"Murat",nachname:"Yeni",land:"DE",referral_code:"DlZzovl37u"},
+    {email:"mesutcansezgin@gmail.com",vorname:"Mesut",nachname:"Sezgin",land:"DE",referral_code:"VQg6Xm2kLM"},
+    {email:"hasan-c-3@hotmail.de",vorname:"Hasan",nachname:"Celik",land:"DE",referral_code:"6k2iCHB3e9"},
+    {email:"sali.asani.17@gmail.com",vorname:"Sali",nachname:"Asani",land:"DE",referral_code:"Cs8Y47z1pG"},
+    {email:"jf@smart-seller.de",vorname:"Jannik",nachname:"Frahm",land:"DE",referral_code:"F4f30J5I3z"},
+    {email:"ercan-gezdirici@web.de",vorname:"Ercan",nachname:"Gezdirici",land:"DE",referral_code:"G2qJaYREtN"},
+    {email:"elmedina.klacari@gmail.com",vorname:"Elmedina",nachname:"Klacari",land:"DE",referral_code:"v3lxrWkKd9"},
+    {email:"info@tophandyvertrag.de",vorname:"Bunyamin",nachname:"Ercetin",land:"DE",referral_code:"hUAjVLvLQJ"},
+    {email:"info@weconnect.ba",vorname:"Waldemar",nachname:"Wilsch",land:"DE",referral_code:"iCQOvRhQVL"},
+    {email:"kontakt@ensar-sahinovic.de",vorname:"Ensar",nachname:"Sahinovic",land:"DE",referral_code:"h6AqRgNLbw"},
+    {email:"veysel@strom24.info",vorname:"Veysel",nachname:"Öztürk",land:"DE",referral_code:"aihCrNWVZ7"},
+    {email:"alihansahinn@outlook.de",vorname:"Alihan",nachname:"Sahin",land:"DE",referral_code:"eZHDaRVAT5"},
+    {email:"leonelsoares6@gmail.com",vorname:"Leonel",nachname:"Soares",land:"DE",referral_code:"ZxI59pjp5s"},
+    {email:"dariabozorova@gmail.com",vorname:"Daria",nachname:"Bozorova",land:"DE",referral_code:"HwmANn7x20"},
+    {email:"sahin-yueksel71@hotmail.de",vorname:"Saahin",nachname:"Yueksel",land:"DE",referral_code:"RxXc0I9kVY"},
+    {email:"safwan.j@outlook.de",vorname:"Safwan",nachname:"Jalkhi",land:"DE",referral_code:"p2JeMvAOZA"},
+    {email:"haririsalem9@gmail.com",vorname:"Salem",nachname:"Hariri",land:"DE",referral_code:"qNPPBmxf3o"},
+    {email:"goekhansen@gmail.com",vorname:"Gökhan",nachname:"Sen",land:"DE",referral_code:"AwGxB2bBAK"},
+    {email:"andreas.pettirsch@outlook.de",vorname:"Andreas",nachname:"Pettirsch",land:"DE",referral_code:"SLSy0YOdVe"},
+    {email:"kontakt@tele-center-ag.de",vorname:"Giray",nachname:"Kircicek",land:"DE",referral_code:"PJ5qQzJuuE"},
+    {email:"h.daher89@gmail.com",vorname:"Hassan",nachname:"Daher",land:"DE",referral_code:"P1R4YXK1cG"},
+    {email:"Kecsansen8@gmail.com",vorname:"Senol",nachname:"Kecsan",land:"DE",referral_code:"E3Br8avbJE"},
+    {email:"info@verkaufsagentur-ds.de",vorname:"Danny",nachname:"Schneider",land:"DE",referral_code:"VGCnCkIoLZ"},
+    {email:"oguzhan.oezmen.93@gmail.com",vorname:"Oguzhan",nachname:"Özmen",land:"DE",referral_code:"0KFFL0bINF"},
+    {email:"sales@sinnex.de",vorname:"Ömer",nachname:"Dalgic",land:"DE",referral_code:"MkGxd2btWq"},
+    {email:"ahmad_kanjo@hotmail.de",vorname:"Ahmad",nachname:"Kanjo",land:"DE",referral_code:"B6N8TZBDXo"},
+    {email:"mike.seidel1978@gmail.com",vorname:"Mike",nachname:"Seidel",land:"DE",referral_code:"lXXRU6uKwS"},
+    {email:"erkan_19_90@hotmail.com",vorname:"Erkan",nachname:"Günenc",land:"DE",referral_code:"pZFuWyP30u"},
+    {email:"eelz@hotmail.de",vorname:"Bilal",nachname:"Selmani",land:"DE",referral_code:"SvwbBQ6qB9"},
+    {email:"salahbitar33@gmail.com",vorname:"Salah",nachname:"Bitar",land:"DE",referral_code:"pF9EoO3zSM"},
+    {email:"mustafaadib10@gmail.com",vorname:"Mustafa",nachname:"Adib",land:"DE",referral_code:"VEUjWF9Q2k"},
+    {email:"mhdnour311@gmail.com",vorname:"Mohamad Nour",nachname:"Alahmed",land:"DE",referral_code:"RHxWCdJ5QG"},
+    {email:"ahmadhesso34@gmail.com",vorname:"Ahmad",nachname:"Hesso",land:"DE",referral_code:"0mM8sK6cJm"},
+    {email:"iamthemone69@web.de",vorname:"Julian",nachname:"De Stefani",land:"DE",referral_code:"t8tRYLuzAB"},
+    {email:"imschalker04@gmail.com",vorname:"Mohamed-Lyes",nachname:"Boudehane",land:"DE",referral_code:"xmDdYCPZvP"},
+    {email:"dani.danial@outlook.de",vorname:"Daniel",nachname:"Zaza",land:"DE",referral_code:"uGBXqKHm4N"},
+    {email:"info@tq-agentur.de",vorname:"Tansel",nachname:"Gümüs",land:"DE",referral_code:"6eNXJVwzVT"},
+    {email:"s.ismaili@mein-partner.de",vorname:"Samet",nachname:"Ismaili",land:"DE",referral_code:"wNk3QZwQlJ"},
+    {email:"celik0908@gmail.com",vorname:"Irfan",nachname:"Celik",land:"DE",referral_code:"Eggr6qLjCv"},
+    {email:"ayman.osman88@gmail.com",vorname:"Ayman",nachname:"Osman",land:"DE",referral_code:"TwN4TxSjvG"},
+    {email:"luan.gashi95@gmail.com",vorname:"Luan",nachname:"Gashi",land:"DE",referral_code:"xwqplRNZaU"},
+    {email:"hbeser90@hotmail.de",vorname:"Hakan",nachname:"Beser",land:"DE",referral_code:"u4qe6YdEKv"},
+    {email:"info@tarifrechner-services.de",vorname:"Özkan",nachname:"Akbulut",land:"DE",referral_code:"TRssFB4CVu"},
+    {email:"fad_90@live.de",vorname:"Fadi",nachname:"Sliman",land:"DE",referral_code:"CsDc5smYzD"},
+    {email:"serdalkucuk@web.de",vorname:"Serdal",nachname:"Kücük",land:"DE",referral_code:"OVSxcT1aqL"},
+    {email:"erelaciye@gmail.com",vorname:"Erdogan",nachname:"Elaci",land:"DE",referral_code:"L5RDWP2HFV"},
+    {email:"n_alani@icloud.com",vorname:"Nabil",nachname:"Alani",land:"DE",referral_code:"uXDmgKV1qT"},
+    {email:"gencaalp42@hotmail.de",vorname:"Genc",nachname:"Alp",land:"DE",referral_code:"bM31ySFDp9"},
+    {email:"rami.alhassoun@outlook.de",vorname:"Rami",nachname:"Alhassoun",land:"DE",referral_code:"iLaSjbJjYY"},
+    {email:"fatih-uensal@hotmail.de",vorname:"Fatih",nachname:"Ünsal",land:"DE",referral_code:"U2y1a0f5EH"},
+    {email:"kushtrim.berisha1997@gmail.com",vorname:"Kushtrim",nachname:"Berisha",land:"DE",referral_code:"CXwj2mFIUP"},
+    {email:"gueltekin.mehmed@gmail.com",vorname:"Mehmed",nachname:"Gueltekin",land:"DE",referral_code:"tHKvIGxn5T"},
+    {email:"info@check-vertrieb.de",vorname:"Tahir",nachname:"Cicek",land:"DE",referral_code:"mfVvgmfVnB"},
+    {email:"shamilmuhammad1@hotmail.com",vorname:"Shamil",nachname:"Muhammad",land:"DE",referral_code:"TUnPCZU2dS"},
+    {email:"b.elsherbini.12@gmail.com",vorname:"Baha",nachname:"Elsherbini",land:"DE",referral_code:"I9w4lR5bsy"},
+    {email:"husseinalshalal91@gmail.com",vorname:"Hussein",nachname:"Al Shalal",land:"DE",referral_code:"Q2i69A00SV"},
+    {email:"mkmk1997@gmx.de",vorname:"Mohamed",nachname:"Kaddour",land:"DE",referral_code:"jzSxHTf4bU"},
+    {email:"burakkalici@icloud.com",vorname:"Burak",nachname:"Kalici",land:"DE",referral_code:"KfYC0aeIr5"},
+    {email:"marcel-esser@web.de",vorname:"Marcel",nachname:"Esser",land:"DE",referral_code:"4K0SuZyE5n"},
+    {email:"muhammadhossin34@gmail.com",vorname:"Muhammad Hossin",nachname:"Al-Mustafa",land:"DE",referral_code:"FVAjH3NL4s"},
+    {email:"walidkuran20@gmail.com",vorname:"Walid",nachname:"Kuran",land:"DE",referral_code:"rqrQUCHcZ1"},
+    {email:"kenan-hadzic@live.de",vorname:"Kenan",nachname:"Hadzic",land:"DE",referral_code:"Ioq2dXtJTs"},
+    {email:"denisimm58@gmail.com",vorname:"Denis",nachname:"Imm",land:"DE",referral_code:"zIQC8SQ27K"},
+    {email:"ibrahimxaylan@gmail.com",vorname:"ibrahim",nachname:"Aylan",land:"DE",referral_code:"bCHI1n5hB7"},
+    {email:"akidnuri@icloud.com",vorname:"Akid",nachname:"Nuri",land:"DE",referral_code:"Dd0pSaOmPq"},
+    {email:"ayham.albaradan@gmail.com",vorname:"Ayham",nachname:"Al Baradan",land:"DE",referral_code:"EgOqYF4f6P"},
+    {email:"ibrahimbattal42@gmail.com",vorname:"Ibrahim",nachname:"Battal",land:"DE",referral_code:"RXDwlPCHKa"},
+    {email:"s.schaefer10@googlemail.com",vorname:"Steve",nachname:"Schäfer",land:"DE",referral_code:"LKrkU8Dksc"},
+    {email:"esra.karakaya45@gmx.de",vorname:"Esra",nachname:"Karakaya",land:"DE",referral_code:"GbOBU3Xd7T"},
+    {email:"Riccardo2@mail.de",vorname:"Riccardo",nachname:"Maniscalco",land:"DE",referral_code:"xFmqZNzCq9"},
+    {email:"oguzkaanusta@outlook.de",vorname:"Oguz Kaan",nachname:"Usta",land:"DE",referral_code:"Yf9xG0b5QI"},
+    {email:"aymhss@icloud.com",vorname:"Ayman",nachname:"Hassan",land:"DE",referral_code:"RlQq5lK5x7"},
+    {email:"saadeldinsaleh1984@gmail.com",vorname:"Saadeldin",nachname:"Saleh",land:"DE",referral_code:"LDEf2VvGYy"},
+    {email:"s.ateia@premium-sales.de",vorname:"Saied",nachname:"Ateia",land:"DE",referral_code:"TiA92MYPYh"},
+    {email:"drazic.blaz@gmail.com",vorname:"Blaz",nachname:"Drazic",land:"DE",referral_code:"k5LOWpnqrO"},
+    {email:"mido.albeso@gmail.com",vorname:"Ammar",nachname:"Albeso",land:"DE",referral_code:"cNlP2sTsmY"},
+    {email:"s.ismailaga@icloud.com",vorname:"Semih",nachname:"Ismailaga",land:"DE",referral_code:"zC3wTPNXMJ"},
+    {email:"ahmet.1994@outlook.de",vorname:"Ahmet",nachname:"Erbay",land:"DE",referral_code:"WGPJMHJ7HF"},
+    {email:"tunc.1994@outlook.de",vorname:"Tunc",nachname:"Tunc",land:"DE",referral_code:"bX3YCKTSjd"},
+    {email:"info@energytarife.de",vorname:"Cagri",nachname:"Sarac",land:"DE",referral_code:"oeq2CfPVXI"},
+    {email:"info@telecom-welt.de",vorname:"Mustafa",nachname:"Türkoglu",land:"DE",referral_code:"oB4meMwuGa"},
+    {email:"info@mr-mobile.de",vorname:"Fatih",nachname:"Özcan",land:"DE",referral_code:"n3p1l4bqSj"},
+    {email:"m.sahin.68@web.de",vorname:"Mesut",nachname:"Sahin",land:"DE",referral_code:"cqGIi0Ys81"},
+    {email:"furkan-aktass@hotmail.de",vorname:"Furkan",nachname:"Aktas",land:"DE",referral_code:"HZQ7eFKREh"},
+    {email:"kontakt@dz-vertrieb.de",vorname:"Daniel",nachname:"Zaza",land:"DE",referral_code:"AkM9K3VCPj"},
+    {email:"cengo@gmx.de",vorname:"Cengiz",nachname:"Özbey",land:"DE",referral_code:"jOYJ3OWijT"},
+    {email:"aras22@web.de",vorname:"Muhammet",nachname:"Aras",land:"DE",referral_code:"FyZxnj86cG"},
+    {email:"babakarturan@gmail.com",vorname:"Turan",nachname:"Babakara",land:"DE",referral_code:"mYDWLJd2Qg"},
+    {email:"farhadrezaii2020@gmail.com",vorname:"Farhad",nachname:"Rezai",land:"DE",referral_code:"WTzzCCQJTb"},
+    {email:"yunus.yimaz78@gmail.com",vorname:"Yunus",nachname:"Yilmaz",land:"DE",referral_code:"WZpSqnTYh9"},
+    {email:"burhan.genc2003@gmail.com",vorname:"Burhan",nachname:"Genc",land:"DE",referral_code:"XWP6oR5Y9t"},
+    {email:"oezguerbasboga@gmail.com",vorname:"Özgür",nachname:"Basboga",land:"DE",referral_code:"WDJu6yzpHu"},
+    {email:"mohamedhamzahamzaalhafez@gmail.com",vorname:"Mohamed Hamza",nachname:"Alhafez",land:"DE",referral_code:"gp0x8uy55O"},
+    {email:"info@mobilfunkberatung-owl.de",vorname:"Hayrettin",nachname:"Aydin",land:"DE",referral_code:"0LBm4EqRPO"},
+    {email:"alshaarmohamad.6@gmail.com",vorname:"Mohamad",nachname:"Alshaar",land:"DE",referral_code:"jaqPA2QEzr"},
+    {email:"mehmetyilmaz424@gmail.com",vorname:"Mehmet",nachname:"Yilmaz",land:"DE",referral_code:"bQZon77saC"},
+    {email:"davidschulze361@icloud.com",vorname:"David",nachname:"Schulze",land:"DE",referral_code:"IYeMtePkCP"},
+    {email:"sbaykara21@outlook.de",vorname:"Sercan",nachname:"Baykara",land:"DE",referral_code:"ngkh4VDZI1"},
+    {email:"mustafaissa144@gmail.com",vorname:"Mustafa",nachname:"Issa",land:"DE",referral_code:"2kABq5vzTc"},
+    {email:"arben.lushi@outlook.de",vorname:"Arben",nachname:"Lushi",land:"DE",referral_code:"88fRdh7ihg"},
+    {email:"mr.wuppertal@outlook.com",vorname:"Fatih",nachname:"Özcan",land:"DE",referral_code:"rOeTkTaM2y"},
+    {email:"habilarslan@icloud.com",vorname:"Habil",nachname:"Arslan",land:"DE",referral_code:"PJKxlUnEUl"},
+    {email:"adnan_alhawari@gmx.de",vorname:"Adnan",nachname:"Al Hawari",land:"DE",referral_code:"5Qc5l85woo"},
+    {email:"saidbg12@gmail.com",vorname:"Said Helvis",nachname:"Bell Gamez",land:"DE",referral_code:"Kc8etRZhAN"},
+    {email:"gabriel.i.gomez.p@gmail.com",vorname:"Gabriel",nachname:"Gomez",land:"DE",referral_code:"9Xa58rdcEU"},
+    {email:"johnluwali@gmail.com",vorname:"John",nachname:"Penndorf",land:"DE",referral_code:"Me0LW7rI9W"},
+    {email:"doran.ac@web.de",vorname:"Dogan",nachname:"Acar",land:"DE",referral_code:"0H3w4AORA2"},
+    {email:"walter.stein@weconnect.ba",vorname:"Mirsada",nachname:"Wilsch",land:"DE",referral_code:"79iKzT2ppk"},
+    {email:"albahri@deinebestewahl.de",vorname:"Alaa",nachname:"Albahri",land:"DE",referral_code:"xu2NpG7cP8"},
+    {email:"batughancinar@outlook.de",vorname:"Batughan",nachname:"Cinar",land:"DE",referral_code:"d0umbwHFv3"},
+    {email:"bueche.timothy@gmx.de",vorname:"Timothy",nachname:"Büche",land:"DE",referral_code:"pjRtO81RMJ"},
+    {email:"tikuhajdinaj97@gmail.com",vorname:"Adriatik",nachname:"Hajdinaj",land:"DE",referral_code:"5VwhbvqWs8"},
+    {email:"atilla.sicim@gmail.com",vorname:"Atilla",nachname:"Sicim",land:"DE",referral_code:"tTMPTa4XHL"},
+    {email:"omermoonsaeed99@gmail.com",vorname:"Omer",nachname:"Saeed",land:"DE",referral_code:"vSa3kzrAeS"},
+    {email:"rainerlang.mhf@gmail.com",vorname:"Rainer",nachname:"Lang",land:"DE",referral_code:"mSjkrKGIZm"},
+    {email:"a.mazhary1999@gmail.com",vorname:"Amir",nachname:"Mazhary",land:"DE",referral_code:"A4i62TGAtF"},
+    {email:"bjornloheider@icloud.com",vorname:"Björn",nachname:"Loheider",land:"DE",referral_code:"8HvrBM4VM7"},
+    {email:"info@apkom.de",vorname:"Adrian",nachname:"Pniewski",land:"DE",referral_code:"deioZZYvNk"},
+    {email:"a.aabed@web.de",vorname:"Aabed",nachname:"Al Hussein",land:"DE",referral_code:"0D7tNbPOPc"},
+    {email:"mdhtza@gmail.com",vorname:"Medhat",nachname:"Zakkar",land:"DE",referral_code:"gs4MCEXX5Q"},
+    {email:"citycut.express@gmail.com",vorname:"Kahi",nachname:"Hasan",land:"DE",referral_code:"OVcETyRu8V"},
+    {email:"smarttel.parchim@yahoo.com",vorname:"Abdulla",nachname:"Al Houssen",land:"DE",referral_code:"YqhMhgzDe2"},
+    {email:"el.ahmad@hotmail.de",vorname:"Ahmad",nachname:"El Ahmad",land:"DE",referral_code:"YbrkTCYrUH"},
+    {email:"tommsanders@icloud.com",vorname:"Tom-Marvin",nachname:"Sanders",land:"DE",referral_code:"mYwFKOjXoW"},
+    {email:"Aym.suliman@gmail.com",vorname:"ayman",nachname:"suliman",land:"DE",referral_code:"oEmqkgVhnR"},
+    {email:"hasan.polat4605@icloud.com",vorname:"Hasan",nachname:"Polat",land:"DE",referral_code:"8kAqJuudM4"},
+    {email:"Ecomind@outlook.de",vorname:"Arsenis",nachname:"Kiourtsidis",land:"DE",referral_code:"sTBjLqbewD"},
+    {email:"edis.trakic@icloud.com",vorname:"Edis",nachname:"Trakic",land:"DE",referral_code:"gFs2RG649c"},
+    {email:"henkepromotion@t-online.de",vorname:"Dennis",nachname:"Henke",land:"DE",referral_code:"fKNwGmsywW"},
+    {email:"anto9892@gmail.com",vorname:"Antonio",nachname:"Maione",land:"DE",referral_code:"MWnEG2NT7m"},
+    {email:"mahdiabdolrahim25@gmail.com",vorname:"Mahdi",nachname:"Abdolrahim",land:"DE",referral_code:"UTgCyhRDJ5"},
+    {email:"matrix.dessau@gmail.com",vorname:"Hazem",nachname:"Kabawa",land:"DE",referral_code:"0A7dkw7ECP"},
+    {email:"gamboss@hotmail.com",vorname:"Furkan",nachname:"Bulut",land:"DE",referral_code:"5aR3ckQLiF"},
+    {email:"ibrahim.torun@web.de",vorname:"ibrahim",nachname:"torun",land:"DE",referral_code:"HvqIUoIUrc"},
+    {email:"nabilberkani@outlook.de",vorname:"Nabil",nachname:"Berkani",land:"DE",referral_code:"ElmieFOF8T"},
+    {email:"sivakas7@gmail.com",vorname:"Sivakas",nachname:"Sivanathan",land:"DE",referral_code:"mASyWv0wNM"},
+    {email:"sichersein7@gmail.com",vorname:"Mohammad Bahaa",nachname:"Shaaban",land:"DE",referral_code:"j9GFiyxRc1"},
+    {email:"kdr.cm@outlook.de",vorname:"Kadir",nachname:"Cem",land:"DE",referral_code:"jzoJzCl7Vv"},
+    {email:"info@nl-gmbh.com",vorname:"Ahmad",nachname:"Alsobaydi",land:"DE",referral_code:"U7RGzVWJVT"},
+    {email:"mustafaalzu94@gmail.com",vorname:"Mustafa Basim Mahdi",nachname:"Al-Zubaidi",land:"DE",referral_code:"gjhLOhH8T3"},
+    {email:"Sharifi0@web.de",vorname:"Ramin",nachname:"Sharifi",land:"DE",referral_code:"uLJLMY53T4"}
+];
+
+let done = 0, skip = 0, fail = 0;
+
+function log(msg, cls = '') {
+    const d = document.getElementById('log');
+    d.innerHTML += `<div class="${cls}">${msg}</div>`;
+    d.scrollTop = d.scrollHeight;
+}
+
+async function checkFirst() {
+    document.getElementById('log').innerHTML = '';
+    log('Prüfe vorhandene Partner in Datenbank...');
+    
+    try {
+        const res = await fetch('tables/partners?limit=1000');
+        const data = await res.json();
+        const existing = (data.data || []).map(p => p.email?.toLowerCase());
+        
+        log(`\n✅ ${existing.length} Partner bereits in Datenbank\n`, 'yellow');
+        
+        let missing = 0;
+        partners.forEach(p => {
+            if (!existing.includes(p.email.toLowerCase())) {
+                missing++;
+            }
+        });
+        
+        log(`📊 ${missing} Partner fehlen noch`, missing > 0 ? 'red' : 'yellow');
+        log(`\nKlicke auf Button 2 um fehlende Partner zu importieren.`);
+        
+    } catch(e) {
+        log('❌ FEHLER: ' + e.message, 'red');
+    }
+}
+
+async function startImport() {
+    document.getElementById('log').innerHTML = '';
+    log('🚀 STARTE IMPORT...\n');
+    
+    // Erst vorhandene laden
+    let existing = [];
+    try {
+        const res = await fetch('tables/partners?limit=1000');
+        const data = await res.json();
+        existing = (data.data || []).map(p => p.email?.toLowerCase());
+        log(`${existing.length} Partner bereits vorhanden\n`);
+    } catch(e) {
+        log('Konnte vorhandene nicht laden, importiere alle...', 'yellow');
+    }
+    
+    for (let i = 0; i < partners.length; i++) {
+        const p = partners[i];
+        
+        // Skip wenn schon vorhanden
+        if (existing.includes(p.email.toLowerCase())) {
+            skip++;
+            document.getElementById('skip').textContent = skip;
+            continue;
+        }
+        
+        try {
+            const res = await fetch('tables/partners', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    ...p,
+                    passwort_hash: 'Partner2026!',
+                    passwort_muss_geaendert_werden: true,
+                    ist_affiliate: true,
+                    aktiv: true,
+                    tarif: 'Silber',
+                    status: 'Approved'
+                })
+            });
+            
+            if (res.ok) {
+                done++;
+                log(`✅ ${p.email}`);
+            } else {
+                fail++;
+                log(`❌ ${p.email}: ${res.status}`, 'red');
+            }
+        } catch(e) {
+            fail++;
+            log(`❌ ${p.email}: ${e.message}`, 'red');
+        }
+        
+        document.getElementById('done').textContent = done;
+        document.getElementById('fail').textContent = fail;
+        
+        // Kurze Pause alle 5
+        if (i % 5 === 0) await new Promise(r => setTimeout(r, 50));
+    }
+    
+    log(`\n════════════════════════════════`);
+    log(`✅ FERTIG!`);
+    log(`Importiert: ${done} | Übersprungen: ${skip} | Fehler: ${fail}`);
+}
+</script>
+</body>
+</html>

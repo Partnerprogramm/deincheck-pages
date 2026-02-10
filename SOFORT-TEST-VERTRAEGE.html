@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔥 SOFORT-TEST: Verträge & Provisionen</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #1a1a2e;
+            color: white;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container { max-width: 1400px; margin: 0 auto; }
+        h1 { text-align: center; margin-bottom: 30px; font-size: 32px; }
+        .status-box {
+            background: #16213e;
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 20px;
+            border: 2px solid #0f3460;
+        }
+        .status-box h2 { margin-bottom: 16px; display: flex; align-items: center; gap: 10px; }
+        .result {
+            background: #0f3460;
+            padding: 16px;
+            border-radius: 8px;
+            margin-top: 12px;
+            font-family: monospace;
+            white-space: pre-wrap;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .success { border-left: 4px solid #00ff88; }
+        .error { border-left: 4px solid #ff4757; }
+        .warning { border-left: 4px solid #ffa502; }
+        .btn {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 16px 32px;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 18px;
+            font-weight: 700;
+            margin: 10px;
+            transition: all 0.3s;
+        }
+        .btn:hover { transform: scale(1.05); box-shadow: 0 8px 25px rgba(102, 126, 234, 0.5); }
+        .btn-green { background: linear-gradient(135deg, #00b894, #00cec9); }
+        .btn-red { background: linear-gradient(135deg, #e17055, #d63031); }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin: 20px 0;
+        }
+        .stat-card {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            padding: 24px;
+            border-radius: 16px;
+            text-align: center;
+        }
+        .stat-value { font-size: 36px; font-weight: 800; }
+        .stat-label { font-size: 14px; opacity: 0.9; margin-top: 8px; }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 16px;
+        }
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #0f3460;
+        }
+        th { background: #0f3460; font-weight: 600; }
+        tr:hover { background: rgba(102, 126, 234, 0.1); }
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        .badge-neu { background: #e84393; }
+        .badge-aktiviert { background: #00b894; }
+        .badge-pruefung { background: #0984e3; }
+        .badge-abgelehnt { background: #d63031; }
+        .badge-ausstehend { background: #fdcb6e; color: #2d3436; }
+        .badge-ausgezahlt { background: #00b894; }
+        .badge-storniert { background: #636e72; }
+        .provision { color: #00ff88; font-weight: 700; }
+        #loading {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            z-index: 1000;
+        }
+        #loading.hidden { display: none; }
+    </style>
+</head>
+<body>
+    <div id="loading">⏳ Lade Daten aus Datenbank...</div>
+    
+    <div class="container">
+        <h1>🔥 SOFORT-TEST: Verträge & Provisionen</h1>
+        
+        <div class="status-box">
+            <div style="text-align: center;">
+                <button class="btn" onclick="loadAllData()">🔄 Daten neu laden</button>
+                <button class="btn btn-green" onclick="window.location.href='admin-dashboard.html'">➡️ Zum Admin-Dashboard</button>
+            </div>
+        </div>
+        
+        <div id="stats-container" class="stats-grid"></div>
+        
+        <div class="status-box">
+            <h2>📄 Verträge aus Datenbank</h2>
+            <div id="vertraege-result" class="result">Laden...</div>
+        </div>
+        
+        <div class="status-box">
+            <h2>💰 Provisionen aus Datenbank</h2>
+            <div id="provisionen-result" class="result">Laden...</div>
+        </div>
+        
+        <div class="status-box">
+            <h2>🔧 Debug-Informationen</h2>
+            <div id="debug-result" class="result">Laden...</div>
+        </div>
+    </div>
+
+    <script>
+        let allVertraege = [];
+        let allProvisionen = [];
+        
+        async function loadAllData() {
+            document.getElementById('loading').classList.remove('hidden');
+            
+            const debug = [];
+            debug.push('=== DATENBANK-ABFRAGE GESTARTET ===');
+            debug.push(`Zeit: ${new Date().toLocaleString('de-DE')}`);
+            debug.push('');
+            
+            try {
+                // 1. Verträge laden
+                debug.push('📥 Lade Verträge...');
+                const vResponse = await fetch('tables/vertragsabschluesse?limit=1000');
+                debug.push(`   HTTP Status: ${vResponse.status} ${vResponse.statusText}`);
+                
+                if (!vResponse.ok) {
+                    throw new Error(`Verträge laden fehlgeschlagen: ${vResponse.status}`);
+                }
+                
+                const vResult = await vResponse.json();
+                allVertraege = vResult.data || [];
+                debug.push(`   ✅ ${allVertraege.length} Verträge geladen`);
+                debug.push(`   Total in DB: ${vResult.total || 'unbekannt'}`);
+                debug.push('');
+                
+                // 2. Provisionen laden
+                debug.push('📥 Lade Provisionen...');
+                const pResponse = await fetch('tables/provisionen?limit=1000');
+                debug.push(`   HTTP Status: ${pResponse.status} ${pResponse.statusText}`);
+                
+                if (!pResponse.ok) {
+                    throw new Error(`Provisionen laden fehlgeschlagen: ${pResponse.status}`);
+                }
+                
+                const pResult = await pResponse.json();
+                allProvisionen = pResult.data || [];
+                debug.push(`   ✅ ${allProvisionen.length} Provisionen geladen`);
+                debug.push(`   Total in DB: ${pResult.total || 'unbekannt'}`);
+                debug.push('');
+                
+                // Stats berechnen
+                const gesamtProvision = allProvisionen.reduce((sum, p) => sum + parseFloat(p.betrag || 0), 0);
+                const ausstehend = allProvisionen.filter(p => p.status === 'ausstehend').reduce((sum, p) => sum + parseFloat(p.betrag || 0), 0);
+                const ausgezahlt = allProvisionen.filter(p => p.status === 'ausgezahlt').reduce((sum, p) => sum + parseFloat(p.betrag || 0), 0);
+                
+                debug.push('📊 STATISTIKEN:');
+                debug.push(`   Verträge gesamt: ${allVertraege.length}`);
+                debug.push(`   Provisionen gesamt: ${gesamtProvision.toFixed(2)}€`);
+                debug.push(`   Davon ausstehend: ${ausstehend.toFixed(2)}€`);
+                debug.push(`   Davon ausgezahlt: ${ausgezahlt.toFixed(2)}€`);
+                debug.push('');
+                debug.push('=== ABFRAGE ERFOLGREICH ===');
+                
+                // UI aktualisieren
+                renderStats(gesamtProvision, ausstehend, ausgezahlt);
+                renderVertraege();
+                renderProvisionen();
+                
+                document.getElementById('debug-result').textContent = debug.join('\n');
+                document.getElementById('debug-result').className = 'result success';
+                
+            } catch (error) {
+                debug.push('');
+                debug.push('❌ FEHLER:');
+                debug.push(`   ${error.message}`);
+                debug.push('');
+                debug.push('Mögliche Ursachen:');
+                debug.push('   - API nicht erreichbar');
+                debug.push('   - Netzwerkfehler');
+                debug.push('   - Datenbank-Problem');
+                
+                document.getElementById('debug-result').textContent = debug.join('\n');
+                document.getElementById('debug-result').className = 'result error';
+                
+                document.getElementById('vertraege-result').textContent = '❌ Fehler beim Laden: ' + error.message;
+                document.getElementById('vertraege-result').className = 'result error';
+                
+                document.getElementById('provisionen-result').textContent = '❌ Fehler beim Laden: ' + error.message;
+                document.getElementById('provisionen-result').className = 'result error';
+            }
+            
+            document.getElementById('loading').classList.add('hidden');
+        }
+        
+        function renderStats(gesamt, ausstehend, ausgezahlt) {
+            document.getElementById('stats-container').innerHTML = `
+                <div class="stat-card">
+                    <div class="stat-value">${allVertraege.length}</div>
+                    <div class="stat-label">📄 Verträge</div>
+                </div>
+                <div class="stat-card" style="background: linear-gradient(135deg, #00b894, #00cec9);">
+                    <div class="stat-value">${gesamt.toFixed(0)}€</div>
+                    <div class="stat-label">💰 Provision gesamt</div>
+                </div>
+                <div class="stat-card" style="background: linear-gradient(135deg, #fdcb6e, #e17055);">
+                    <div class="stat-value">${ausstehend.toFixed(0)}€</div>
+                    <div class="stat-label">⏳ Ausstehend</div>
+                </div>
+                <div class="stat-card" style="background: linear-gradient(135deg, #00b894, #55efc4);">
+                    <div class="stat-value">${ausgezahlt.toFixed(0)}€</div>
+                    <div class="stat-label">✅ Ausgezahlt</div>
+                </div>
+            `;
+        }
+        
+        function renderVertraege() {
+            if (allVertraege.length === 0) {
+                document.getElementById('vertraege-result').innerHTML = '⚠️ Keine Verträge in der Datenbank gefunden!';
+                document.getElementById('vertraege-result').className = 'result warning';
+                return;
+            }
+            
+            // Sortieren nach Datum (neueste zuerst)
+            const sorted = [...allVertraege].sort((a, b) => {
+                const dateA = new Date(a.erstellt_am || a.created_at || 0);
+                const dateB = new Date(b.erstellt_am || b.created_at || 0);
+                return dateB - dateA;
+            });
+            
+            let html = `<strong>✅ ${allVertraege.length} Verträge gefunden:</strong>\n\n`;
+            html += '<table>';
+            html += '<tr><th>#</th><th>Vertragsnr.</th><th>Datum</th><th>Partner</th><th>Kunde</th><th>Kategorie</th><th>Anbieter</th><th>Tarif</th><th>Provision</th><th>Status</th></tr>';
+            
+            sorted.slice(0, 20).forEach((v, i) => {
+                const datum = v.erstellt_am ? new Date(v.erstellt_am).toLocaleDateString('de-DE') : 'N/A';
+                const kunde = v.kunde_name || `${v.kunde_vorname || ''} ${v.kunde_nachname || ''}`.trim() || 'N/A';
+                const provision = parseFloat(v.gesamt_provision || v.provision || v.provision_betrag || 0);
+                
+                let statusBadge = '<span class="badge badge-neu">NEU</span>';
+                if (v.vertrag_status === 'aktiviert') statusBadge = '<span class="badge badge-aktiviert">AKTIVIERT</span>';
+                else if (v.vertrag_status === 'in_pruefung') statusBadge = '<span class="badge badge-pruefung">IN PRÜFUNG</span>';
+                else if (v.vertrag_status === 'abgelehnt') statusBadge = '<span class="badge badge-abgelehnt">ABGELEHNT</span>';
+                
+                html += `<tr>
+                    <td>${i + 1}</td>
+                    <td><strong>${v.vertragsnummer || 'N/A'}</strong></td>
+                    <td>${datum}</td>
+                    <td>${v.partner_name || v.partner_email || 'N/A'}</td>
+                    <td>${kunde}</td>
+                    <td>${v.kategorie || 'N/A'}</td>
+                    <td>${v.anbieter || 'N/A'}</td>
+                    <td>${v.tarif || v.tarif_name || 'N/A'}</td>
+                    <td class="provision">${provision.toFixed(2)}€</td>
+                    <td>${statusBadge}</td>
+                </tr>`;
+            });
+            
+            html += '</table>';
+            
+            if (allVertraege.length > 20) {
+                html += `\n\n... und ${allVertraege.length - 20} weitere Verträge`;
+            }
+            
+            document.getElementById('vertraege-result').innerHTML = html;
+            document.getElementById('vertraege-result').className = 'result success';
+        }
+        
+        function renderProvisionen() {
+            if (allProvisionen.length === 0) {
+                document.getElementById('provisionen-result').innerHTML = '⚠️ Keine Provisionen in der Datenbank gefunden!';
+                document.getElementById('provisionen-result').className = 'result warning';
+                return;
+            }
+            
+            // Sortieren nach Datum (neueste zuerst)
+            const sorted = [...allProvisionen].sort((a, b) => {
+                const dateA = new Date(a.datum || a.created_at || 0);
+                const dateB = new Date(b.datum || b.created_at || 0);
+                return dateB - dateA;
+            });
+            
+            let html = `<strong>✅ ${allProvisionen.length} Provisionen gefunden:</strong>\n\n`;
+            html += '<table>';
+            html += '<tr><th>#</th><th>Datum</th><th>Partner</th><th>Kunde</th><th>Typ</th><th>Tarif</th><th>Betrag</th><th>Status</th></tr>';
+            
+            sorted.slice(0, 20).forEach((p, i) => {
+                const datum = p.datum ? new Date(p.datum).toLocaleDateString('de-DE') : 'N/A';
+                const betrag = parseFloat(p.betrag || 0);
+                
+                let statusBadge = '<span class="badge badge-ausstehend">AUSSTEHEND</span>';
+                if (p.status === 'ausgezahlt') statusBadge = '<span class="badge badge-ausgezahlt">AUSGEZAHLT</span>';
+                else if (p.status === 'storniert') statusBadge = '<span class="badge badge-storniert">STORNIERT</span>';
+                
+                html += `<tr>
+                    <td>${i + 1}</td>
+                    <td>${datum}</td>
+                    <td>${p.partner_name || p.partner_email || 'N/A'}</td>
+                    <td>${p.kunde_name || 'N/A'}</td>
+                    <td>${p.typ || 'N/A'}</td>
+                    <td>${p.tarif || 'N/A'}</td>
+                    <td class="provision">${betrag.toFixed(2)}€</td>
+                    <td>${statusBadge}</td>
+                </tr>`;
+            });
+            
+            html += '</table>';
+            
+            if (allProvisionen.length > 20) {
+                html += `\n\n... und ${allProvisionen.length - 20} weitere Provisionen`;
+            }
+            
+            document.getElementById('provisionen-result').innerHTML = html;
+            document.getElementById('provisionen-result').className = 'result success';
+        }
+        
+        // Automatisch laden
+        document.addEventListener('DOMContentLoaded', loadAllData);
+    </script>
+</body>
+</html>
